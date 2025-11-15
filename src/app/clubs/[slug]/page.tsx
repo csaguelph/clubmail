@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import PageContainer from "@/components/layout/PageContainer";
-import { getSession } from "@/server/better-auth/server";
+import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
 
 export default async function ClubPage({
@@ -10,11 +9,7 @@ export default async function ClubPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    redirect("/");
-  }
+  await requireAuth();
 
   const { slug } = await params;
   const clubInfo = await api.clubs.getClubBySlug({ slug });
