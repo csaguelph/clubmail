@@ -10,6 +10,7 @@
 
 # database
 /generated
+/generated/prisma
 
 # next.js
 /.next/
