@@ -221,7 +221,7 @@ export default async function CampaignDetailPage({
             </h2>
             <PreviewButton html={campaign.html} />
           </div>
-          <div className="max-h-[600px] overflow-auto rounded border border-gray-200">
+          <div className="rounded border border-gray-200 overflow-hidden">
             <iframe
               srcDoc={campaign.html}
               className="h-[600px] w-full"
