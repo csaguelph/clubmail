@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import PageContainer from "@/components/layout/PageContainer";
-import { getSession } from "@/server/better-auth/server";
+import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
 import CampaignEditForm from "./CampaignEditForm";
 
@@ -11,11 +11,7 @@ export default async function CampaignEditPage({
 }: {
   params: Promise<{ slug: string; campaignId: string }>;
 }) {
-  const session = await getSession();
-
-  if (!session?.user) {
-    redirect("/");
-  }
+  await requireAuth();
 
   const { slug, campaignId } = await params;
   const clubInfo = await api.clubs.getClubBySlug({ slug });

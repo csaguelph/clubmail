@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import PageContainer from "@/components/layout/PageContainer";
-import { getSession } from "@/server/better-auth/server";
+import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
 import EmailListsManager from "./EmailListsManager";
 
@@ -13,11 +13,7 @@ interface PageProps {
 
 export default async function EmailListsPage({ params }: PageProps) {
   const { slug } = await params;
-  const session = await getSession();
-
-  if (!session?.user) {
-    redirect("/");
-  }
+  await requireAuth();
 
   // Get club details with role info
   const clubInfo = await api.clubs.getClubBySlug({ slug });
