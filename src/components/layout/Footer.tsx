@@ -36,9 +36,6 @@ export function Footer() {
             >
               GitHub
             </a>
-            <Link href="/help" className="text-gray-600 hover:text-gray-900">
-              Help
-            </Link>
             <Link href="/privacy" className="text-gray-600 hover:text-gray-900">
               Privacy
             </Link>

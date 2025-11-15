@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-gray-900">Introduction</h2>
             <p className="mt-4 text-gray-600">
-              ClubsMail is operated by the Central Student Association (CSA) at the
+              ClubMail is operated by the Central Student Association (CSA) at the
               University of Guelph. This privacy policy explains how we collect, use,
               and protect your personal information when you use our email management
               platform.
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
                   User Account Information
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  When you sign in with GitHub, we collect your name, email address,
+                  When you sign in, we collect your name, email address,
                   and profile information.
                 </p>
               </div>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
               How We Use Your Information
             </h2>
             <ul className="mt-4 list-inside list-disc space-y-2 text-gray-600">
-              <li>To provide and maintain the ClubsMail service</li>
+              <li>To provide and maintain the ClubMail service</li>
               <li>To authenticate users and manage permissions</li>
               <li>To send email campaigns on behalf of clubs</li>
               <li>To track email delivery and compliance</li>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="mt-4 list-inside list-disc space-y-2 text-gray-600">
               <li>With AWS SES for email delivery</li>
-              <li>With GitHub for authentication</li>
+              <li>With Microsoft for authentication</li>
               <li>When required by law or legal process</li>
               <li>With club administrators for the clubs you're subscribed to</li>
             </ul>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
               Unsubscribing
             </h2>
             <p className="mt-4 text-gray-600">
-              Every campaign email includes an unsubscribe link. Clicking this link
+              Every email includes an unsubscribe link. Clicking this link
               will immediately remove you from that club's mailing list. You can also
               contact the club directly to request removal.
             </p>
@@ -159,10 +159,10 @@ export default function PrivacyPage() {
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:privacy@csaonline.ca"
+                  href="mailto:csamain@uoguelph.ca"
                   className="text-[#b1d135] hover:underline"
                 >
-                  privacy@csaonline.ca
+                  csamain@uoguelph.ca
                 </a>
               </p>
             </div>
