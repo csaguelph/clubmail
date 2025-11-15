@@ -10,7 +10,7 @@ export const adminRouter = createTRPCRouter({
       z.object({
         limit: z.number().min(1).max(100).default(50),
         cursor: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const clubs = await ctx.db.club.findMany({
@@ -98,9 +98,13 @@ export const adminRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(255),
-        slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/),
+        slug: z
+          .string()
+          .min(1)
+          .max(255)
+          .regex(/^[a-z0-9-]+$/),
         primaryContactEmails: z.array(z.string().email()).min(1).max(5),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Check if slug already exists
@@ -183,9 +187,14 @@ export const adminRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         name: z.string().min(1).max(255).optional(),
-        slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/).optional(),
+        slug: z
+          .string()
+          .min(1)
+          .max(255)
+          .regex(/^[a-z0-9-]+$/)
+          .optional(),
         isActive: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { clubId, ...updateData } = input;

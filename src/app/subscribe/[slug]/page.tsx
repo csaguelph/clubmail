@@ -14,10 +14,8 @@ export default function SubscribePage() {
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const { data: club, isLoading: clubLoading } = api.clubs.getPublicClubInfo.useQuery(
-    { slug },
-    { retry: false }
-  );
+  const { data: club, isLoading: clubLoading } =
+    api.clubs.getPublicClubInfo.useQuery({ slug }, { retry: false });
 
   const subscribeMutation = api.subscribers.subscribe.useMutation({
     onSuccess: () => {
@@ -53,8 +51,8 @@ export default function SubscribePage() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-3xl font-bold text-gray-900">Club Not Found</h1>
           <p className="mt-4 text-gray-600">
-            The club you&apos;re looking for doesn&apos;t exist or is not accepting
-            subscriptions.
+            The club you&apos;re looking for doesn&apos;t exist or is not
+            accepting subscriptions.
           </p>
         </div>
       </PageContainer>
@@ -121,7 +119,7 @@ export default function SubscribePage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-[#b1d135] focus:outline-none"
               placeholder="you@example.com"
             />
           </div>
@@ -138,7 +136,7 @@ export default function SubscribePage() {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-[#b1d135] focus:outline-none"
               placeholder="Your name"
             />
             <p className="mt-1 text-sm text-gray-500">
@@ -157,7 +155,7 @@ export default function SubscribePage() {
           <button
             type="submit"
             disabled={subscribeMutation.isPending}
-            className="flex w-full justify-center rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#a0c030] focus:outline-none focus:ring-2 focus:ring-[#b1d135] focus:ring-offset-2 disabled:opacity-50"
+            className="flex w-full justify-center rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#a0c030] focus:ring-2 focus:ring-[#b1d135] focus:ring-offset-2 focus:outline-none disabled:opacity-50"
           >
             {subscribeMutation.isPending ? (
               <>

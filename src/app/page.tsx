@@ -1,11 +1,4 @@
-import {
-  BarChart3,
-  Layout,
-  Mail,
-  Shield,
-  Users,
-  Zap
-} from "lucide-react";
+import { BarChart3, Layout, Mail, Shield, Users, Zap } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -86,7 +79,8 @@ export default async function Home() {
 
               {session && (
                 <p className="mt-6 text-slate-300">
-                  Logged in as <span className="font-semibold">{session.user?.name}</span>
+                  Logged in as{" "}
+                  <span className="font-semibold">{session.user?.name}</span>
                 </p>
               )}
             </div>
@@ -98,7 +92,7 @@ export default async function Home() {
           <h2 className="mb-12 text-center text-4xl font-bold text-slate-900">
             Everything you need to engage your members
           </h2>
-          
+
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 */}
             <div className="rounded-xl bg-white p-8 shadow-lg transition hover:shadow-xl">
@@ -109,8 +103,8 @@ export default async function Home() {
                 Drag-and-Drop Editor
               </h3>
               <p className="text-slate-600">
-                Build beautiful emails with our intuitive visual editor. Add headings,
-                text, buttons, images, and more—no coding required.
+                Build beautiful emails with our intuitive visual editor. Add
+                headings, text, buttons, images, and more—no coding required.
               </p>
             </div>
 
@@ -123,8 +117,8 @@ export default async function Home() {
                 Subscriber Management
               </h3>
               <p className="text-slate-600">
-                Easily manage your members with CSV import/export, custom email lists,
-                and full subscriber editing capabilities.
+                Easily manage your members with CSV import/export, custom email
+                lists, and full subscriber editing capabilities.
               </p>
             </div>
 
@@ -151,8 +145,8 @@ export default async function Home() {
                 Role-Based Access
               </h3>
               <p className="text-slate-600">
-                Manage your team with Owner, Editor, and Viewer roles. Control who
-                can create campaigns and manage club settings.
+                Manage your team with Owner, Editor, and Viewer roles. Control
+                who can create campaigns and manage club settings.
               </p>
             </div>
 
@@ -165,8 +159,8 @@ export default async function Home() {
                 Campaign Tracking
               </h3>
               <p className="text-slate-600">
-                Monitor delivery status with real-time stats for sent, delivered,
-                bounced, and failed emails.
+                Monitor delivery status with real-time stats for sent,
+                delivered, bounced, and failed emails.
               </p>
             </div>
 
@@ -179,8 +173,8 @@ export default async function Home() {
                 Quick & Easy
               </h3>
               <p className="text-slate-600">
-                From draft to inbox in minutes. Create campaigns, send test emails,
-                and launch to your entire list with just a few clicks.
+                From draft to inbox in minutes. Create campaigns, send test
+                emails, and launch to your entire list with just a few clicks.
               </p>
             </div>
           </div>
@@ -192,7 +186,7 @@ export default async function Home() {
             <h2 className="mb-12 text-center text-4xl font-bold text-slate-900">
               How it works
             </h2>
-            
+
             <div className="mx-auto max-w-4xl space-y-8">
               <div className="flex gap-6">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#b1d135] font-bold text-slate-900">
@@ -203,8 +197,8 @@ export default async function Home() {
                     Set up your club
                   </h3>
                   <p className="text-slate-600">
-                    Configure your club settings, email preferences, and add staff members
-                    with the appropriate roles.
+                    Configure your club settings, email preferences, and add
+                    staff members with the appropriate roles.
                   </p>
                 </div>
               </div>
@@ -218,8 +212,8 @@ export default async function Home() {
                     Add subscribers
                   </h3>
                   <p className="text-slate-600">
-                    Import your members via CSV or add them individually. Create custom
-                    email lists to organize your audience.
+                    Import your members via CSV or add them individually. Create
+                    custom email lists to organize your audience.
                   </p>
                 </div>
               </div>
@@ -233,8 +227,8 @@ export default async function Home() {
                     Create your campaign
                   </h3>
                   <p className="text-slate-600">
-                    Use our drag-and-drop editor to build beautiful emails. Add blocks,
-                    customize content, and preview your design.
+                    Use our drag-and-drop editor to build beautiful emails. Add
+                    blocks, customize content, and preview your design.
                   </p>
                 </div>
               </div>
@@ -248,8 +242,8 @@ export default async function Home() {
                     Send and track
                   </h3>
                   <p className="text-slate-600">
-                    Send test emails to verify everything looks perfect, then send to your
-                    entire list and monitor delivery stats.
+                    Send test emails to verify everything looks perfect, then
+                    send to your entire list and monitor delivery stats.
                   </p>
                 </div>
               </div>

@@ -2,7 +2,16 @@
 
 import { api } from "@/trpc/react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { Crown, Edit, Edit3, Eye, Shield, Trash2, UserPlus, X } from "lucide-react";
+import {
+  Crown,
+  Edit,
+  Edit3,
+  Eye,
+  Shield,
+  Trash2,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 
 interface ClubStaffManagerProps {
@@ -12,12 +21,16 @@ interface ClubStaffManagerProps {
 
 type ClubRole = "CLUB_OWNER" | "CLUB_EDITOR" | "CLUB_VIEWER";
 
-const ROLE_INFO: Record<ClubRole, { label: string; icon: React.ReactNode; color: string; description: string }> = {
+const ROLE_INFO: Record<
+  ClubRole,
+  { label: string; icon: React.ReactNode; color: string; description: string }
+> = {
   CLUB_OWNER: {
     label: "Owner",
     icon: <Crown className="h-4 w-4" />,
     color: "bg-purple-100 text-purple-800 border-purple-200",
-    description: "Full access - can manage staff, settings, campaigns, and subscribers",
+    description:
+      "Full access - can manage staff, settings, campaigns, and subscribers",
   },
   CLUB_EDITOR: {
     label: "Editor",
@@ -58,7 +71,8 @@ export default function ClubStaffManager({
 
   const utils = api.useUtils();
 
-  const { data: staffMembers, isLoading } = api.clubMembers.listMembers.useQuery({ clubId });
+  const { data: staffMembers, isLoading } =
+    api.clubMembers.listMembers.useQuery({ clubId });
 
   const addStaff = api.clubMembers.addMember.useMutation({
     onSuccess: () => {
@@ -114,14 +128,16 @@ export default function ClubStaffManager({
     });
   };
 
-  const ownerCount = staffMembers?.filter((m) => m.role === "CLUB_OWNER").length ?? 0;
+  const ownerCount =
+    staffMembers?.filter((m) => m.role === "CLUB_OWNER").length ?? 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600">
-          {staffMembers?.length ?? 0} staff {staffMembers?.length === 1 ? "member" : "members"}
+          {staffMembers?.length ?? 0} staff{" "}
+          {staffMembers?.length === 1 ? "member" : "members"}
         </p>
         <button
           onClick={() => setIsAddModalOpen(true)}
@@ -134,7 +150,7 @@ export default function ClubStaffManager({
 
       {/* Role Legend */}
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <h3 className="mb-3 text-sm font-semibold text-gray-900 flex items-center gap-2">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900">
           <Shield className="h-4 w-4" />
           Role Permissions
         </h3>
@@ -145,7 +161,9 @@ export default function ClubStaffManager({
                 {info.icon}
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">{info.label}</div>
+                <div className="text-sm font-medium text-gray-900">
+                  {info.label}
+                </div>
                 <div className="text-xs text-gray-600">{info.description}</div>
               </div>
             </div>
@@ -156,9 +174,7 @@ export default function ClubStaffManager({
       {/* Staff Table */}
       <div className="rounded-lg border border-gray-200 bg-white shadow">
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Staff Members
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">Staff Members</h2>
         </div>
 
         {isLoading ? (
@@ -174,16 +190,16 @@ export default function ClubStaffManager({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Staff Member
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Role
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Actions
                   </th>
                 </tr>
@@ -192,11 +208,12 @@ export default function ClubStaffManager({
                 {staffMembers.map((member) => {
                   const roleInfo = ROLE_INFO[member.role as ClubRole];
                   const isCurrentUser = member.userId === currentUserId;
-                  const isLastOwner = member.role === "CLUB_OWNER" && ownerCount <= 1;
+                  const isLastOwner =
+                    member.role === "CLUB_OWNER" && ownerCount <= 1;
 
                   return (
                     <tr key={member.id} className="hover:bg-gray-50">
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {member.user.image ? (
                             // Using raw <img> here for simple avatar display. Next.js recommends using <Image />
@@ -208,7 +225,7 @@ export default function ClubStaffManager({
                               className="h-8 w-8 rounded-full"
                             />
                           ) : (
-                            <div className="h-8 w-8 rounded-full bg-[#b1d135] flex items-center justify-center text-gray-900 font-semibold text-sm">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b1d135] text-sm font-semibold text-gray-900">
                               {member.user.name.charAt(0).toUpperCase()}
                             </div>
                           )}
@@ -216,22 +233,26 @@ export default function ClubStaffManager({
                             <div className="text-sm font-medium text-gray-900">
                               {member.user.name}
                               {isCurrentUser && (
-                                <span className="ml-2 text-xs text-gray-500">(You)</span>
+                                <span className="ml-2 text-xs text-gray-500">
+                                  (You)
+                                </span>
                               )}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-600">
                         {member.user.email}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm">
-                        <span className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${roleInfo.color}`}>
+                      <td className="px-6 py-4 text-sm whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${roleInfo.color}`}
+                        >
                           {roleInfo.icon}
                           {roleInfo.label}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
+                      <td className="px-6 py-4 text-right text-sm whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
@@ -245,8 +266,12 @@ export default function ClubStaffManager({
                               setIsEditModalOpen(true);
                             }}
                             disabled={isCurrentUser}
-                            className="text-[#b1d135] hover:text-[#a0c030] disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={isCurrentUser ? "Cannot change your own role" : "Change role"}
+                            className="text-[#b1d135] hover:text-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+                            title={
+                              isCurrentUser
+                                ? "Cannot change your own role"
+                                : "Change role"
+                            }
                           >
                             <Edit className="h-4 w-4" />
                           </button>
@@ -261,7 +286,7 @@ export default function ClubStaffManager({
                               setIsRemoveModalOpen(true);
                             }}
                             disabled={isCurrentUser || isLastOwner}
-                            className="text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             title={
                               isCurrentUser
                                 ? "Cannot remove yourself"
@@ -318,11 +343,12 @@ export default function ClubStaffManager({
                   required
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="staff@example.com"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  If the user doesn&apos;t have an account, they&apos;ll be invited to sign up.
+                  If the user doesn&apos;t have an account, they&apos;ll be
+                  invited to sign up.
                 </p>
               </div>
 
@@ -337,7 +363,7 @@ export default function ClubStaffManager({
                   id="role"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as ClubRole)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 >
                   {Object.entries(ROLE_INFO).map(([role, info]) => (
                     <option key={role} value={role}>
@@ -404,7 +430,9 @@ export default function ClubStaffManager({
                   <div className="text-sm font-medium text-gray-900">
                     {editingStaff?.name}
                   </div>
-                  <div className="text-xs text-gray-600">{editingStaff?.email}</div>
+                  <div className="text-xs text-gray-600">
+                    {editingStaff?.email}
+                  </div>
                 </div>
               </div>
 
@@ -421,11 +449,14 @@ export default function ClubStaffManager({
                   onChange={(e) =>
                     setEditingStaff(
                       editingStaff
-                        ? { ...editingStaff, newRole: e.target.value as ClubRole }
-                        : null
+                        ? {
+                            ...editingStaff,
+                            newRole: e.target.value as ClubRole,
+                          }
+                        : null,
                     )
                   }
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 >
                   {Object.entries(ROLE_INFO).map(([role, info]) => (
                     <option key={role} value={role}>
@@ -486,8 +517,8 @@ export default function ClubStaffManager({
             <div className="mt-4">
               <p className="text-sm text-gray-600">
                 Are you sure you want to remove{" "}
-                <span className="font-semibold">{removingStaff?.name}</span> from the club
-                staff?
+                <span className="font-semibold">{removingStaff?.name}</span>{" "}
+                from the club staff?
               </p>
               <p className="mt-2 text-sm text-gray-600">
                 They will lose all access to club management features.
@@ -512,7 +543,9 @@ export default function ClubStaffManager({
                   disabled={removeStaff.isPending}
                   className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {removeStaff.isPending ? "Removing..." : "Remove Staff Member"}
+                  {removeStaff.isPending
+                    ? "Removing..."
+                    : "Remove Staff Member"}
                 </button>
               </div>
             </div>

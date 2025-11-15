@@ -15,8 +15,7 @@ export default async function ClubPage({
   const clubInfo = await api.clubs.getClubBySlug({ slug });
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
 
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   return (
     <PageContainer>
@@ -68,7 +67,7 @@ export default async function ClubPage({
       <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Link
           href={`/clubs/${slug}/campaigns`}
-          className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+          className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
         >
           <div className="flex items-center">
             <div className="shrink-0">
@@ -99,7 +98,7 @@ export default async function ClubPage({
 
         <Link
           href={`/clubs/${slug}/subscribers`}
-          className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+          className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
         >
           <div className="flex items-center">
             <div className="shrink-0">
@@ -130,7 +129,7 @@ export default async function ClubPage({
 
         <Link
           href={`/clubs/${slug}/lists`}
-          className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+          className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
         >
           <div className="flex items-center">
             <div className="shrink-0">
@@ -162,7 +161,7 @@ export default async function ClubPage({
         {club.myRole === "CLUB_OWNER" && (
           <Link
             href={`/clubs/${slug}/staff`}
-            className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+            className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
           >
             <div className="flex items-center">
               <div className="shrink-0">
@@ -194,7 +193,7 @@ export default async function ClubPage({
 
         <Link
           href={`/clubs/${slug}/settings`}
-          className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+          className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
         >
           <div className="flex items-center">
             <div className="shrink-0">
@@ -233,7 +232,9 @@ export default async function ClubPage({
       {/* Club Info */}
       <div className="mt-8 rounded-lg bg-white shadow">
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Club Information</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Club Information
+          </h2>
         </div>
         <div className="px-6 py-4">
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">

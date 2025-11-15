@@ -9,9 +9,7 @@ interface EmailListsManagerProps {
   clubId: string;
 }
 
-export default function EmailListsManager({
-  clubId,
-}: EmailListsManagerProps) {
+export default function EmailListsManager({ clubId }: EmailListsManagerProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -58,7 +56,7 @@ export default function EmailListsManager({
 
   if (!emailLists) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="py-12 text-center text-gray-500">
         Loading email lists...
       </div>
     );
@@ -115,12 +113,12 @@ export default function EmailListsManager({
         {emailLists.map((list) => (
           <div
             key={list.id}
-            className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+            className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  <h3 className="truncate text-lg font-semibold text-gray-900">
                     {list.name}
                   </h3>
                   {list.isDefault && (
@@ -130,13 +128,13 @@ export default function EmailListsManager({
                   )}
                 </div>
                 {list.description && (
-                  <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                  <p className="mt-1 line-clamp-2 text-sm text-gray-600">
                     {list.description}
                   </p>
                 )}
               </div>
               {!list.isDefault && (
-                <div className="flex items-center gap-1 ml-2">
+                <div className="ml-2 flex items-center gap-1">
                   <button
                     onClick={() => {
                       setEditingList({
@@ -181,7 +179,8 @@ export default function EmailListsManager({
 
             {list.isDefault && (
               <p className="mt-3 text-xs text-gray-500">
-                This is your default list. New subscribers are added here automatically.
+                This is your default list. New subscribers are added here
+                automatically.
               </p>
             )}
           </div>
@@ -223,7 +222,7 @@ export default function EmailListsManager({
                   required
                   value={newListName}
                   onChange={(e) => setNewListName(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="e.g., Newsletter Subscribers"
                 />
               </div>
@@ -240,7 +239,7 @@ export default function EmailListsManager({
                   value={newListDescription}
                   onChange={(e) => setNewListDescription(e.target.value)}
                   rows={3}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="Describe the purpose of this list..."
                 />
               </div>
@@ -310,10 +309,10 @@ export default function EmailListsManager({
                     setEditingList(
                       editingList
                         ? { ...editingList, name: e.target.value }
-                        : null
+                        : null,
                     )
                   }
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 />
               </div>
 
@@ -331,11 +330,11 @@ export default function EmailListsManager({
                     setEditingList(
                       editingList
                         ? { ...editingList, description: e.target.value }
-                        : null
+                        : null,
                     )
                   }
                   rows={3}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 />
               </div>
 

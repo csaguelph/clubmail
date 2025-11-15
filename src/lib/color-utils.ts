@@ -20,7 +20,9 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
 function getLuminance(r: number, g: number, b: number): number {
   const [rs, gs, bs] = [r, g, b].map((c) => {
     const sRGB = c / 255;
-    return sRGB <= 0.03928 ? sRGB / 12.92 : Math.pow((sRGB + 0.055) / 1.055, 2.4);
+    return sRGB <= 0.03928
+      ? sRGB / 12.92
+      : Math.pow((sRGB + 0.055) / 1.055, 2.4);
   });
   return 0.2126 * rs! + 0.7152 * gs! + 0.0722 * bs!;
 }
@@ -45,7 +47,7 @@ export function isColorDark(hexColor: string): boolean {
   if (!rgb) return false;
 
   const luminance = getLuminance(rgb.r, rgb.g, rgb.b);
-  
+
   // If luminance is less than 0.5, it's a dark color
   return luminance < 0.5;
 }

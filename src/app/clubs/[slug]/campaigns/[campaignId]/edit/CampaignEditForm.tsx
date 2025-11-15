@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 
 import { EmailEditor } from "@/lib/email-editor";
 import type { EmailBlock } from "@/lib/email-editor/types";
-import { generateDesignJSON, generateEmailHTML, parseDesignJSON } from "@/lib/email-editor/utils";
+import {
+  generateDesignJSON,
+  generateEmailHTML,
+  parseDesignJSON,
+} from "@/lib/email-editor/utils";
 import { api } from "@/trpc/react";
 
 interface CampaignEditFormProps {
@@ -39,7 +43,9 @@ export default function CampaignEditForm({
   const router = useRouter();
   const [name, setName] = useState(campaign.name);
   const [subject, setSubject] = useState(campaign.subject);
-  const [preheaderText, setPreheaderText] = useState(campaign.preheaderText ?? "");
+  const [preheaderText, setPreheaderText] = useState(
+    campaign.preheaderText ?? "",
+  );
   const [emailListId] = useState(campaign.emailListId);
   const [blocks, setBlocks] = useState<EmailBlock[]>([]);
 
@@ -63,7 +69,7 @@ export default function CampaignEditForm({
       blocks,
       clubName,
       brandColor,
-      undefined // No unsubscribe token for draft
+      undefined, // No unsubscribe token for draft
     );
 
     // Generate design JSON from blocks
@@ -101,7 +107,7 @@ export default function CampaignEditForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
             <p className="mt-1 text-sm text-gray-500">
               Internal name for this campaign (not visible to subscribers)
@@ -146,7 +152,7 @@ export default function CampaignEditForm({
               onChange={(e) => setSubject(e.target.value)}
               required
               placeholder="Your email subject..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
 
@@ -163,7 +169,7 @@ export default function CampaignEditForm({
               value={preheaderText}
               onChange={(e) => setPreheaderText(e.target.value)}
               placeholder="Preview text that appears after the subject..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
             <p className="mt-1 text-sm text-gray-500">
               This text appears next to the subject line in email clients
@@ -177,8 +183,8 @@ export default function CampaignEditForm({
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Email Content
         </h2>
-        <EmailEditor 
-          blocks={blocks} 
+        <EmailEditor
+          blocks={blocks}
           onChange={setBlocks}
           clubName={clubName}
           brandColor={brandColor}
@@ -189,8 +195,10 @@ export default function CampaignEditForm({
       <div className="flex items-center justify-end space-x-4">
         <button
           type="button"
-          onClick={() => router.push(`/clubs/${clubSlug}/campaigns/${campaign.id}`)}
-          className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          onClick={() =>
+            router.push(`/clubs/${clubSlug}/campaigns/${campaign.id}`)
+          }
+          className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
         >
           Cancel
         </button>

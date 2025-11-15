@@ -24,7 +24,7 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await getSession();
-  
+
   let userRole: "ADMIN" | "USER" | undefined;
   if (session?.user) {
     const user = await db.user.findUnique({
