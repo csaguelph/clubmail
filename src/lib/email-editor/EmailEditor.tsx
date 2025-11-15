@@ -1,7 +1,7 @@
 "use client";
 
-import { Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, ChevronUp, Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
+import { useRef, useState } from "react";
 import type { EmailBlock, EmailBlockType } from "./types";
 
 interface EmailEditorProps {
@@ -15,6 +15,7 @@ interface EmailEditorProps {
 export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerText, physicalAddress }: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
 
   const addBlock = (type: EmailBlockType) => {
     const newBlock: EmailBlock = createDefaultBlock(type);
@@ -50,6 +51,29 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerTe
       newBlocks[index]!,
     ];
     onChange(newBlocks);
+  };
+
+  const handleDragStart = (id: string) => {
+    setDraggedBlockId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedBlockId || draggedBlockId === targetId) return;
+
+    const draggedIndex = blocks.findIndex((b) => b.id === draggedBlockId);
+    const targetIndex = blocks.findIndex((b) => b.id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const newBlocks = [...blocks];
+    const [draggedBlock] = newBlocks.splice(draggedIndex, 1);
+    newBlocks.splice(targetIndex, 0, draggedBlock!);
+    onChange(newBlocks);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedBlockId(null);
   };
 
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
@@ -89,12 +113,16 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerTe
                   key={block.id}
                   block={block}
                   isSelected={selectedBlockId === block.id}
+                  isDragging={draggedBlockId === block.id}
                   isFirst={index === 0}
                   isLast={index === blocks.length - 1}
                   onSelect={() => setSelectedBlockId(block.id)}
                   onDelete={() => deleteBlock(block.id)}
                   onMoveUp={() => moveBlock(block.id, "up")}
                   onMoveDown={() => moveBlock(block.id, "down")}
+                  onDragStart={() => handleDragStart(block.id)}
+                  onDragOver={(e) => handleDragOver(e, block.id)}
+                  onDragEnd={handleDragEnd}
                 />
               ))}
             </div>
@@ -374,22 +402,40 @@ function BlockMenu({ onAddBlock }: { onAddBlock: (type: EmailBlockType) => void 
 function BlockItem({
   block,
   isSelected,
+  isDragging,
   isFirst,
   isLast,
   onSelect,
   onDelete,
   onMoveUp,
   onMoveDown,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
 }: {
   block: EmailBlock;
   isSelected: boolean;
+  isDragging: boolean;
   isFirst: boolean;
   isLast: boolean;
   onSelect: () => void;
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
 }) {
+  const blockRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    // Set the drag image to the entire block
+    if (blockRef.current) {
+      e.dataTransfer.setDragImage(blockRef.current, 20, 20);
+    }
+    onDragStart();
+  };
+
   const getBlockPreview = () => {
     switch (block.type) {
       case "heading":
@@ -409,13 +455,28 @@ function BlockItem({
 
   return (
     <div
+      ref={blockRef}
+      onDragOver={onDragOver}
       onClick={onSelect}
-      className={`flex items-center gap-2 rounded-lg border p-3 cursor-pointer transition ${
-        isSelected
-          ? "border-[#b1d135] bg-[#b1d135]/5"
-          : "border-gray-200 bg-white hover:border-gray-300"
+      className={`flex items-center gap-2 rounded-lg border p-3 transition ${
+        isDragging
+          ? "opacity-50"
+          : isSelected
+            ? "border-[#b1d135] bg-[#b1d135]/5"
+            : "border-gray-200 bg-white hover:border-gray-300"
       }`}
     >
+      {/* Drag Handle */}
+      <div
+        draggable
+        onDragStart={handleDragStart}
+        onDragEnd={onDragEnd}
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical className="h-5 w-5" />
+      </div>
+
       <div className="flex flex-col gap-1">
         <button
           type="button"
@@ -426,7 +487,7 @@ function BlockItem({
           disabled={isFirst}
           className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
         >
-          <GripVertical className="h-4 w-4" />
+          <ChevronUp className="h-4 w-4" />
         </button>
         <button
           type="button"
@@ -437,7 +498,7 @@ function BlockItem({
           disabled={isLast}
           className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
         >
-          <GripVertical className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" />
         </button>
       </div>
 
