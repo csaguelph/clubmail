@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { db } from "@/server/db";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -11,7 +12,7 @@ export async function GET(
   const url = request.nextUrl.searchParams.get("url");
 
   // Redirect destination (default to homepage if URL missing/invalid)
-  let redirectUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  let redirectUrl = env.NEXT_PUBLIC_BASE_URL;
 
   if (url) {
     try {

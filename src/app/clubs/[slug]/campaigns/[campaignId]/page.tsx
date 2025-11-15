@@ -2,6 +2,7 @@ import { Pencil } from "lucide-react";
 import Link from "next/link";
 
 import PageContainer from "@/components/layout/PageContainer";
+import { env } from "@/env";
 import { generateEmailHTML, parseDesignJSON } from "@/lib/email-editor/utils";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
@@ -34,7 +35,7 @@ export default async function CampaignDetailPage({
   // This ensures the preview uses the latest rendering logic (like auto text color)
   // Include test unsubscribe URL so the preview shows the unsubscribe link
   const blocks = parseDesignJSON(campaign.designJson);
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
   const previewHtml = await generateEmailHTML(blocks, club.name, settings.brandColor, testUnsubscribeUrl);
 
