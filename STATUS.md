@@ -3,13 +3,21 @@
 ## 🎉 Latest Updates - Enhanced MVP! (Nov 2025)
 
 ### Just Implemented ✨
-1. **Enhanced Subscriber Management**
+1. **Club Staff Management** (`/clubs/[slug]/staff`) - NEW!
+   - ✅ Add staff members by email (creates stub accounts if needed)
+   - ✅ Change staff roles (Owner, Editor, Viewer)
+   - ✅ Remove staff members with safety checks
+   - ✅ Visual role indicators with icons and descriptions
+   - ✅ Protection: Can't remove yourself or the last owner
+   - Owner-only feature for security
+
+2. **Enhanced Subscriber Management**
    - ✅ Edit subscriber names (email is read-only)
    - ✅ Delete individual subscribers with confirmation
    - ✅ Export subscribers to CSV (email, name, status, date)
    - Edit and Delete buttons in subscriber table
    
-2. **Email List Management** (`/clubs/[slug]/lists`)
+3. **Email List Management** (`/clubs/[slug]/lists`)
    - ✅ Create new email lists with names and descriptions
    - ✅ Edit list names and descriptions
    - ✅ Delete non-default lists with safety checks
@@ -31,6 +39,7 @@
 ### Club Management ✅
 - ✅ **Club Dashboard** (`/clubs/[slug]`) - Stats, quick actions, club info
 - ✅ **Club Settings** (`/clubs/[slug]/settings`) - Email configuration, legal info
+- ✅ **Club Staff Management** (`/clubs/[slug]/staff`) - **Add, edit, remove staff with role management**
 - ✅ **Subscriber Management** (`/clubs/[slug]/subscribers`) - Add, import CSV, list view, **edit, delete, export**
 - ✅ **Email List Management** (`/clubs/[slug]/lists`) - **Create, edit, delete email lists**
 - ✅ **Campaign List** (`/clubs/[slug]/campaigns`) - View campaigns with stats
@@ -85,19 +94,19 @@
    - Campaign comparison charts
 
 ### Medium Priority
-4. ~~**Email List Management**~~ ✅ DONE
+~~**Email List Management**~~ ✅ DONE
    - ~~Create/edit/delete email lists beyond default~~
    - ~~List descriptions and metadata~~
    - Move subscribers between lists (future enhancement)
    - Archive old lists (future enhancement)
 
-5. **Club Member Management**
-   - Add/remove club members via UI
-   - Assign/change roles
-   - Transfer ownership
-   - Member activity logs
+~~**Club Staff Management**~~ ✅ DONE
+   - ~~Add/remove club staff via UI~~
+   - ~~Assign/change roles~~
+   - Protection against removing last owner (built-in)
+   - Activity logs (future enhancement)
 
-6. ~~**Enhanced Subscriber Features**~~ ✅ DONE
+~~**Enhanced Subscriber Features**~~ ✅ DONE
    - ~~Edit subscriber information~~
    - ~~Remove individual subscribers~~
    - ~~Export subscriber lists (CSV)~~
@@ -208,8 +217,6 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ## Current Limitations
 
 - **No Scheduling**: Can't schedule for future delivery (sends immediately only)
-- ~~**Limited Email Lists**~~: ✅ DONE - Full email list CRUD now available
-- **No Member Management UI**: Must be done via database
 - **No Open/Click Analytics**: Email tracking not yet implemented (requires pixels + SNS)
 - **Basic Editor**: No rich text, templates, or advanced layouts yet
 - **No Image Upload**: Must use external URLs for images
@@ -296,21 +303,21 @@ Before deploying to production:
 ✅ **Complete Email Campaign Workflow**:
 1. Admin creates club → ✅ Works
 2. Club owner configures settings → ✅ Works
-3. **Club editor creates/manages email lists → ✅ Works**
-4. Club editor adds subscribers → ✅ Works (individual + CSV import)
-5. **Club editor edits/deletes subscribers → ✅ Works**
-6. **Club editor exports subscribers as CSV → ✅ Works**
-7. Club editor creates campaign → ✅ Works (full drag-and-drop editor)
-8. Campaign is saved with HTML + design JSON → ✅ Works
-9. **Club editor edits campaign → ✅ Works (loads design back into editor)**
-10. **Club editor sends test email → ✅ Works (to any email address)**
-11. **Club editor sends campaign → ✅ Works (sends to all subscribers immediately)**
-12. **Campaign stats tracked → ✅ Works (sent/delivered/bounced/complained/failed)**
+3. **Club owner manages staff members → ✅ Works**
+4. **Club editor creates/manages email lists → ✅ Works**
+5. Club editor adds subscribers → ✅ Works (individual + CSV import)
+6. **Club editor edits/deletes subscribers → ✅ Works**
+7. **Club editor exports subscribers as CSV → ✅ Works**
+8. Club editor creates campaign → ✅ Works (full drag-and-drop editor)
+9. Campaign is saved with HTML + design JSON → ✅ Works
+10. **Club editor edits campaign → ✅ Works (loads design back into editor)**
+11. **Club editor sends test email → ✅ Works (to any email address)**
+12. **Club editor sends campaign → ✅ Works (sends to all subscribers immediately)**
+13. **Campaign stats tracked → ✅ Works (sent/delivered/bounced/complained/failed)**
 
 ⚠️ **What's Missing**:
 - Scheduling campaigns for future delivery
 - Advanced analytics (open/click tracking requires tracking pixels)
-- Club member management UI
 - Moving subscribers between lists
 
 ## Next Immediate Priority
@@ -319,6 +326,7 @@ Before deploying to production:
 
 The platform now has a **complete email campaign workflow with full data management**:
 - ✅ Create clubs and configure settings
+- ✅ Manage club staff with role-based permissions
 - ✅ Create and manage multiple email lists
 - ✅ Manage subscribers with CSV import/export
 - ✅ Edit and delete individual subscribers
@@ -333,5 +341,5 @@ The platform now has a **complete email campaign workflow with full data managem
 Optional enhancements for the future:
 1. **Scheduling** - Send campaigns at a future date/time
 2. **Analytics** - Open/click tracking (requires tracking pixels + SNS webhooks)
-3. **Club Member Management UI** - Manage members, roles, and permissions
-4. **Advanced Editor Features** - Rich text, templates, image upload
+3. **Advanced Editor Features** - Rich text, templates, image upload
+4. **Subscriber Management** - Move subscribers between lists, activity history
