@@ -44,7 +44,7 @@ export default async function ClubPage({
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-4">
         <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-sm font-medium text-gray-500">Members</h3>
+          <h3 className="text-sm font-medium text-gray-500">Staff</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">
             {club.members.length}
           </p>
@@ -132,6 +132,70 @@ export default async function ClubPage({
             </div>
           </div>
         </Link>
+
+        <Link
+          href={`/clubs/${slug}/lists`}
+          className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+        >
+          <div className="flex items-center">
+            <div className="shrink-0">
+              <svg
+                className="h-8 w-8 text-[#b1d135]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#b1d135]">
+                Email Lists
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Create and manage email lists
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        {club.myRole === "CLUB_OWNER" && (
+          <Link
+            href={`/clubs/${slug}/staff`}
+            className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+          >
+            <div className="flex items-center">
+              <div className="shrink-0">
+                <svg
+                  className="h-8 w-8 text-[#b1d135]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#b1d135]">
+                  Staff
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Manage staff members and roles
+                </p>
+              </div>
+            </div>
+          </Link>
+        )}
 
         <Link
           href={`/clubs/${slug}/settings`}

@@ -1,27 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import PageContainer from "@/components/layout/PageContainer";
-import { getSession } from "@/server/better-auth/server";
-import { db } from "@/server/db";
+import { requireAdmin } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
 
 export default async function AdminPage() {
-  const session = await getSession();
-
-  if (!session?.user) {
-    redirect("/");
-  }
-
-  // Check if user is admin
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-
-  if (user?.role !== "ADMIN") {
-    redirect("/clubs");
-  }
+  const user = await requireAdmin();
 
   // Get clubs list
   const { clubs } = await api.admin.listClubs({ limit: 50 });
