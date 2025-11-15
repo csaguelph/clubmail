@@ -49,7 +49,7 @@ export function EmailTemplate({
             </Text>
             <Text style={footerTextStyle}>
               {unsubscribeUrl && (
-                <a href={unsubscribeUrl} style={{ ...link, color: brandColor }}>
+                <a href={unsubscribeUrl} style={link}>
                   Unsubscribe
                 </a>
               )}
@@ -199,6 +199,6 @@ const footerTextStyle = {
 };
 
 const link = {
-  color: "#b1d135",
+  color: "#3b82f6", // Match rich text link color
   textDecoration: "underline",
 };

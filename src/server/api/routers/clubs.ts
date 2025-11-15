@@ -2,9 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-    clubViewerProcedure,
-    createTRPCRouter,
-    protectedProcedure,
+  clubViewerProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
 } from "@/server/api/trpc";
 
 export const clubsRouter = createTRPCRouter({
@@ -170,6 +171,44 @@ export const clubsRouter = createTRPCRouter({
             message: "You do not have access to this club",
           });
         }
+      }
+
+      return club;
+    }),
+
+  // Get public club info for subscription page
+  getPublicClubInfo: publicProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const club = await ctx.db.club.findUnique({
+        where: { slug: input.slug },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          isActive: true,
+          settings: {
+            select: {
+              fromName: true,
+            },
+          },
+          _count: {
+            select: {
+              subscribers: {
+                where: {
+                  status: "SUBSCRIBED",
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!club || !club.isActive) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Club not found",
+        });
       }
 
       return club;

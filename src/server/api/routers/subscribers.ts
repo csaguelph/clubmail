@@ -445,4 +445,92 @@ export const subscribersRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  // Public subscribe endpoint
+  subscribe: publicProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        email: z.string().email(),
+        name: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify club exists and is active
+      const club = await ctx.db.club.findUnique({
+        where: { id: input.clubId },
+        select: { isActive: true },
+      });
+
+      if (!club?.isActive) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Club not found",
+        });
+      }
+
+      // Check if subscriber already exists
+      const existing = await ctx.db.subscriber.findUnique({
+        where: {
+          clubId_email: {
+            clubId: input.clubId,
+            email: input.email,
+          },
+        },
+      });
+
+      if (existing) {
+        // If already subscribed, just return success
+        if (existing.status === "SUBSCRIBED") {
+          return { success: true, alreadySubscribed: true };
+        }
+
+        // If unsubscribed or bounced, reactivate
+        await ctx.db.subscriber.update({
+          where: { id: existing.id },
+          data: {
+            status: "SUBSCRIBED",
+            name: input.name ?? existing.name,
+          },
+        });
+
+        return { success: true, resubscribed: true };
+      }
+
+      // Get the default email list
+      const defaultList = await ctx.db.emailList.findFirst({
+        where: {
+          clubId: input.clubId,
+          isDefault: true,
+        },
+      });
+
+      if (!defaultList) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Default email list not found",
+        });
+      }
+
+      // Create new subscriber and add to default list
+      await ctx.db.$transaction(async (tx) => {
+        const newSubscriber = await tx.subscriber.create({
+          data: {
+            clubId: input.clubId,
+            email: input.email,
+            name: input.name,
+            status: "SUBSCRIBED",
+          },
+        });
+
+        await tx.subscriberListMembership.create({
+          data: {
+            subscriberId: newSubscriber.id,
+            emailListId: defaultList.id,
+          },
+        });
+      });
+
+      return { success: true, alreadySubscribed: false };
+    }),
 });

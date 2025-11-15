@@ -32,8 +32,11 @@ export default async function CampaignDetailPage({
 
   // Regenerate HTML with current brand color for preview
   // This ensures the preview uses the latest rendering logic (like auto text color)
+  // Include test unsubscribe URL so the preview shows the unsubscribe link
   const blocks = parseDesignJSON(campaign.designJson);
-  const previewHtml = await generateEmailHTML(blocks, club.name, settings.brandColor);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
+  const previewHtml = await generateEmailHTML(blocks, club.name, settings.brandColor, testUnsubscribeUrl);
 
   const stats = await api.campaigns.getCampaignStats({
     clubId: club.id,
