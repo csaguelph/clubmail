@@ -212,6 +212,53 @@ export function injectUnsubscribeLink(html: string, unsubscribeToken: string): s
 }
 
 /**
+ * Inject tracking pixel and wrap links for click tracking
+ */
+export function injectTracking(html: string, trackingToken: string): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  
+  // 1. Inject tracking pixel before </body>
+  const trackingPixel = `<img src="${baseUrl}/api/track/open/${trackingToken}" width="1" height="1" alt="" style="display:block" />`;
+  
+  if (html.includes("</body>")) {
+    html = html.replace("</body>", `${trackingPixel}</body>`);
+  } else {
+    // Fallback: append at the end
+    html += trackingPixel;
+  }
+  
+  // 2. Wrap all links (except unsubscribe) with click tracking
+  // Match <a> tags and extract href
+  html = html.replace(
+    /<a\s+([^>]*href=["']([^"']+)["'][^>]*)>/gi,
+    (match, attributes: string, url: string) => {
+      // Don't wrap unsubscribe links or tracking links
+      if (
+        url.includes("/unsubscribe") ||
+        url.includes("/api/track/") ||
+        url.startsWith("mailto:")
+      ) {
+        return match;
+      }
+      
+      // Encode the destination URL
+      const encodedUrl = encodeURIComponent(url);
+      const trackingUrl = `${baseUrl}/api/track/click/${trackingToken}?url=${encodedUrl}`;
+      
+      // Replace the href in the original attributes
+      const newAttributes = attributes.replace(
+        /href=["'][^"']+["']/i,
+        `href="${trackingUrl}"`
+      );
+      
+      return `<a ${newAttributes}>`;
+    }
+  );
+  
+  return html;
+}
+
+/**
  * Send a campaign email to a subscriber
  */
 export async function sendCampaignEmail(params: {
@@ -229,6 +276,7 @@ export async function sendCampaignEmail(params: {
   clubSettings: {
     replyToEmail?: string | null;
   };
+  trackingToken?: string; // Optional tracking token for open/click tracking
 }): Promise<{
   success: boolean;
   messageId?: string;
@@ -238,14 +286,18 @@ export async function sendCampaignEmail(params: {
   const unsubscribeUrl = generateUnsubscribeLink(params.subscriber.unsubscribeToken);
   
   // Inject unsubscribe link
-  const htmlWithUnsubscribe = injectUnsubscribeLink(
+  let html = injectUnsubscribeLink(
     params.campaign.html,
     params.subscriber.unsubscribeToken
   );
   
+  // Inject tracking pixel and wrap links if tracking token provided
+  if (params.trackingToken) {
+    html = injectTracking(html, params.trackingToken);
+  }
+  
   // Personalize subject and content if subscriber has a name
   let subject = params.campaign.subject;
-  let html = htmlWithUnsubscribe;
   
   if (params.subscriber.name) {
     subject = subject.replace(/\{\{name\}\}/g, params.subscriber.name);
@@ -273,6 +325,7 @@ export async function batchSendCampaignEmails(params: {
     email: string;
     name?: string | null;
     unsubscribeToken: string;
+    trackingToken?: string; // Optional tracking token from Email record
   }>;
   campaign: {
     subject: string;
@@ -315,6 +368,7 @@ export async function batchSendCampaignEmails(params: {
       subscriber,
       campaign: params.campaign,
       clubSettings: params.clubSettings,
+      trackingToken: subscriber.trackingToken,
     });
     
     results.push({

@@ -85,7 +85,7 @@ export default async function ClubsPage() {
 
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xs text-gray-500">
-                  {club.settings?.fromEmail || "No email configured"}
+                  {club.settings?.fromName || "No sender configured"}
                 </span>
                 <svg
                   className="h-5 w-5 text-gray-400 group-hover:text-[#b1d135]"

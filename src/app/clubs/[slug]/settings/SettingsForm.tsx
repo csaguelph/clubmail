@@ -13,6 +13,7 @@ interface SettingsFormProps {
     replyToEmail: string | null;
     defaultSubjectPrefix: string | null;
     brandColor: string;
+    enableTracking: boolean;
   };
 }
 
@@ -30,6 +31,9 @@ export default function SettingsForm({
     initialSettings.defaultSubjectPrefix || ""
   );
   const [brandColor, setBrandColor] = useState(initialSettings.brandColor);
+  const [enableTracking, setEnableTracking] = useState(
+    initialSettings.enableTracking
+  );
 
   const updateSettings = api.clubSettings.updateSettings.useMutation({
     onSuccess: () => {
@@ -46,6 +50,7 @@ export default function SettingsForm({
       replyToEmail: replyToEmail || undefined,
       defaultSubjectPrefix: defaultSubjectPrefix || undefined,
       brandColor,
+      enableTracking,
     });
   };
 
@@ -198,6 +203,32 @@ export default function SettingsForm({
             <p className="mt-1 text-xs text-amber-600">
               Note: Changing the brand color will only affect new campaigns and draft campaigns that are edited and saved.
             </p>
+          </div>
+
+          <div>
+            <div className="flex items-start">
+              <div className="flex h-5 items-center">
+                <input
+                  id="enableTracking"
+                  type="checkbox"
+                  checked={enableTracking}
+                  onChange={(e) => setEnableTracking(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
+                />
+              </div>
+              <div className="ml-3">
+                <label
+                  htmlFor="enableTracking"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Enable Email Tracking
+                </label>
+                <p className="text-xs text-gray-500">
+                  Track email opens and link clicks for engagement analytics.
+                  Tracking uses pixels and wrapped links (privacy-preserving).
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

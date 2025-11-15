@@ -43,6 +43,19 @@ export default async function CampaignDetailPage({
     campaignId,
   });
 
+  // Get engagement stats if campaign has been sent
+  let engagement = null;
+  if (campaign.status === "SENT") {
+    try {
+      engagement = await api.campaigns.getCampaignEngagement({
+        clubId: club.id,
+        campaignId,
+      });
+    } catch (error) {
+      console.error("Failed to load engagement stats:", error);
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     const styles = {
       DRAFT: "bg-gray-100 text-gray-800",
@@ -223,6 +236,95 @@ export default async function CampaignDetailPage({
           </dl>
         </div>
       </div>
+
+      {/* Engagement Stats (if campaign is sent) */}
+      {engagement && (
+        <div className="mb-8 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            Engagement Statistics
+          </h2>
+          <div className="grid gap-6 md:grid-cols-4">
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Opens</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-900">
+                {engagement.uniqueOpens}
+              </dd>
+              <dd className="mt-1 text-xs text-gray-500">
+                {engagement.openRate.toFixed(1)}% open rate
+              </dd>
+              {engagement.totalOpens > engagement.uniqueOpens && (
+                <dd className="mt-1 text-xs text-gray-500">
+                  ({engagement.totalOpens} total opens)
+                </dd>
+              )}
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Clicks</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-900">
+                {engagement.uniqueClicks}
+              </dd>
+              <dd className="mt-1 text-xs text-gray-500">
+                {engagement.clickRate.toFixed(1)}% click rate
+              </dd>
+              {engagement.totalClicks > engagement.uniqueClicks && (
+                <dd className="mt-1 text-xs text-gray-500">
+                  ({engagement.totalClicks} total clicks)
+                </dd>
+              )}
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Click-to-Open Rate</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-900">
+                {engagement.uniqueOpens > 0
+                  ? ((engagement.uniqueClicks / engagement.uniqueOpens) * 100).toFixed(1)
+                  : "0"}%
+              </dd>
+              <dd className="mt-1 text-xs text-gray-500">
+                of those who opened
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Total Sent</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-900">
+                {engagement.totalSent}
+              </dd>
+              <dd className="mt-1 text-xs text-gray-500">
+                successfully delivered
+              </dd>
+            </div>
+          </div>
+
+          {/* Top Clicked URLs */}
+          {engagement.topUrls.length > 0 && (
+            <div className="mt-6">
+              <h3 className="mb-3 text-sm font-semibold text-gray-900">
+                Top Clicked Links
+              </h3>
+              <div className="space-y-2">
+                {engagement.topUrls.slice(0, 5).map((urlData, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-md bg-gray-50 p-3"
+                  >
+                    <a
+                      href={urlData.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="truncate text-sm text-blue-600 hover:underline"
+                      style={{ maxWidth: "70%" }}
+                    >
+                      {urlData.url}
+                    </a>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {urlData.clicks} {urlData.clicks === 1 ? "click" : "clicks"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* HTML Preview */}
       {campaign.html && (

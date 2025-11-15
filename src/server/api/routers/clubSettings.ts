@@ -35,6 +35,7 @@ export const clubSettingsRouter = createTRPCRouter({
         replyToEmail: z.string().email().optional().nullable(),
         defaultSubjectPrefix: z.string().optional().nullable(),
         brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+        enableTracking: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
