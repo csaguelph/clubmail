@@ -96,6 +96,7 @@ model ClubSettings {
   replyToEmail          String?
   defaultSubjectPrefix  String?
   brandColor            String  @default("#b1d135")
+  enableTracking        Boolean @default(true)
 
   club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId String @unique
@@ -140,7 +141,7 @@ model Subscriber {
   clubId String
 
   listMemberships SubscriberListMembership[]
-  emailEvents     EmailEvent[]
+  emails          Email[]
 
   @@unique([clubId, email])
   @@index([clubId])
@@ -198,13 +199,42 @@ model Campaign {
   createdBy   User   @relation(fields: [createdById], references: [id])
   createdById String
 
-  emailEvents EmailEvent[]
+  emails Email[]
 
   @@index([clubId])
   @@index([status])
 }
 
-enum EmailEventStatus {
+// ========================================
+// Email Tracking Models
+// ========================================
+
+model Email {
+  id                 String       @id @default(cuid())
+  trackingToken      String       @unique @default(cuid())
+  providerMessageId  String?
+  status             EmailStatus  @default(QUEUED)
+  errorMessage       String?
+  sentAt             DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId String
+
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id])
+  subscriberId String
+
+  opens  EmailOpen[]
+  clicks EmailClick[]
+
+  @@index([campaignId])
+  @@index([subscriberId])
+  @@index([status])
+  @@index([trackingToken])
+}
+
+enum EmailStatus {
   QUEUED
   SENT
   DELIVERED
@@ -213,22 +243,31 @@ enum EmailEventStatus {
   FAILED
 }
 
-model EmailEvent {
-  id                 String           @id @default(cuid())
-  providerMessageId  String?
-  status             EmailEventStatus @default(QUEUED)
-  errorMessage       String?
-  timestamp          DateTime         @default(now())
+model EmailOpen {
+  id        String   @id @default(cuid())
+  userAgent String?
+  ipAddress String?
+  openedAt  DateTime @default(now())
 
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  campaignId String
+  email   Email  @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  emailId String
 
-  subscriber   Subscriber @relation(fields: [subscriberId], references: [id])
-  subscriberId String
+  @@index([emailId])
+  @@index([openedAt])
+}
 
-  @@index([campaignId])
-  @@index([subscriberId])
-  @@index([status])
+model EmailClick {
+  id        String   @id @default(cuid())
+  url       String
+  userAgent String?
+  ipAddress String?
+  clickedAt DateTime @default(now())
+
+  email   Email  @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  emailId String
+
+  @@index([emailId])
+  @@index([clickedAt])
 }
 
 model Session {

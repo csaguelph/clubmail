@@ -86,7 +86,7 @@ export default async function CampaignsPage({
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Total Emails</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">
-            {campaigns.reduce((sum, c) => sum + c._count.emailEvents, 0)}
+            {campaigns.reduce((sum, c) => sum + c._count.emails, 0)}
           </p>
         </div>
       </div>
@@ -160,10 +160,10 @@ export default async function CampaignsPage({
                   </div>
                 </div>
                 <div className="ml-4 flex items-center space-x-4">
-                  {campaign._count.emailEvents > 0 && (
+                  {campaign._count.emails > 0 && (
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
-                        {campaign._count.emailEvents}
+                        {campaign._count.emails}
                       </p>
                       <p className="text-xs text-gray-500">recipients</p>
                     </div>

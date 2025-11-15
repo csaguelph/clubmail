@@ -57,7 +57,7 @@ export const campaignsRouter = createTRPCRouter({
           },
           _count: {
             select: {
-              emailEvents: true,
+              emails: true,
             },
           },
         },
@@ -105,7 +105,7 @@ export const campaignsRouter = createTRPCRouter({
           },
           _count: {
             select: {
-              emailEvents: true,
+              emails: true,
             },
           },
         },
@@ -145,8 +145,8 @@ export const campaignsRouter = createTRPCRouter({
         });
       }
 
-      // Get event statistics
-      const events = await ctx.db.emailEvent.groupBy({
+      // Get email delivery statistics
+      const emails = await ctx.db.email.groupBy({
         by: ["status"],
         where: {
           campaignId: input.campaignId,
@@ -164,11 +164,11 @@ export const campaignsRouter = createTRPCRouter({
         failed: 0,
       };
 
-      events.forEach((event) => {
-        const count = event._count;
+      emails.forEach((email) => {
+        const count = email._count;
         stats.total += count;
 
-        switch (event.status) {
+        switch (email.status) {
           case "QUEUED":
             stats.queued = count;
             break;
@@ -191,6 +191,87 @@ export const campaignsRouter = createTRPCRouter({
       });
 
       return stats;
+    }),
+
+  // Get campaign engagement statistics (opens and clicks)
+  getCampaignEngagement: clubViewerProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        campaignId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      // Verify campaign belongs to club
+      const campaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Get all emails for this campaign
+      const emails = await ctx.db.email.findMany({
+        where: {
+          campaignId: input.campaignId,
+          status: "SENT", // Only count sent emails
+        },
+        select: {
+          id: true,
+          _count: {
+            select: {
+              opens: true,
+              clicks: true,
+            },
+          },
+        },
+      });
+
+      // Count unique emails with at least one open/click
+      const uniqueOpens = emails.filter((e) => e._count.opens > 0).length;
+      const uniqueClicks = emails.filter((e) => e._count.clicks > 0).length;
+
+      // Count total opens/clicks (including duplicates)
+      const totalOpens = emails.reduce((sum, e) => sum + e._count.opens, 0);
+      const totalClicks = emails.reduce((sum, e) => sum + e._count.clicks, 0);
+
+      // Get top clicked URLs
+      const clickedUrls = await ctx.db.emailClick.groupBy({
+        by: ["url"],
+        where: {
+          email: {
+            campaignId: input.campaignId,
+          },
+        },
+        _count: true,
+        orderBy: {
+          _count: {
+            url: "desc",
+          },
+        },
+        take: 10,
+      });
+
+      return {
+        totalSent: emails.length,
+        uniqueOpens,
+        totalOpens,
+        uniqueClicks,
+        totalClicks,
+        openRate: emails.length > 0 ? (uniqueOpens / emails.length) * 100 : 0,
+        clickRate: emails.length > 0 ? (uniqueClicks / emails.length) * 100 : 0,
+        topUrls: clickedUrls.map((u) => ({
+          url: u.url,
+          clicks: u._count,
+        })),
+      };
     }),
 
   // Create a new campaign
@@ -512,9 +593,37 @@ export const campaignsRouter = createTRPCRouter({
       }
 
       try {
+        // Create Email records BEFORE sending so we have tracking tokens
+        const emailRecords = await Promise.all(
+          subscribers.map((subscriber) =>
+            ctx.db.email.create({
+              data: {
+                campaignId: input.campaignId,
+                subscriberId: subscriber.id,
+                status: "QUEUED",
+              },
+              select: {
+                id: true,
+                trackingToken: true,
+                subscriberId: true,
+              },
+            })
+          )
+        );
+
+        // Create a map of subscriberId to trackingToken for easy lookup
+        const trackingTokenMap = new Map(
+          emailRecords.map((record) => [record.subscriberId, record.trackingToken])
+        );
+
         // Send emails in batch with rate limiting
         const { sent, failed, results } = await batchSendCampaignEmails({
-          subscribers,
+          subscribers: subscribers.map((sub) => ({
+            ...sub,
+            trackingToken: settings.enableTracking
+              ? trackingTokenMap.get(sub.id)!
+              : undefined,
+          })),
           campaign: {
             subject: campaign.subject,
             fromName: campaign.fromName,
@@ -527,17 +636,25 @@ export const campaignsRouter = createTRPCRouter({
           maxPerSecond: 10, // Conservative rate limit
         });
 
-        // Create EmailEvent records for tracking
-        await ctx.db.emailEvent.createMany({
-          data: results.map((result) => ({
-            campaignId: input.campaignId,
-            subscriberId: result.subscriberId,
-            providerMessageId: result.messageId,
-            status: result.success ? "SENT" : "FAILED",
-            errorMessage: result.error,
-            timestamp: new Date(),
-          })),
-        });
+        // Update Email records with send results
+        await Promise.all(
+          results.map((result) => {
+            const emailRecord = emailRecords.find(
+              (r) => r.subscriberId === result.subscriberId
+            );
+            if (!emailRecord) return Promise.resolve();
+
+            return ctx.db.email.update({
+              where: { id: emailRecord.id },
+              data: {
+                providerMessageId: result.messageId,
+                status: result.success ? "SENT" : "FAILED",
+                errorMessage: result.error,
+                sentAt: result.success ? new Date() : null,
+              },
+            });
+          })
+        );
 
         // Update campaign status
         await ctx.db.campaign.update({
