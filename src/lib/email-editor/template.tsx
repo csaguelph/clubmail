@@ -42,10 +42,10 @@ export function EmailTemplate({
           <Section style={footer}>
             <Hr style={hr} />
             <Text style={footerTextStyle}>
-              This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association.
+              This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association or the University of Guelph.
             </Text>
             <Text style={footerTextStyle}>
-              University of Guelph, 50 Stone Road East, Guelph, ON N1G 2W1
+              University of Guelph, University Centre 274, 50 Stone Road East, Guelph, ON N1G 2W1
             </Text>
             <Text style={footerTextStyle}>
               {unsubscribeUrl && (

@@ -199,14 +199,6 @@ export default function SettingsForm({
               Note: Changing the brand color will only affect new campaigns and draft campaigns that are edited and saved.
             </p>
           </div>
-
-          <div className="rounded-md bg-blue-50 p-4">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> All emails will include a footer stating that the content 
-              is created by your club and not reviewed or endorsed by the CSA, along with an 
-              unsubscribe link and the University of Guelph address.
-            </p>
-          </div>
         </div>
       </div>
 
