@@ -1,17 +1,18 @@
 import { getTextColorForBackground } from "@/lib/color-utils";
 import {
-    Body,
-    Button,
-    Container,
-    Head,
-    Heading,
-    Hr,
-    Html,
-    Img,
-    Section,
-    Text,
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Section,
+  Text,
 } from "@react-email/components";
 import type { EmailBlock } from "./types";
+import { processRichTextForEmail } from "./utils";
 interface EmailTemplateProps {
   blocks: EmailBlock[];
   clubName: string;
@@ -73,11 +74,25 @@ function renderBlock(block: EmailBlock, brandColor: string = "#b1d135") {
       );
 
     case "richtext":
+      // Email clients need special handling for HTML content
+      // Process the HTML to add inline styles for better email client compatibility
+      const processedContent = processRichTextForEmail(block.content);
       return (
-        <div
-          style={text}
-          dangerouslySetInnerHTML={{ __html: block.content }}
-        />
+        <table width="100%" cellPadding="0" cellSpacing="0" border={0}>
+          <tbody>
+            <tr>
+              <td
+                style={{
+                  fontSize: "16px",
+                  lineHeight: "24px",
+                  color: "#484848",
+                  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+                }}
+                dangerouslySetInnerHTML={{ __html: processedContent }}
+              />
+            </tr>
+          </tbody>
+        </table>
       );
 
     case "button":
@@ -138,15 +153,16 @@ const heading = {
   lineHeight: "1.3",
   fontWeight: "700",
   color: "#484848",
-  marginBottom: "16px",
+  margin: "0 0 16px 0",
+  padding: "0",
 };
 
 const text = {
   fontSize: "16px",
-  lineHeight: "1.5",
+  lineHeight: "24px",
   color: "#484848",
-  marginBottom: "16px",
-  whiteSpace: "pre-wrap" as const,
+  margin: "0 0 16px 0",
+  padding: "0",
 };
 
 const button = {

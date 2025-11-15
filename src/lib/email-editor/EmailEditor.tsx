@@ -1,10 +1,10 @@
 "use client";
 
-import { getTextColorForBackground } from "@/lib/color-utils";
 import { ChevronDown, ChevronUp, Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RichTextEditor } from "./RichTextEditor";
 import type { EmailBlock, EmailBlockType } from "./types";
+import { generateEmailHTML } from "./utils";
 
 interface EmailEditorProps {
   blocks: EmailBlock[];
@@ -148,7 +148,7 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandCol
                 <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
                   <p className="text-xs font-medium text-gray-600">Live Preview</p>
                 </div>
-                <div className="p-6 max-h-[600px] overflow-y-auto">
+                <div className="h-[600px]">
                   <EmailPreview 
                     blocks={blocks} 
                     clubName={clubName}
@@ -173,194 +173,28 @@ function EmailPreview({
   clubName: string;
   brandColor: string;
 }) {
-  return (
-    <div style={{ 
-      fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-      backgroundColor: '#ffffff',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
-      {blocks.map((block) => (
-        <div key={block.id} style={{ marginBottom: '16px' }}>
-          {renderPreviewBlock(block, brandColor)}
-        </div>
-      ))}
-      
-      {/* Footer Preview */}
-      <div style={{ 
-        borderTop: '1px solid #e6ebf1', 
-        marginTop: '32px',
-        paddingTop: '20px'
-      }}>
-        <p style={{ 
-          fontSize: '12px', 
-          lineHeight: '1.5', 
-          color: '#8898aa',
-          marginBottom: '8px'
-        }}>
-          This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association.
-        </p>
-        <p style={{ 
-          fontSize: '12px', 
-          lineHeight: '1.5', 
-          color: '#8898aa',
-          marginBottom: '8px'
-        }}>
-          University of Guelph, 50 Stone Road East, Guelph, ON N1G 2W1
-        </p>
-        <p style={{ 
-          fontSize: '12px', 
-          lineHeight: '1.5', 
-          color: '#8898aa',
-          marginBottom: '8px'
-        }}>
-          <span style={{ color: brandColor, textDecoration: 'underline' }}>Unsubscribe</span>
-        </p>
+  const [html, setHtml] = useState<string>('');
+
+  useEffect(() => {
+    generateEmailHTML(blocks, clubName, brandColor).then(setHtml);
+  }, [blocks, clubName, brandColor]);
+
+  if (!html) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        Generating preview...
       </div>
-    </div>
-  );
-}
-
-function renderPreviewBlock(block: EmailBlock, brandColor: string) {
-  const textColor = getTextColorForBackground(brandColor);
-  
-  switch (block.type) {
-    case "heading":
-      const headingStyle = {
-        1: { fontSize: '32px', lineHeight: '1.3', fontWeight: '700', color: '#484848', marginBottom: '16px' },
-        2: { fontSize: '24px', lineHeight: '1.3', fontWeight: '700', color: '#484848', marginBottom: '16px' },
-        3: { fontSize: '20px', lineHeight: '1.3', fontWeight: '700', color: '#484848', marginBottom: '16px' },
-      };
-      const HeadingTag = `h${block.level}` as 'h1' | 'h2' | 'h3';
-      return (
-        <HeadingTag style={headingStyle[block.level]}>
-          {block.content || 'Heading'}
-        </HeadingTag>
-      );
-
-    case "richtext":
-      return (
-        <div 
-          style={{ 
-            fontSize: '16px', 
-            lineHeight: '1.5', 
-            color: '#484848',
-            marginBottom: '16px'
-          }}
-        >
-          <style>{`
-            .richtext-preview p {
-              margin-bottom: 1em;
-            }
-            .richtext-preview p:last-child {
-              margin-bottom: 0;
-            }
-            .richtext-preview ul,
-            .richtext-preview ol {
-              padding-left: 1.5em;
-              margin-bottom: 1em;
-            }
-            .richtext-preview ul {
-              list-style-type: disc;
-            }
-            .richtext-preview ol {
-              list-style-type: decimal;
-            }
-            .richtext-preview li {
-              margin-bottom: 0.25em;
-            }
-            .richtext-preview strong {
-              font-weight: 700;
-            }
-            .richtext-preview em {
-              font-style: italic;
-            }
-            .richtext-preview u {
-              text-decoration: underline;
-            }
-            .richtext-preview a {
-              color: #3b82f6;
-              text-decoration: underline;
-            }
-            .richtext-preview br {
-              display: block;
-              content: "";
-              margin-top: 0.5em;
-            }
-          `}</style>
-          <div 
-            className="richtext-preview"
-            dangerouslySetInnerHTML={{ __html: block.content || '<p>Enter your rich text here...</p>' }}
-          />
-        </div>
-      );
-
-    case "button":
-      const buttonAlign = {
-        left: 'flex-start',
-        center: 'center',
-        right: 'flex-end',
-      };
-      return (
-        <div style={{ display: 'flex', justifyContent: buttonAlign[block.align] }}>
-          <a
-            href={block.url}
-            style={{
-              backgroundColor: brandColor,
-              borderRadius: '5px',
-              color: textColor,
-              fontSize: '16px',
-              fontWeight: 'bold',
-              textDecoration: 'none',
-              textAlign: 'center',
-              display: 'inline-block',
-              padding: '12px 24px',
-            }}
-          >
-            {block.text || 'Button'}
-          </a>
-        </div>
-      );
-
-    case "image":
-      if (!block.url) {
-        return (
-          <div style={{
-            border: '2px dashed #e6ebf1',
-            borderRadius: '4px',
-            padding: '32px',
-            textAlign: 'center',
-            color: '#8898aa',
-            fontSize: '14px'
-          }}>
-            No image URL provided
-          </div>
-        );
-      }
-      return (
-        <img
-          src={block.url}
-          alt={block.alt}
-          width={block.width}
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
-      );
-
-    case "divider":
-      return (
-        <hr style={{ 
-          borderColor: '#e6ebf1',
-          borderWidth: '1px 0 0 0',
-          margin: '20px 0' 
-        }} />
-      );
-
-    case "spacer":
-      return <div style={{ height: block.height }} />;
-
-    default:
-      return null;
+    );
   }
+
+  return (
+    <iframe
+      srcDoc={html}
+      className="w-full h-full border-0"
+      title="Email Preview"
+      sandbox="allow-same-origin"
+    />
+  );
 }
 
 function createDefaultBlock(type: EmailBlockType): EmailBlock {
