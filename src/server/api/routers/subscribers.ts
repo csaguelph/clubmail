@@ -2,10 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-    clubEditorProcedure,
-    clubViewerProcedure,
-    createTRPCRouter,
-    publicProcedure,
+  clubEditorProcedure,
+  clubViewerProcedure,
+  createTRPCRouter,
+  publicProcedure,
 } from "@/server/api/trpc";
 
 export const subscribersRouter = createTRPCRouter({
@@ -18,7 +18,7 @@ export const subscribersRouter = createTRPCRouter({
         status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
         limit: z.number().min(1).max(100).default(50),
         cursor: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const where: {
@@ -79,7 +79,7 @@ export const subscribersRouter = createTRPCRouter({
         clubId: z.string(),
         listId: z.string().optional(),
         status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const where: {
@@ -115,7 +115,7 @@ export const subscribersRouter = createTRPCRouter({
         email: z.string().email(),
         name: z.string().optional().nullable(),
         listIds: z.array(z.string()).optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Check if subscriber already exists
@@ -199,9 +199,9 @@ export const subscribersRouter = createTRPCRouter({
           z.object({
             email: z.string().email(),
             name: z.string().optional(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify list belongs to club
@@ -251,14 +251,16 @@ export const subscribersRouter = createTRPCRouter({
             }
 
             // Ensure they're in the list
-            const membership = await ctx.db.subscriberListMembership.findUnique({
-              where: {
-                subscriberId_emailListId: {
-                  subscriberId: existing.id,
-                  emailListId: input.listId,
+            const membership = await ctx.db.subscriberListMembership.findUnique(
+              {
+                where: {
+                  subscriberId_emailListId: {
+                    subscriberId: existing.id,
+                    emailListId: input.listId,
+                  },
                 },
               },
-            });
+            );
 
             if (!membership) {
               await ctx.db.subscriberListMembership.create({
@@ -291,7 +293,7 @@ export const subscribersRouter = createTRPCRouter({
           }
         } catch (error) {
           results.errors.push(
-            `Failed to import ${sub.email}: ${error instanceof Error ? error.message : "Unknown error"}`
+            `Failed to import ${sub.email}: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
         }
       }
@@ -307,7 +309,7 @@ export const subscribersRouter = createTRPCRouter({
         subscriberId: z.string(),
         name: z.string().optional().nullable(),
         status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { clubId, subscriberId, ...updateData } = input;
@@ -341,7 +343,7 @@ export const subscribersRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         subscriberId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify subscriber belongs to club
@@ -373,7 +375,7 @@ export const subscribersRouter = createTRPCRouter({
         clubId: z.string(),
         listId: z.string().optional(),
         status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const where: {
@@ -412,7 +414,7 @@ export const subscribersRouter = createTRPCRouter({
         "email,name,status,subscribed_date", // Header
         ...subscribers.map(
           (sub) =>
-            `${sub.email},"${sub.name ?? ""}",${sub.status},${sub.createdAt.toISOString()}`
+            `${sub.email},"${sub.name ?? ""}",${sub.status},${sub.createdAt.toISOString()}`,
         ),
       ];
 
@@ -453,7 +455,7 @@ export const subscribersRouter = createTRPCRouter({
         clubId: z.string(),
         email: z.string().email(),
         name: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify club exists and is active

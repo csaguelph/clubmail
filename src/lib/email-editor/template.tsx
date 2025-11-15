@@ -42,10 +42,13 @@ export function EmailTemplate({
           <Section style={footer}>
             <Hr style={hr} />
             <Text style={footerTextStyle}>
-              This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association or the University of Guelph.
+              This content is created by {clubName} and is not reviewed or
+              endorsed by the Central Student Association or the University of
+              Guelph.
             </Text>
             <Text style={footerTextStyle}>
-              University of Guelph, University Centre 274, 50 Stone Road East, Guelph, ON N1G 2W1
+              University of Guelph, University Centre 274, 50 Stone Road East,
+              Guelph, ON N1G 2W1
             </Text>
             <Text style={footerTextStyle}>
               {unsubscribeUrl && (
@@ -63,10 +66,10 @@ export function EmailTemplate({
 
 function renderBlock(block: EmailBlock, brandColor = "#b1d135") {
   const textColor = getTextColorForBackground(brandColor);
-  
+
   switch (block.type) {
     case "heading": {
-      const HeadingTag = (`h${block.level}`) as
+      const HeadingTag = `h${block.level}` as
         | "h1"
         | "h2"
         | "h3"
@@ -93,7 +96,8 @@ function renderBlock(block: EmailBlock, brandColor = "#b1d135") {
                   fontSize: "16px",
                   lineHeight: "24px",
                   color: "#484848",
-                  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+                  fontFamily:
+                    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
                 }}
                 dangerouslySetInnerHTML={{ __html: processedContent }}
               />
@@ -110,7 +114,10 @@ function renderBlock(block: EmailBlock, brandColor = "#b1d135") {
       };
       return (
         <div style={buttonAlign[block.align]}>
-          <Button href={block.url} style={{ ...button, backgroundColor: brandColor, color: textColor }}>
+          <Button
+            href={block.url}
+            style={{ ...button, backgroundColor: brandColor, color: textColor }}
+          >
             {block.text}
           </Button>
         </div>

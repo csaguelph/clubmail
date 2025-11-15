@@ -1,7 +1,12 @@
 "use client";
 
 import PageContainer from "@/components/layout/PageContainer";
-import { EmailEditor, generateDesignJSON, generateEmailHTML, type EmailBlock } from "@/lib/email-editor";
+import {
+  EmailEditor,
+  generateDesignJSON,
+  generateEmailHTML,
+  type EmailBlock,
+} from "@/lib/email-editor";
 import { api } from "@/trpc/react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,15 +20,17 @@ export default function NewCampaignPage() {
   const [emailListId, setEmailListId] = useState("");
   const [blocks, setBlocks] = useState<EmailBlock[]>([]);
 
-  const { data: club } = api.clubs.getClubBySlug.useQuery({ slug: params.slug });
+  const { data: club } = api.clubs.getClubBySlug.useQuery({
+    slug: params.slug,
+  });
   // club details query removed because it's not used in this page
   const { data: emailLists } = api.emailLists.listLists.useQuery(
     { clubId: club?.id ?? "" },
-    { enabled: !!club?.id }
+    { enabled: !!club?.id },
   );
   const { data: settings } = api.clubSettings.getSettings.useQuery(
     { clubId: club?.id ?? "" },
-    { enabled: !!club?.id }
+    { enabled: !!club?.id },
   );
 
   const createCampaign = api.campaigns.createCampaign.useMutation({
@@ -41,7 +48,7 @@ export default function NewCampaignPage() {
       blocks,
       club.name,
       settings.brandColor,
-      undefined // unsubscribe URL will be injected when sending
+      undefined, // unsubscribe URL will be injected when sending
     );
 
     const designJson = generateDesignJSON(blocks);
@@ -108,7 +115,7 @@ export default function NewCampaignPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 placeholder="e.g., November Newsletter"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -128,7 +135,7 @@ export default function NewCampaignPage() {
                 required
                 value={emailListId}
                 onChange={(e) => setEmailListId(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               >
                 <option value="">Select an email list</option>
                 {emailLists?.map((list) => (
@@ -160,7 +167,7 @@ export default function NewCampaignPage() {
                 required
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 placeholder="Your email subject"
               />
             </div>
@@ -176,7 +183,7 @@ export default function NewCampaignPage() {
                 id="preheader"
                 value={preheaderText}
                 onChange={(e) => setPreheaderText(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 placeholder="Preview text shown in email clients"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -184,8 +191,8 @@ export default function NewCampaignPage() {
               </p>
             </div>
             <div className="pt-4">
-              <EmailEditor 
-                blocks={blocks} 
+              <EmailEditor
+                blocks={blocks}
                 onChange={setBlocks}
                 clubName={club.name}
                 brandColor={settings?.brandColor}

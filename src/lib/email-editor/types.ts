@@ -1,5 +1,11 @@
 // Email block types for the drag-and-drop editor
-export type EmailBlockType = "heading" | "richtext" | "button" | "image" | "divider" | "spacer";
+export type EmailBlockType =
+  | "heading"
+  | "richtext"
+  | "button"
+  | "image"
+  | "divider"
+  | "spacer";
 
 export interface BaseBlock {
   id: string;

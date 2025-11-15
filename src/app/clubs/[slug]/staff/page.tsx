@@ -36,9 +36,7 @@ export default async function ClubStaffPage({ params }: PageProps) {
           <span>/</span>
           <span className="text-gray-900">Staff</span>
         </div>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">
-          Club Staff
-        </h1>
+        <h1 className="mt-2 text-3xl font-bold text-gray-900">Club Staff</h1>
         <p className="mt-2 text-sm text-gray-600">
           Manage staff members and permissions for {club.name}
         </p>

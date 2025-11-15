@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-    clubOwnerProcedure,
-    clubViewerProcedure,
-    createTRPCRouter,
+  clubOwnerProcedure,
+  clubViewerProcedure,
+  createTRPCRouter,
 } from "@/server/api/trpc";
 
 export const clubSettingsRouter = createTRPCRouter({
@@ -34,9 +34,12 @@ export const clubSettingsRouter = createTRPCRouter({
         fromName: z.string().min(1).optional(),
         replyToEmail: z.string().email().optional().nullable(),
         defaultSubjectPrefix: z.string().optional().nullable(),
-        brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+        brandColor: z
+          .string()
+          .regex(/^#[0-9A-Fa-f]{6}$/)
+          .optional(),
         enableTracking: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { clubId, ...updateData } = input;

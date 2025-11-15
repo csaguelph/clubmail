@@ -25,14 +25,14 @@ export default function SettingsForm({
   const router = useRouter();
   const [fromName, setFromName] = useState(initialSettings.fromName);
   const [replyToEmail, setReplyToEmail] = useState(
-    initialSettings.replyToEmail ?? ""
+    initialSettings.replyToEmail ?? "",
   );
   const [defaultSubjectPrefix, setDefaultSubjectPrefix] = useState(
-    initialSettings.defaultSubjectPrefix ?? ""
+    initialSettings.defaultSubjectPrefix ?? "",
   );
   const [brandColor, setBrandColor] = useState(initialSettings.brandColor);
   const [enableTracking, setEnableTracking] = useState(
-    initialSettings.enableTracking
+    initialSettings.enableTracking,
   );
 
   const updateSettings = api.clubSettings.updateSettings.useMutation({
@@ -75,7 +75,7 @@ export default function SettingsForm({
               required
               value={fromName}
               onChange={(e) => setFromName(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="Computer Science Club"
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -95,7 +95,7 @@ export default function SettingsForm({
               id="fromEmail"
               value="noreply@csaonline.ca"
               disabled
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 shadow-sm cursor-not-allowed"
+              className="mt-1 block w-full cursor-not-allowed rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 shadow-sm"
             />
             <p className="mt-1 text-xs text-gray-500">
               All emails are sent from noreply@csaonline.ca
@@ -114,11 +114,12 @@ export default function SettingsForm({
               id="replyToEmail"
               value={replyToEmail}
               onChange={(e) => setReplyToEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="contact@example.com"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Where should replies be sent? If not set, replies will go to noreply@csaonline.ca
+              Where should replies be sent? If not set, replies will go to
+              noreply@csaonline.ca
             </p>
           </div>
         </div>
@@ -142,7 +143,7 @@ export default function SettingsForm({
               id="defaultSubjectPrefix"
               value={defaultSubjectPrefix}
               onChange={(e) => setDefaultSubjectPrefix(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="[CS Club]"
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -170,7 +171,7 @@ export default function SettingsForm({
                 value={brandColor}
                 onChange={(e) => setBrandColor(e.target.value)}
                 pattern="^#[0-9A-Fa-f]{6}$"
-                className="block w-32 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="block w-32 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 placeholder="#b1d135"
               />
               <button
@@ -181,7 +182,7 @@ export default function SettingsForm({
                 Reset to default
               </button>
             </div>
-            
+
             {/* Preview */}
             <div className="mt-3 flex items-center gap-3">
               <span className="text-sm text-gray-600">Preview:</span>
@@ -196,12 +197,14 @@ export default function SettingsForm({
                 Sample Button
               </button>
             </div>
-            
+
             <p className="mt-1 text-xs text-gray-500">
-              Used for buttons and links in your emails (default: CSA green #b1d135)
+              Used for buttons and links in your emails (default: CSA green
+              #b1d135)
             </p>
             <p className="mt-1 text-xs text-amber-600">
-              Note: Changing the brand color will only affect new campaigns and draft campaigns that are edited and saved.
+              Note: Changing the brand color will only affect new campaigns and
+              draft campaigns that are edited and saved.
             </p>
           </div>
 

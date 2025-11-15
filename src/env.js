@@ -30,7 +30,10 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_BASE_URL: z.string().url().refine((url) => !url.endsWith("/")),
+    NEXT_PUBLIC_BASE_URL: z
+      .string()
+      .url()
+      .refine((url) => !url.endsWith("/")),
     NEXT_PUBLIC_GIT_COMMIT_SHA: z.string().optional(),
   },
 
@@ -52,8 +55,11 @@ export const env = createEnv({
     AWS_SES_FROM_EMAIL: process.env.AWS_SES_FROM_EMAIL,
 
     // Client:
-    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT ?? 3000}`),
+    NEXT_PUBLIC_BASE_URL:
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : `http://localhost:${process.env.PORT ?? 3000}`),
     NEXT_PUBLIC_GIT_COMMIT_SHA: process.env.NEXT_PUBLIC_GIT_COMMIT_SHA,
   },
   /**

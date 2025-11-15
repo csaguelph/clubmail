@@ -24,7 +24,7 @@ export default function SubscribersList({
   emailLists,
 }: SubscribersListProps) {
   const [selectedListId, setSelectedListId] = useState(
-    emailLists.find((l) => l.isDefault)?.id ?? emailLists[0]?.id ?? ""
+    emailLists.find((l) => l.isDefault)?.id ?? emailLists[0]?.id ?? "",
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -45,16 +45,17 @@ export default function SubscribersList({
 
   const utils = api.useUtils();
 
-  const { data: subscribers, isLoading } = api.subscribers.listSubscribers.useQuery(
-    {
-      clubId,
-      listId: selectedListId ?? undefined,
-      limit: 100,
-    },
-    {
-      enabled: !!selectedListId,
-    }
-  );
+  const { data: subscribers, isLoading } =
+    api.subscribers.listSubscribers.useQuery(
+      {
+        clubId,
+        listId: selectedListId ?? undefined,
+        limit: 100,
+      },
+      {
+        enabled: !!selectedListId,
+      },
+    );
 
   const addSubscriber = api.subscribers.createSubscriber.useMutation({
     onSuccess: () => {
@@ -96,7 +97,7 @@ export default function SubscribersList({
     },
     {
       enabled: false, // Don't run on mount, only when explicitly triggered
-    }
+    },
   );
 
   const handleAddSubscriber = (e: React.FormEvent) => {
@@ -122,10 +123,13 @@ export default function SubscribersList({
     }
 
     // Skip header row and parse data
-    const subscribersData = lines.slice(1).map((line) => {
-      const [email, name] = line.split(",").map((s) => s.trim());
-      return { email: email ?? "", name };
-    }).filter((s) => s.email); // Filter out empty emails
+    const subscribersData = lines
+      .slice(1)
+      .map((line) => {
+        const [email, name] = line.split(",").map((s) => s.trim());
+        return { email: email ?? "", name };
+      })
+      .filter((s) => s.email); // Filter out empty emails
 
     bulkImport.mutate({
       clubId,
@@ -175,14 +179,17 @@ export default function SubscribersList({
       {/* Email List Selector and Actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <label htmlFor="emailList" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="emailList"
+            className="text-sm font-medium text-gray-700"
+          >
             Email List:
           </label>
           <select
             id="emailList"
             value={selectedListId}
             onChange={(e) => setSelectedListId(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
           >
             {emailLists.map((list) => (
               <option key={list.id} value={list.id}>
@@ -222,7 +229,7 @@ export default function SubscribersList({
       {/* Subscribers Table */}
       <div className="rounded-lg border border-gray-200 bg-white shadow">
         <div className="border-b border-gray-200 px-6 py-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900">
             Subscribers ({subscribers?.subscribers.length ?? 0})
           </h2>
         </div>
@@ -246,19 +253,19 @@ export default function SubscribersList({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Subscribed
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                     Actions
                   </th>
                 </tr>
@@ -266,13 +273,13 @@ export default function SubscribersList({
               <tbody className="divide-y divide-gray-200 bg-white">
                 {subscribers.subscribers.map((subscriber) => (
                   <tr key={subscriber.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
                       {subscriber.email}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
                       {subscriber.name ?? "-"}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm whitespace-nowrap">
                       <span
                         className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                           subscriber.status === "SUBSCRIBED"
@@ -289,10 +296,10 @@ export default function SubscribersList({
                             : "Bounced"}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
                       {new Date(subscriber.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
+                    <td className="px-6 py-4 text-right text-sm whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => {
@@ -366,7 +373,7 @@ export default function SubscribersList({
                   required
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="subscriber@example.com"
                 />
               </div>
@@ -383,7 +390,7 @@ export default function SubscribersList({
                   id="name"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="John Doe"
                 />
               </div>
@@ -450,11 +457,12 @@ export default function SubscribersList({
                   value={csvContent}
                   onChange={(e) => setCsvContent(e.target.value)}
                   rows={10}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="email,name&#10;john@example.com,John Doe&#10;jane@example.com,Jane Smith"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Format: email,name (one subscriber per line, first line is header)
+                  Format: email,name (one subscriber per line, first line is
+                  header)
                 </p>
               </div>
 
@@ -541,10 +549,10 @@ export default function SubscribersList({
                     setEditingSubscriber(
                       editingSubscriber
                         ? { ...editingSubscriber, name: e.target.value }
-                        : null
+                        : null,
                     )
                   }
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   placeholder="John Doe"
                 />
               </div>
@@ -600,8 +608,10 @@ export default function SubscribersList({
             <div className="mt-4">
               <p className="text-sm text-gray-600">
                 Are you sure you want to delete the subscriber{" "}
-                <span className="font-semibold">{deletingSubscriber?.email}</span>?
-                This action cannot be undone.
+                <span className="font-semibold">
+                  {deletingSubscriber?.email}
+                </span>
+                ? This action cannot be undone.
               </p>
 
               {deleteSubscriber.error && (

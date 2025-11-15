@@ -17,8 +17,7 @@ export default async function CampaignEditPage({
   const clubInfo = await api.clubs.getClubBySlug({ slug });
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
 
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   if (!canEdit) {
     redirect(`/clubs/${slug}/campaigns/${campaignId}`);

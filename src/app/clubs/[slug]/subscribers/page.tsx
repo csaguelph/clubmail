@@ -17,8 +17,7 @@ export default async function SubscribersPage({
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
 
   // Only editors and owners can manage subscribers
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   if (!canEdit) {
     redirect(`/clubs/${slug}`);
@@ -45,11 +44,7 @@ export default async function SubscribersPage({
         </p>
       </div>
 
-      <SubscribersList
-        clubId={club.id}
-        slug={slug}
-        emailLists={emailLists}
-      />
+      <SubscribersList clubId={club.id} slug={slug} emailLists={emailLists} />
     </PageContainer>
   );
 }

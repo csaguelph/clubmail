@@ -72,7 +72,7 @@ export function Header({ user, userRole }: HeaderProps) {
                 <form action="/api/auth/sign-out" method="POST">
                   <button
                     type="submit"
-                    className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
                   >
                     Sign out
                   </button>

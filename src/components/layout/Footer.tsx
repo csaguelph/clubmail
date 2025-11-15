@@ -20,7 +20,7 @@ export function Footer() {
                 href={`https://github.com/csaguelph/clubs-mail/commit/${gitCommit}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs font-mono text-gray-400 hover:text-gray-600 hover:underline"
+                className="flex items-center gap-1 font-mono text-xs text-gray-400 hover:text-gray-600 hover:underline"
               >
                 <GitCommit className="h-3 w-3" />
                 {gitCommit.slice(0, 7)}
