@@ -9,11 +9,8 @@ interface SettingsFormProps {
   slug: string;
   settings: {
     fromName: string;
-    fromEmail: string;
     replyToEmail: string | null;
     defaultSubjectPrefix: string | null;
-    footerText: string | null;
-    physicalAddress: string | null;
   };
 }
 
@@ -24,16 +21,11 @@ export default function SettingsForm({
 }: SettingsFormProps) {
   const router = useRouter();
   const [fromName, setFromName] = useState(initialSettings.fromName);
-  const [fromEmail, setFromEmail] = useState(initialSettings.fromEmail);
   const [replyToEmail, setReplyToEmail] = useState(
     initialSettings.replyToEmail || ""
   );
   const [defaultSubjectPrefix, setDefaultSubjectPrefix] = useState(
     initialSettings.defaultSubjectPrefix || ""
-  );
-  const [footerText, setFooterText] = useState(initialSettings.footerText || "");
-  const [physicalAddress, setPhysicalAddress] = useState(
-    initialSettings.physicalAddress || ""
   );
 
   const updateSettings = api.clubSettings.updateSettings.useMutation({
@@ -48,11 +40,8 @@ export default function SettingsForm({
     updateSettings.mutate({
       clubId,
       fromName,
-      fromEmail,
       replyToEmail: replyToEmail || undefined,
       defaultSubjectPrefix: defaultSubjectPrefix || undefined,
-      footerText: footerText || undefined,
-      physicalAddress: physicalAddress || undefined,
     });
   };
 
@@ -90,19 +79,17 @@ export default function SettingsForm({
               htmlFor="fromEmail"
               className="block text-sm font-medium text-gray-700"
             >
-              From Email *
+              From Email
             </label>
             <input
               type="email"
               id="fromEmail"
-              required
-              value={fromEmail}
-              onChange={(e) => setFromEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
-              placeholder="noreply@csclub.example.com"
+              value="noreply@csaonline.ca"
+              disabled
+              className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 shadow-sm cursor-not-allowed"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Must be verified in AWS SES
+              All emails are sent from noreply@csaonline.ca
             </p>
           </div>
 
@@ -119,10 +106,10 @@ export default function SettingsForm({
               value={replyToEmail}
               onChange={(e) => setReplyToEmail(e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
-              placeholder="contact@csclub.example.com"
+              placeholder="contact@example.com"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Email address for replies (if different from From Email)
+              Where should replies be sent? If not set, replies will go to noreply@csaonline.ca
             </p>
           </div>
         </div>
@@ -154,51 +141,13 @@ export default function SettingsForm({
             </p>
           </div>
 
-          <div>
-            <label
-              htmlFor="footerText"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Footer Text (optional)
-            </label>
-            <textarea
-              id="footerText"
-              value={footerText}
-              onChange={(e) => setFooterText(e.target.value)}
-              rows={3}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
-              placeholder="You're receiving this email because you subscribed to our mailing list."
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Additional text to include in email footers
+          <div className="rounded-md bg-blue-50 p-4">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> All emails will include a footer stating that the content 
+              is created by your club and not reviewed or endorsed by the CSA, along with an 
+              unsubscribe link and the University of Guelph address.
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Legal Information */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          Legal Information
-        </h2>
-        <div>
-          <label
-            htmlFor="physicalAddress"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Physical Address (optional)
-          </label>
-          <textarea
-            id="physicalAddress"
-            value={physicalAddress}
-            onChange={(e) => setPhysicalAddress(e.target.value)}
-            rows={3}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
-            placeholder="123 Main St, City, State ZIP"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Required by CAN-SPAM Act for commercial emails
-          </p>
         </div>
       </div>
 

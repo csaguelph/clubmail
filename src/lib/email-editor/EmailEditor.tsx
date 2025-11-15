@@ -9,11 +9,9 @@ interface EmailEditorProps {
   blocks: EmailBlock[];
   onChange: (blocks: EmailBlock[]) => void;
   clubName?: string;
-  footerText?: string;
-  physicalAddress?: string;
 }
 
-export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerText, physicalAddress }: EmailEditorProps) {
+export function EmailEditor({ blocks, onChange, clubName = "Your Club" }: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
@@ -152,8 +150,6 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerTe
                   <EmailPreview 
                     blocks={blocks} 
                     clubName={clubName}
-                    footerText={footerText}
-                    physicalAddress={physicalAddress}
                   />
                 </div>
               </div>
@@ -168,13 +164,9 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerTe
 function EmailPreview({ 
   blocks, 
   clubName,
-  footerText,
-  physicalAddress 
 }: { 
   blocks: EmailBlock[];
   clubName: string;
-  footerText?: string;
-  physicalAddress?: string;
 }) {
   return (
     <div style={{ 
@@ -195,33 +187,29 @@ function EmailPreview({
         marginTop: '32px',
         paddingTop: '20px'
       }}>
-        {footerText && (
-          <p style={{ 
-            fontSize: '12px', 
-            lineHeight: '1.5', 
-            color: '#8898aa',
-            marginBottom: '8px'
-          }}>
-            {footerText}
-          </p>
-        )}
-        {physicalAddress && (
-          <p style={{ 
-            fontSize: '12px', 
-            lineHeight: '1.5', 
-            color: '#8898aa',
-            marginBottom: '8px'
-          }}>
-            {physicalAddress}
-          </p>
-        )}
         <p style={{ 
           fontSize: '12px', 
           lineHeight: '1.5', 
           color: '#8898aa',
           marginBottom: '8px'
         }}>
-          Sent by {clubName} • <span style={{ color: '#b1d135', textDecoration: 'underline' }}>Unsubscribe</span>
+          This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association.
+        </p>
+        <p style={{ 
+          fontSize: '12px', 
+          lineHeight: '1.5', 
+          color: '#8898aa',
+          marginBottom: '8px'
+        }}>
+          University of Guelph, 50 Stone Road East, Guelph, ON N1G 2W1
+        </p>
+        <p style={{ 
+          fontSize: '12px', 
+          lineHeight: '1.5', 
+          color: '#8898aa',
+          marginBottom: '8px'
+        }}>
+          <span style={{ color: '#b1d135', textDecoration: 'underline' }}>Unsubscribe</span>
         </p>
       </div>
     </div>

@@ -15,16 +15,12 @@ import type { EmailBlock } from "./types";
 interface EmailTemplateProps {
   blocks: EmailBlock[];
   clubName: string;
-  footerText?: string;
-  physicalAddress?: string;
   unsubscribeUrl?: string;
 }
 
 export function EmailTemplate({
   blocks,
   clubName,
-  footerText,
-  physicalAddress,
   unsubscribeUrl,
 }: EmailTemplateProps) {
   return (
@@ -42,19 +38,17 @@ export function EmailTemplate({
           {/* Footer */}
           <Section style={footer}>
             <Hr style={hr} />
-            {footerText && <Text style={footerTextStyle}>{footerText}</Text>}
-            {physicalAddress && (
-              <Text style={footerTextStyle}>{physicalAddress}</Text>
-            )}
             <Text style={footerTextStyle}>
-              Sent by {clubName}
+              This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association.
+            </Text>
+            <Text style={footerTextStyle}>
+              University of Guelph, 50 Stone Road East, Guelph, ON N1G 2W1
+            </Text>
+            <Text style={footerTextStyle}>
               {unsubscribeUrl && (
-                <>
-                  {" • "}
-                  <a href={unsubscribeUrl} style={link}>
-                    Unsubscribe
-                  </a>
-                </>
+                <a href={unsubscribeUrl} style={link}>
+                  Unsubscribe
+                </a>
               )}
             </Text>
           </Section>

@@ -131,8 +131,6 @@ export const adminRouter = createTRPCRouter({
           data: {
             clubId: newClub.id,
             fromName: input.name,
-            fromEmail: "", // Will be filled in by club owner
-            footerText: `You are receiving this email because you are a member of ${input.name}.`,
           },
         });
 

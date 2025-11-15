@@ -5,16 +5,12 @@ import type { EmailBlock } from "./types";
 export async function generateEmailHTML(
   blocks: EmailBlock[],
   clubName: string,
-  footerText?: string,
-  physicalAddress?: string,
   unsubscribeUrl?: string
 ): Promise<string> {
   return await render(
     EmailTemplate({
       blocks,
       clubName,
-      footerText,
-      physicalAddress,
       unsubscribeUrl,
     })
   );

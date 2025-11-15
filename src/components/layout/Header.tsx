@@ -27,8 +27,8 @@ export function Header({ user, userRole }: HeaderProps) {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <div className="text-2xl font-bold">
-                <span className="text-gray-900">Clubs</span>
-                <span className="text-[#b1d135]">Mail</span>
+                <span className="text-[#b1d135]">Club</span>
+                <span className="text-gray-900">Mail</span>
               </div>
             </Link>
           </div>
