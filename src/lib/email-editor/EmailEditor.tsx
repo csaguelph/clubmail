@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronUp, Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
 import { useRef, useState } from "react";
+import { RichTextEditor } from "./RichTextEditor";
 import type { EmailBlock, EmailBlockType } from "./types";
 
 interface EmailEditorProps {
@@ -95,7 +96,7 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerTe
 
       <div className="flex gap-6">
         {/* Block List */}
-        <div className={`space-y-2 ${showPreview || selectedBlock ? 'flex-1' : 'w-full'}`}>
+        <div className={`space-y-2 ${showPreview ? 'flex-1' : selectedBlock ? 'flex-1' : 'w-full'}`}>
           <div className="mb-4 flex items-center justify-between">
             <BlockMenu onAddBlock={addBlock} />
           </div>
@@ -131,7 +132,7 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerTe
 
         {/* Block Editor */}
         {selectedBlock && (
-          <div className="w-80 rounded-lg border border-gray-200 bg-white p-4 sticky top-4 self-start max-h-[600px] overflow-y-auto">
+          <div className={`rounded-lg border border-gray-200 bg-white p-4 sticky top-4 self-start max-h-[600px] overflow-y-auto ${showPreview ? 'w-80' : 'flex-1'}`}>
             <h3 className="mb-4 text-sm font-medium text-gray-900">
               Edit {selectedBlock.type}
             </h3>
@@ -242,17 +243,57 @@ function renderPreviewBlock(block: EmailBlock) {
         </HeadingTag>
       );
 
-    case "text":
+    case "richtext":
       return (
-        <p style={{ 
-          fontSize: '16px', 
-          lineHeight: '1.5', 
-          color: '#484848',
-          whiteSpace: 'pre-wrap',
-          marginBottom: '16px'
-        }}>
-          {block.content || 'Enter your text here...'}
-        </p>
+        <div 
+          style={{ 
+            fontSize: '16px', 
+            lineHeight: '1.5', 
+            color: '#484848',
+            marginBottom: '16px'
+          }}
+        >
+          <style>{`
+            .richtext-preview p {
+              margin-bottom: 1em;
+            }
+            .richtext-preview p:last-child {
+              margin-bottom: 0;
+            }
+            .richtext-preview ul,
+            .richtext-preview ol {
+              padding-left: 1.5em;
+              margin-bottom: 1em;
+            }
+            .richtext-preview ul {
+              list-style-type: disc;
+            }
+            .richtext-preview ol {
+              list-style-type: decimal;
+            }
+            .richtext-preview li {
+              margin-bottom: 0.25em;
+            }
+            .richtext-preview strong {
+              font-weight: 700;
+            }
+            .richtext-preview em {
+              font-style: italic;
+            }
+            .richtext-preview u {
+              text-decoration: underline;
+            }
+            .richtext-preview br {
+              display: block;
+              content: "";
+              margin-top: 0.5em;
+            }
+          `}</style>
+          <div 
+            className="richtext-preview"
+            dangerouslySetInnerHTML={{ __html: block.content || '<p>Enter your rich text here...</p>' }}
+          />
+        </div>
       );
 
     case "button":
@@ -329,8 +370,8 @@ function createDefaultBlock(type: EmailBlockType): EmailBlock {
   switch (type) {
     case "heading":
       return { id, type: "heading", content: "Heading", level: 1 };
-    case "text":
-      return { id, type: "text", content: "Enter your text here..." };
+    case "richtext":
+      return { id, type: "richtext", content: "<p>Enter your rich text here...</p>" };
     case "button":
       return {
         id,
@@ -353,7 +394,7 @@ function BlockMenu({ onAddBlock }: { onAddBlock: (type: EmailBlockType) => void 
 
   const blockTypes: { type: EmailBlockType; label: string; icon: React.ReactNode }[] = [
     { type: "heading", label: "Heading", icon: <Heading1 className="h-4 w-4" /> },
-    { type: "text", label: "Text", icon: <Type className="h-4 w-4" /> },
+    { type: "richtext", label: "Rich Text", icon: <Type className="h-4 w-4" /> },
     { type: "button", label: "Button", icon: <Link className="h-4 w-4" /> },
     { type: "image", label: "Image", icon: <Image className="h-4 w-4" /> },
     { type: "divider", label: "Divider", icon: <Minus className="h-4 w-4" /> },
@@ -440,8 +481,8 @@ function BlockItem({
     switch (block.type) {
       case "heading":
         return block.content || "Heading";
-      case "text":
-        return block.content || "Text";
+      case "richtext":
+        return "Rich Text Content";
       case "button":
         return `Button: ${block.text}`;
       case "image":
@@ -566,17 +607,15 @@ function BlockEditor({
         </div>
       );
 
-    case "text":
+    case "richtext":
       return (
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Content
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Rich Text Content
           </label>
-          <textarea
-            value={block.content}
-            onChange={(e) => onChange(block.id, { content: e.target.value })}
-            rows={6}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+          <RichTextEditor
+            content={block.content}
+            onChange={(html) => onChange(block.id, { content: html })}
           />
         </div>
       );

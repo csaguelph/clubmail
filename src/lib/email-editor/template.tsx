@@ -74,8 +74,13 @@ function renderBlock(block: EmailBlock) {
         </Heading>
       );
 
-    case "text":
-      return <Text style={text}>{block.content}</Text>;
+    case "richtext":
+      return (
+        <div
+          style={text}
+          dangerouslySetInnerHTML={{ __html: block.content }}
+        />
+      );
 
     case "button":
       const buttonAlign = {

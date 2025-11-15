@@ -1,5 +1,5 @@
 // Email block types for the drag-and-drop editor
-export type EmailBlockType = "heading" | "text" | "button" | "image" | "divider" | "spacer";
+export type EmailBlockType = "heading" | "richtext" | "button" | "image" | "divider" | "spacer";
 
 export interface BaseBlock {
   id: string;
@@ -12,9 +12,9 @@ export interface HeadingBlock extends BaseBlock {
   level: 1 | 2 | 3;
 }
 
-export interface TextBlock extends BaseBlock {
-  type: "text";
-  content: string;
+export interface RichTextBlock extends BaseBlock {
+  type: "richtext";
+  content: string; // HTML content
 }
 
 export interface ButtonBlock extends BaseBlock {
@@ -42,7 +42,7 @@ export interface SpacerBlock extends BaseBlock {
 
 export type EmailBlock =
   | HeadingBlock
-  | TextBlock
+  | RichTextBlock
   | ButtonBlock
   | ImageBlock
   | DividerBlock
