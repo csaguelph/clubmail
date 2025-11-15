@@ -53,7 +53,7 @@ export default function SubscribePage() {
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-3xl font-bold text-gray-900">Club Not Found</h1>
           <p className="mt-4 text-gray-600">
-            The club you're looking for doesn't exist or is not accepting
+            The club you&apos;re looking for doesn&apos;t exist or is not accepting
             subscriptions.
           </p>
         </div>
@@ -77,10 +77,10 @@ export default function SubscribePage() {
           </h1>
           <p className="mt-4 text-gray-600">
             {subscribeMutation.data?.alreadySubscribed
-              ? `You're already subscribed to ${club.name}. You'll continue to receive our emails.`
+              ? `You&apos;re already subscribed to ${club.name}. You&apos;ll continue to receive our emails.`
               : subscribeMutation.data?.resubscribed
-                ? `Welcome back! You've been resubscribed to ${club.name}'s mailing list.`
-                : `Thank you for subscribing to ${club.name}! You'll start receiving our emails soon.`}
+                ? `Welcome back! You&apos;ve been resubscribed to ${club.name}&apos;s mailing list.`
+                : `Thank you for subscribing to ${club.name}! You&apos;ll start receiving our emails soon.`}
           </p>
           <p className="mt-2 text-sm text-gray-500">
             You can unsubscribe at any time using the link in our emails.
@@ -142,7 +142,7 @@ export default function SubscribePage() {
               placeholder="Your name"
             />
             <p className="mt-1 text-sm text-gray-500">
-              We'll use your name to personalize our emails.
+              We&apos;ll use your name to personalize our emails.
             </p>
           </div>
 

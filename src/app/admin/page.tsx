@@ -5,7 +5,7 @@ import { requireAdmin } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
 
 export default async function AdminPage() {
-  const user = await requireAdmin();
+  await requireAdmin();
 
   // Get clubs list
   const { clubs } = await api.admin.listClubs({ limit: 50 });

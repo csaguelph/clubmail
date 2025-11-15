@@ -199,6 +199,9 @@ export default function ClubStaffManager({
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="flex items-center">
                           {member.user.image ? (
+                            // Using raw <img> here for simple avatar display. Next.js recommends using <Image />
+                            // but that adds layout/loader complexity. Disable the specific rule for this line.
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={member.user.image}
                               alt={member.user.name}

@@ -151,17 +151,15 @@ export const adminRouter = createTRPCRouter({
             where: { email },
           });
 
-          if (!user) {
-            // Create stub user - they'll complete registration via invite
-            user = await tx.user.create({
-              data: {
-                id: `stub_${Date.now()}_${Math.random()}`,
-                email,
-                name: email.split("@")[0] ?? "User",
-                emailVerified: false,
-              },
-            });
-          }
+          // Create stub user if none exists
+          user ??= await tx.user.create({
+            data: {
+              id: `stub_${Date.now()}_${Math.random()}`,
+              email,
+              name: email.split("@")[0] ?? "User",
+              emailVerified: false,
+            },
+          });
 
           // Add as club owner
           await tx.clubMember.create({

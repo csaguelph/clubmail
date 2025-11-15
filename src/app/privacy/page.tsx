@@ -78,7 +78,7 @@ export default function PrivacyPage() {
               <li>With AWS SES for email delivery</li>
               <li>With Microsoft for authentication</li>
               <li>When required by law or legal process</li>
-              <li>With club administrators for the clubs you're subscribed to</li>
+              <li>With club administrators for the clubs you&apos;re subscribed to</li>
             </ul>
           </section>
 
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
             </h2>
             <p className="mt-4 text-gray-600">
               Every email includes an unsubscribe link. Clicking this link
-              will immediately remove you from that club's mailing list. You can also
+              will immediately remove you from that club&apos;s mailing list. You can also
               contact the club directly to request removal.
             </p>
           </section>

@@ -39,8 +39,8 @@ export default function CampaignEditForm({
   const router = useRouter();
   const [name, setName] = useState(campaign.name);
   const [subject, setSubject] = useState(campaign.subject);
-  const [preheaderText, setPreheaderText] = useState(campaign.preheaderText || "");
-  const [emailListId, setEmailListId] = useState(campaign.emailListId);
+  const [preheaderText, setPreheaderText] = useState(campaign.preheaderText ?? "");
+  const [emailListId] = useState(campaign.emailListId);
   const [blocks, setBlocks] = useState<EmailBlock[]>([]);
 
   // Parse design JSON on mount
@@ -74,7 +74,7 @@ export default function CampaignEditForm({
       campaignId: campaign.id,
       name,
       subject,
-      preheaderText: preheaderText || null,
+      preheaderText: preheaderText ?? null,
       designJson,
       html,
     });

@@ -61,17 +61,24 @@ export function EmailTemplate({
   );
 }
 
-function renderBlock(block: EmailBlock, brandColor: string = "#b1d135") {
+function renderBlock(block: EmailBlock, brandColor = "#b1d135") {
   const textColor = getTextColorForBackground(brandColor);
   
   switch (block.type) {
-    case "heading":
-      const HeadingTag = `h${block.level}` as "h1" | "h2" | "h3";
+    case "heading": {
+      const HeadingTag = (`h${block.level}`) as
+        | "h1"
+        | "h2"
+        | "h3"
+        | "h4"
+        | "h5"
+        | "h6";
       return (
         <Heading as={HeadingTag} style={heading}>
           {block.content}
         </Heading>
       );
+    }
 
     case "richtext":
       // Email clients need special handling for HTML content
@@ -157,13 +164,7 @@ const heading = {
   padding: "0",
 };
 
-const text = {
-  fontSize: "16px",
-  lineHeight: "24px",
-  color: "#484848",
-  margin: "0 0 16px 0",
-  padding: "0",
-};
+// `text` style removed because it was unused (fixed lint warning)
 
 const button = {
   backgroundColor: "#b1d135",
