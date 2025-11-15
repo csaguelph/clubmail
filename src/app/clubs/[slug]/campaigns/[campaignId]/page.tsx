@@ -2,6 +2,7 @@ import { Pencil } from "lucide-react";
 import Link from "next/link";
 
 import PageContainer from "@/components/layout/PageContainer";
+import { generateEmailHTML, parseDesignJSON } from "@/lib/email-editor/utils";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
 import CampaignActions from "./CampaignActions";
@@ -25,6 +26,14 @@ export default async function CampaignDetailPage({
     clubId: club.id,
     campaignId,
   });
+
+  // Get club settings for brand color
+  const settings = await api.clubSettings.getSettings({ clubId: club.id });
+
+  // Regenerate HTML with current brand color for preview
+  // This ensures the preview uses the latest rendering logic (like auto text color)
+  const blocks = parseDesignJSON(campaign.designJson);
+  const previewHtml = await generateEmailHTML(blocks, club.name, settings.brandColor);
 
   const stats = await api.campaigns.getCampaignStats({
     clubId: club.id,
@@ -219,11 +228,11 @@ export default async function CampaignDetailPage({
             <h2 className="text-lg font-semibold text-gray-900">
               Email Preview
             </h2>
-            <PreviewButton html={campaign.html} />
+            <PreviewButton html={previewHtml} />
           </div>
           <div className="rounded border border-gray-200 overflow-hidden">
             <iframe
-              srcDoc={campaign.html}
+              srcDoc={previewHtml}
               className="h-[600px] w-full"
               title="Email Preview"
               sandbox="allow-same-origin"

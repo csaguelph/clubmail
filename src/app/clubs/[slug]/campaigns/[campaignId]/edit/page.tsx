@@ -65,8 +65,7 @@ export default async function CampaignEditPage({
         campaign={campaign}
         emailLists={emailLists}
         clubName={club.name}
-        footerText={settings.footerText}
-        physicalAddress={settings.physicalAddress}
+        brandColor={settings.brandColor}
       />
     </PageContainer>
   );

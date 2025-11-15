@@ -93,11 +93,9 @@ model ClubMember {
 model ClubSettings {
   id                    String  @id @default(cuid())
   fromName              String
-  fromEmail             String
   replyToEmail          String?
   defaultSubjectPrefix  String?
-  footerText            String?
-  physicalAddress       String?
+  brandColor            String  @default("#b1d135")
 
   club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId String @unique

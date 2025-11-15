@@ -32,11 +32,9 @@ export const clubSettingsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         fromName: z.string().min(1).optional(),
-        fromEmail: z.string().email().optional(),
         replyToEmail: z.string().email().optional().nullable(),
         defaultSubjectPrefix: z.string().optional().nullable(),
-        footerText: z.string().optional().nullable(),
-        physicalAddress: z.string().optional().nullable(),
+        brandColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

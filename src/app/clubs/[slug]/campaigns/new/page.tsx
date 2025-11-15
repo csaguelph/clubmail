@@ -43,8 +43,7 @@ export default function NewCampaignPage() {
     const html = await generateEmailHTML(
       blocks,
       club.name,
-      settings.footerText || undefined,
-      settings.physicalAddress || undefined,
+      settings.brandColor,
       undefined // unsubscribe URL will be injected when sending
     );
 
@@ -192,8 +191,7 @@ export default function NewCampaignPage() {
                 blocks={blocks} 
                 onChange={setBlocks}
                 clubName={club.name}
-                footerText={settings?.footerText || undefined}
-                physicalAddress={settings?.physicalAddress || undefined}
+                brandColor={settings?.brandColor}
               />
             </div>
           </div>

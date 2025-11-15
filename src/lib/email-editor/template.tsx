@@ -1,3 +1,4 @@
+import { getTextColorForBackground } from "@/lib/color-utils";
 import {
   Body,
   Button,
@@ -11,20 +12,18 @@ import {
   Text,
 } from "@react-email/components";
 import type { EmailBlock } from "./types";
-
+import { processRichTextForEmail } from "./utils";
 interface EmailTemplateProps {
   blocks: EmailBlock[];
   clubName: string;
-  footerText?: string;
-  physicalAddress?: string;
+  brandColor?: string;
   unsubscribeUrl?: string;
 }
 
 export function EmailTemplate({
   blocks,
   clubName,
-  footerText,
-  physicalAddress,
+  brandColor = "#b1d135",
   unsubscribeUrl,
 }: EmailTemplateProps) {
   return (
@@ -35,26 +34,24 @@ export function EmailTemplate({
           {/* Main content blocks */}
           {blocks.map((block) => (
             <Section key={block.id} style={section}>
-              {renderBlock(block)}
+              {renderBlock(block, brandColor)}
             </Section>
           ))}
 
           {/* Footer */}
           <Section style={footer}>
             <Hr style={hr} />
-            {footerText && <Text style={footerTextStyle}>{footerText}</Text>}
-            {physicalAddress && (
-              <Text style={footerTextStyle}>{physicalAddress}</Text>
-            )}
             <Text style={footerTextStyle}>
-              Sent by {clubName}
+              This content is created by {clubName} and is not reviewed or endorsed by the Central Student Association.
+            </Text>
+            <Text style={footerTextStyle}>
+              University of Guelph, 50 Stone Road East, Guelph, ON N1G 2W1
+            </Text>
+            <Text style={footerTextStyle}>
               {unsubscribeUrl && (
-                <>
-                  {" • "}
-                  <a href={unsubscribeUrl} style={link}>
-                    Unsubscribe
-                  </a>
-                </>
+                <a href={unsubscribeUrl} style={{ ...link, color: brandColor }}>
+                  Unsubscribe
+                </a>
               )}
             </Text>
           </Section>
@@ -64,7 +61,9 @@ export function EmailTemplate({
   );
 }
 
-function renderBlock(block: EmailBlock) {
+function renderBlock(block: EmailBlock, brandColor: string = "#b1d135") {
+  const textColor = getTextColorForBackground(brandColor);
+  
   switch (block.type) {
     case "heading":
       const HeadingTag = `h${block.level}` as "h1" | "h2" | "h3";
@@ -75,11 +74,25 @@ function renderBlock(block: EmailBlock) {
       );
 
     case "richtext":
+      // Email clients need special handling for HTML content
+      // Process the HTML to add inline styles for better email client compatibility
+      const processedContent = processRichTextForEmail(block.content);
       return (
-        <div
-          style={text}
-          dangerouslySetInnerHTML={{ __html: block.content }}
-        />
+        <table width="100%" cellPadding="0" cellSpacing="0" border={0}>
+          <tbody>
+            <tr>
+              <td
+                style={{
+                  fontSize: "16px",
+                  lineHeight: "24px",
+                  color: "#484848",
+                  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+                }}
+                dangerouslySetInnerHTML={{ __html: processedContent }}
+              />
+            </tr>
+          </tbody>
+        </table>
       );
 
     case "button":
@@ -90,7 +103,7 @@ function renderBlock(block: EmailBlock) {
       };
       return (
         <div style={buttonAlign[block.align]}>
-          <Button href={block.url} style={button}>
+          <Button href={block.url} style={{ ...button, backgroundColor: brandColor, color: textColor }}>
             {block.text}
           </Button>
         </div>
@@ -140,15 +153,16 @@ const heading = {
   lineHeight: "1.3",
   fontWeight: "700",
   color: "#484848",
-  marginBottom: "16px",
+  margin: "0 0 16px 0",
+  padding: "0",
 };
 
 const text = {
   fontSize: "16px",
-  lineHeight: "1.5",
+  lineHeight: "24px",
   color: "#484848",
-  marginBottom: "16px",
-  whiteSpace: "pre-wrap" as const,
+  margin: "0 0 16px 0",
+  padding: "0",
 };
 
 const button = {

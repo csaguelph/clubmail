@@ -37,21 +37,31 @@ export default async function CampaignsPage({
 
   return (
     <PageContainer>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{club.name} - Campaigns</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Create and manage email campaigns
-          </p>
-        </div>
-        {canEdit && (
+      <div className="mb-8">
+        <div className="mb-4">
           <Link
-            href={`/clubs/${slug}/campaigns/new`}
-            className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#9fbc2f]"
+            href={`/clubs/${slug}`}
+            className="text-sm text-gray-600 hover:text-gray-900"
           >
-            New Campaign
+            ← Back to {club.name}
           </Link>
-        )}
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Create and manage email campaigns for {club.name}
+            </p>
+          </div>
+          {canEdit && (
+            <Link
+              href={`/clubs/${slug}/campaigns/new`}
+              className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#9fbc2f]"
+            >
+              New Campaign
+            </Link>
+          )}
+        </div>
       </div>
       {campaigns.length === 0 ? (
         <div className="rounded-lg bg-white px-6 py-12 text-center shadow">

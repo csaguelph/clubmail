@@ -243,7 +243,7 @@ export const campaignsRouter = createTRPCRouter({
           subject: input.subject || "",
           preheaderText: input.preheaderText,
           fromName: settings.fromName,
-          fromEmail: settings.fromEmail,
+          fromEmail: "noreply@csaonline.ca",
           designJson: input.designJson || JSON.stringify({ blocks: [] }),
           html: input.html || "",
           status: "DRAFT",
@@ -264,7 +264,6 @@ export const campaignsRouter = createTRPCRouter({
         subject: z.string().optional(),
         preheaderText: z.string().optional().nullable(),
         fromName: z.string().optional(),
-        fromEmail: z.string().email().optional(),
         designJson: z.string().optional(),
         html: z.string().optional(),
       })
