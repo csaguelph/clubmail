@@ -176,7 +176,13 @@ function EmailPreview({
   const [html, setHtml] = useState<string>('');
 
   useEffect(() => {
-    generateEmailHTML(blocks, clubName, brandColor).then(setHtml);
+    // Include test unsubscribe URL in preview
+    const baseUrl = typeof window !== 'undefined' 
+      ? window.location.origin 
+      : 'http://localhost:3000';
+    const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
+    
+    generateEmailHTML(blocks, clubName, brandColor, testUnsubscribeUrl).then(setHtml);
   }, [blocks, clubName, brandColor]);
 
   if (!html) {
