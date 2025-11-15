@@ -166,7 +166,7 @@ export async function sendTestEmail(params: {
  * Generate unsubscribe link for a subscriber
  */
 export function generateUnsubscribeLink(unsubscribeToken: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   return `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
 }
 
@@ -215,7 +215,7 @@ export function injectUnsubscribeLink(html: string, unsubscribeToken: string): s
  * Inject tracking pixel and wrap links for click tracking
  */
 export function injectTracking(html: string, trackingToken: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   
   // 1. Inject tracking pixel before </body>
   const trackingPixel = `<img src="${baseUrl}/api/track/open/${trackingToken}" width="1" height="1" alt="" style="display:block" />`;
