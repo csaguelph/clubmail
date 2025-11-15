@@ -1,5 +1,6 @@
 "use client";
 
+import { getTextColorForBackground } from "@/lib/color-utils";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,6 +12,7 @@ interface SettingsFormProps {
     fromName: string;
     replyToEmail: string | null;
     defaultSubjectPrefix: string | null;
+    brandColor: string;
   };
 }
 
@@ -27,6 +29,7 @@ export default function SettingsForm({
   const [defaultSubjectPrefix, setDefaultSubjectPrefix] = useState(
     initialSettings.defaultSubjectPrefix || ""
   );
+  const [brandColor, setBrandColor] = useState(initialSettings.brandColor);
 
   const updateSettings = api.clubSettings.updateSettings.useMutation({
     onSuccess: () => {
@@ -42,6 +45,7 @@ export default function SettingsForm({
       fromName,
       replyToEmail: replyToEmail || undefined,
       defaultSubjectPrefix: defaultSubjectPrefix || undefined,
+      brandColor,
     });
   };
 
@@ -138,6 +142,61 @@ export default function SettingsForm({
             />
             <p className="mt-1 text-xs text-gray-500">
               Will be prepended to campaign subjects
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="brandColor"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Brand Color
+            </label>
+            <div className="mt-1 flex items-center gap-3">
+              <input
+                type="color"
+                id="brandColor"
+                value={brandColor}
+                onChange={(e) => setBrandColor(e.target.value)}
+                className="h-10 w-20 cursor-pointer rounded-md border border-gray-300"
+              />
+              <input
+                type="text"
+                value={brandColor}
+                onChange={(e) => setBrandColor(e.target.value)}
+                pattern="^#[0-9A-Fa-f]{6}$"
+                className="block w-32 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                placeholder="#b1d135"
+              />
+              <button
+                type="button"
+                onClick={() => setBrandColor("#b1d135")}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Reset to default
+              </button>
+            </div>
+            
+            {/* Preview */}
+            <div className="mt-3 flex items-center gap-3">
+              <span className="text-sm text-gray-600">Preview:</span>
+              <button
+                type="button"
+                style={{
+                  backgroundColor: brandColor,
+                  color: getTextColorForBackground(brandColor),
+                }}
+                className="rounded-md px-4 py-2 text-sm font-semibold shadow-sm"
+              >
+                Sample Button
+              </button>
+            </div>
+            
+            <p className="mt-1 text-xs text-gray-500">
+              Used for buttons and links in your emails (default: CSA green #b1d135)
+            </p>
+            <p className="mt-1 text-xs text-amber-600">
+              Note: Changing the brand color will only affect new campaigns and draft campaigns that are edited and saved.
             </p>
           </div>
 

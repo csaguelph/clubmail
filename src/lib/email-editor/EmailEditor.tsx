@@ -1,5 +1,6 @@
 "use client";
 
+import { getTextColorForBackground } from "@/lib/color-utils";
 import { ChevronDown, ChevronUp, Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
 import { useRef, useState } from "react";
 import { RichTextEditor } from "./RichTextEditor";
@@ -9,9 +10,10 @@ interface EmailEditorProps {
   blocks: EmailBlock[];
   onChange: (blocks: EmailBlock[]) => void;
   clubName?: string;
+  brandColor?: string;
 }
 
-export function EmailEditor({ blocks, onChange, clubName = "Your Club" }: EmailEditorProps) {
+export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandColor = "#b1d135" }: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
@@ -150,6 +152,7 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club" }: EmailE
                   <EmailPreview 
                     blocks={blocks} 
                     clubName={clubName}
+                    brandColor={brandColor}
                   />
                 </div>
               </div>
@@ -164,9 +167,11 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club" }: EmailE
 function EmailPreview({ 
   blocks, 
   clubName,
+  brandColor,
 }: { 
   blocks: EmailBlock[];
   clubName: string;
+  brandColor: string;
 }) {
   return (
     <div style={{ 
@@ -177,7 +182,7 @@ function EmailPreview({
     }}>
       {blocks.map((block) => (
         <div key={block.id} style={{ marginBottom: '16px' }}>
-          {renderPreviewBlock(block)}
+          {renderPreviewBlock(block, brandColor)}
         </div>
       ))}
       
@@ -209,14 +214,16 @@ function EmailPreview({
           color: '#8898aa',
           marginBottom: '8px'
         }}>
-          <span style={{ color: '#b1d135', textDecoration: 'underline' }}>Unsubscribe</span>
+          <span style={{ color: brandColor, textDecoration: 'underline' }}>Unsubscribe</span>
         </p>
       </div>
     </div>
   );
 }
 
-function renderPreviewBlock(block: EmailBlock) {
+function renderPreviewBlock(block: EmailBlock, brandColor: string) {
+  const textColor = getTextColorForBackground(brandColor);
+  
   switch (block.type) {
     case "heading":
       const headingStyle = {
@@ -299,9 +306,9 @@ function renderPreviewBlock(block: EmailBlock) {
           <a
             href={block.url}
             style={{
-              backgroundColor: '#b1d135',
+              backgroundColor: brandColor,
               borderRadius: '5px',
-              color: '#000',
+              color: textColor,
               fontSize: '16px',
               fontWeight: 'bold',
               textDecoration: 'none',

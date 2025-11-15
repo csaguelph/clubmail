@@ -1,26 +1,28 @@
+import { getTextColorForBackground } from "@/lib/color-utils";
 import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Img,
-  Section,
-  Text,
+    Body,
+    Button,
+    Container,
+    Head,
+    Heading,
+    Hr,
+    Html,
+    Img,
+    Section,
+    Text,
 } from "@react-email/components";
 import type { EmailBlock } from "./types";
-
 interface EmailTemplateProps {
   blocks: EmailBlock[];
   clubName: string;
+  brandColor?: string;
   unsubscribeUrl?: string;
 }
 
 export function EmailTemplate({
   blocks,
   clubName,
+  brandColor = "#b1d135",
   unsubscribeUrl,
 }: EmailTemplateProps) {
   return (
@@ -31,7 +33,7 @@ export function EmailTemplate({
           {/* Main content blocks */}
           {blocks.map((block) => (
             <Section key={block.id} style={section}>
-              {renderBlock(block)}
+              {renderBlock(block, brandColor)}
             </Section>
           ))}
 
@@ -46,7 +48,7 @@ export function EmailTemplate({
             </Text>
             <Text style={footerTextStyle}>
               {unsubscribeUrl && (
-                <a href={unsubscribeUrl} style={link}>
+                <a href={unsubscribeUrl} style={{ ...link, color: brandColor }}>
                   Unsubscribe
                 </a>
               )}
@@ -58,7 +60,9 @@ export function EmailTemplate({
   );
 }
 
-function renderBlock(block: EmailBlock) {
+function renderBlock(block: EmailBlock, brandColor: string = "#b1d135") {
+  const textColor = getTextColorForBackground(brandColor);
+  
   switch (block.type) {
     case "heading":
       const HeadingTag = `h${block.level}` as "h1" | "h2" | "h3";
@@ -84,7 +88,7 @@ function renderBlock(block: EmailBlock) {
       };
       return (
         <div style={buttonAlign[block.align]}>
-          <Button href={block.url} style={button}>
+          <Button href={block.url} style={{ ...button, backgroundColor: brandColor, color: textColor }}>
             {block.text}
           </Button>
         </div>

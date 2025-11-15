@@ -95,6 +95,7 @@ model ClubSettings {
   fromName              String
   replyToEmail          String?
   defaultSubjectPrefix  String?
+  brandColor            String  @default("#b1d135")
 
   club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId String @unique

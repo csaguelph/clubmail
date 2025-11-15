@@ -25,6 +25,7 @@ interface CampaignEditFormProps {
     name: string;
   }>;
   clubName: string;
+  brandColor: string;
 }
 
 export default function CampaignEditForm({
@@ -33,6 +34,7 @@ export default function CampaignEditForm({
   campaign,
   emailLists,
   clubName,
+  brandColor,
 }: CampaignEditFormProps) {
   const router = useRouter();
   const [name, setName] = useState(campaign.name);
@@ -60,6 +62,7 @@ export default function CampaignEditForm({
     const html = await generateEmailHTML(
       blocks,
       clubName,
+      brandColor,
       undefined // No unsubscribe token for draft
     );
 
@@ -178,6 +181,7 @@ export default function CampaignEditForm({
           blocks={blocks} 
           onChange={setBlocks}
           clubName={clubName}
+          brandColor={brandColor}
         />
       </div>
 
