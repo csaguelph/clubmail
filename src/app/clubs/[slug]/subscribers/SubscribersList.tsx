@@ -2,7 +2,7 @@
 
 import { api } from "@/trpc/react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { Upload, UserPlus, X } from "lucide-react";
+import { Download, Edit, Trash2, Upload, UserPlus, X } from "lucide-react";
 import { useState } from "react";
 
 interface SubscribersListProps {
@@ -28,9 +28,20 @@ export default function SubscribersList({
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [csvContent, setCsvContent] = useState("");
+  const [editingSubscriber, setEditingSubscriber] = useState<{
+    id: string;
+    email: string;
+    name: string | null;
+  } | null>(null);
+  const [deletingSubscriber, setDeletingSubscriber] = useState<{
+    id: string;
+    email: string;
+  } | null>(null);
 
   const utils = api.useUtils();
 
@@ -61,6 +72,32 @@ export default function SubscribersList({
       setCsvContent("");
     },
   });
+
+  const updateSubscriber = api.subscribers.updateSubscriber.useMutation({
+    onSuccess: () => {
+      void utils.subscribers.listSubscribers.invalidate();
+      setIsEditModalOpen(false);
+      setEditingSubscriber(null);
+    },
+  });
+
+  const deleteSubscriber = api.subscribers.deleteSubscriber.useMutation({
+    onSuccess: () => {
+      void utils.subscribers.listSubscribers.invalidate();
+      setIsDeleteModalOpen(false);
+      setDeletingSubscriber(null);
+    },
+  });
+
+  const { refetch: triggerExport } = api.subscribers.exportSubscribers.useQuery(
+    {
+      clubId,
+      listId: selectedListId || undefined,
+    },
+    {
+      enabled: false, // Don't run on mount, only when explicitly triggered
+    }
+  );
 
   const handleAddSubscriber = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +134,42 @@ export default function SubscribersList({
     });
   };
 
+  const handleEditSubscriber = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSubscriber) return;
+
+    updateSubscriber.mutate({
+      clubId,
+      subscriberId: editingSubscriber.id,
+      name: editingSubscriber.name,
+    });
+  };
+
+  const handleDeleteSubscriber = () => {
+    if (!deletingSubscriber) return;
+
+    deleteSubscriber.mutate({
+      clubId,
+      subscriberId: deletingSubscriber.id,
+    });
+  };
+
+  const handleExportCSV = async () => {
+    const result = await triggerExport();
+    if (result.data?.csv) {
+      // Create a blob and download
+      const blob = new Blob([result.data.csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `subscribers-${selectedListId}-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Email List Selector and Actions */}
@@ -121,6 +194,14 @@ export default function SubscribersList({
         </div>
 
         <div className="flex gap-3">
+          <button
+            onClick={handleExportCSV}
+            disabled={!subscribers || subscribers.subscribers.length === 0}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
           <button
             onClick={() => setIsImportModalOpen(true)}
             className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -177,6 +258,9 @@ export default function SubscribersList({
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     Subscribed
                   </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
@@ -207,6 +291,37 @@ export default function SubscribersList({
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                       {new Date(subscriber.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingSubscriber({
+                              id: subscriber.id,
+                              email: subscriber.email,
+                              name: subscriber.name,
+                            });
+                            setIsEditModalOpen(true);
+                          }}
+                          className="text-[#b1d135] hover:text-[#a0c030]"
+                          title="Edit subscriber"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDeletingSubscriber({
+                              id: subscriber.id,
+                              email: subscriber.email,
+                            });
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="text-red-600 hover:text-red-700"
+                          title="Delete subscriber"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -366,6 +481,152 @@ export default function SubscribersList({
                 </button>
               </div>
             </form>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* Edit Subscriber Modal */}
+      <Dialog
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-semibold text-gray-900">
+                Edit Subscriber
+              </DialogTitle>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubscriber} className="mt-4 space-y-4">
+              <div>
+                <label
+                  htmlFor="edit-email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="edit-email"
+                  disabled
+                  value={editingSubscriber?.email || ""}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 shadow-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Email cannot be changed
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="edit-name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="edit-name"
+                  value={editingSubscriber?.name || ""}
+                  onChange={(e) =>
+                    setEditingSubscriber(
+                      editingSubscriber
+                        ? { ...editingSubscriber, name: e.target.value }
+                        : null
+                    )
+                  }
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              {updateSubscriber.error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {updateSubscriber.error.message}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateSubscriber.isPending}
+                  className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {updateSubscriber.isPending ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* Delete Subscriber Modal */}
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-semibold text-gray-900">
+                Delete Subscriber
+              </DialogTitle>
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">
+                Are you sure you want to delete the subscriber{" "}
+                <span className="font-semibold">{deletingSubscriber?.email}</span>?
+                This action cannot be undone.
+              </p>
+
+              {deleteSubscriber.error && (
+                <div className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {deleteSubscriber.error.message}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteSubscriber}
+                  disabled={deleteSubscriber.isPending}
+                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deleteSubscriber.isPending ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
           </DialogPanel>
         </div>
       </Dialog>

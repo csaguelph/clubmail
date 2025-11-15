@@ -366,6 +366,62 @@ export const subscribersRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // Export subscribers as CSV data
+  exportSubscribers: clubViewerProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        listId: z.string().optional(),
+        status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const where: {
+        clubId: string;
+        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";
+        listMemberships?: { some: { emailListId: string } };
+      } = {
+        clubId: input.clubId,
+      };
+
+      if (input.status) {
+        where.status = input.status;
+      }
+
+      if (input.listId) {
+        where.listMemberships = {
+          some: {
+            emailListId: input.listId,
+          },
+        };
+      }
+
+      const subscribers = await ctx.db.subscriber.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        select: {
+          email: true,
+          name: true,
+          status: true,
+          createdAt: true,
+        },
+      });
+
+      // Generate CSV content
+      const csvRows = [
+        "email,name,status,subscribed_date", // Header
+        ...subscribers.map(
+          (sub) =>
+            `${sub.email},"${sub.name || ""}",${sub.status},${sub.createdAt.toISOString()}`
+        ),
+      ];
+
+      return {
+        csv: csvRows.join("\n"),
+        count: subscribers.length,
+      };
+    }),
+
   // Public unsubscribe endpoint
   unsubscribe: publicProcedure
     .input(z.object({ token: z.string() }))

@@ -1,5 +1,21 @@
 # ClubsMail - Implementation Status
 
+## 🎉 Latest Updates - Enhanced MVP! (Nov 2025)
+
+### Just Implemented ✨
+1. **Enhanced Subscriber Management**
+   - ✅ Edit subscriber names (email is read-only)
+   - ✅ Delete individual subscribers with confirmation
+   - ✅ Export subscribers to CSV (email, name, status, date)
+   - Edit and Delete buttons in subscriber table
+   
+2. **Email List Management** (`/clubs/[slug]/lists`)
+   - ✅ Create new email lists with names and descriptions
+   - ✅ Edit list names and descriptions
+   - ✅ Delete non-default lists with safety checks
+   - ✅ Beautiful card-based UI showing subscriber/campaign counts
+   - Default list is protected from deletion
+
 ## 🎉 Completed Features - MVP READY!
 
 ### Core Infrastructure ✅
@@ -15,7 +31,8 @@
 ### Club Management ✅
 - ✅ **Club Dashboard** (`/clubs/[slug]`) - Stats, quick actions, club info
 - ✅ **Club Settings** (`/clubs/[slug]/settings`) - Email configuration, legal info
-- ✅ **Subscriber Management** (`/clubs/[slug]/subscribers`) - Add, import CSV, list view
+- ✅ **Subscriber Management** (`/clubs/[slug]/subscribers`) - Add, import CSV, list view, **edit, delete, export**
+- ✅ **Email List Management** (`/clubs/[slug]/lists`) - **Create, edit, delete email lists**
 - ✅ **Campaign List** (`/clubs/[slug]/campaigns`) - View campaigns with stats
 - ✅ **Campaign Creation** (`/clubs/[slug]/campaigns/new`) - **Full drag-and-drop email editor!**
 - ✅ **Campaign Detail** (`/clubs/[slug]/campaigns/[id]`) - **View campaign with preview, stats, actions**
@@ -68,11 +85,11 @@
    - Campaign comparison charts
 
 ### Medium Priority
-4. **Email List Management**
-   - Create/edit/delete email lists beyond default
-   - List descriptions and metadata
-   - Move subscribers between lists
-   - Archive old lists
+4. ~~**Email List Management**~~ ✅ DONE
+   - ~~Create/edit/delete email lists beyond default~~
+   - ~~List descriptions and metadata~~
+   - Move subscribers between lists (future enhancement)
+   - Archive old lists (future enhancement)
 
 5. **Club Member Management**
    - Add/remove club members via UI
@@ -80,12 +97,12 @@
    - Transfer ownership
    - Member activity logs
 
-6. **Enhanced Subscriber Features**
-   - Edit subscriber information
-   - Remove individual subscribers
-   - View subscriber activity history
-   - Export subscriber lists (CSV/Excel)
-   - Import with custom field mapping
+6. ~~**Enhanced Subscriber Features**~~ ✅ DONE
+   - ~~Edit subscriber information~~
+   - ~~Remove individual subscribers~~
+   - ~~Export subscriber lists (CSV)~~
+   - View subscriber activity history (future enhancement)
+   - Import with custom field mapping (future enhancement)
 
 ### Low Priority
 7. **Analytics & Reporting**
@@ -190,13 +207,10 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 ## Current Limitations
 
-- ~~**Campaign Editing**~~: ✅ DONE - Can now edit campaigns
-- ~~**No Sending**~~: ✅ DONE - Can send immediately + test send
 - **No Scheduling**: Can't schedule for future delivery (sends immediately only)
-- **Limited Email Lists**: Can only use default list created with club (no CRUD UI)
+- ~~**Limited Email Lists**~~: ✅ DONE - Full email list CRUD now available
 - **No Member Management UI**: Must be done via database
 - **No Open/Click Analytics**: Email tracking not yet implemented (requires pixels + SNS)
-- ~~**No Email Preview**~~: ✅ DONE - iframe preview + "Open in New Tab"
 - **Basic Editor**: No rich text, templates, or advanced layouts yet
 - **No Image Upload**: Must use external URLs for images
 
@@ -282,32 +296,32 @@ Before deploying to production:
 ✅ **Complete Email Campaign Workflow**:
 1. Admin creates club → ✅ Works
 2. Club owner configures settings → ✅ Works
-3. Club editor adds subscribers → ✅ Works (individual + CSV import)
-4. Club editor creates campaign → ✅ Works (full drag-and-drop editor)
-5. Campaign is saved with HTML + design JSON → ✅ Works
-6. **Club editor edits campaign → ✅ Works (loads design back into editor)**
-7. **Club editor sends test email → ✅ Works (to any email address)**
-8. **Club editor sends campaign → ✅ Works (sends to all subscribers immediately)**
-9. **Campaign stats tracked → ✅ Works (sent/delivered/bounced/complained/failed)**
+3. **Club editor creates/manages email lists → ✅ Works**
+4. Club editor adds subscribers → ✅ Works (individual + CSV import)
+5. **Club editor edits/deletes subscribers → ✅ Works**
+6. **Club editor exports subscribers as CSV → ✅ Works**
+7. Club editor creates campaign → ✅ Works (full drag-and-drop editor)
+8. Campaign is saved with HTML + design JSON → ✅ Works
+9. **Club editor edits campaign → ✅ Works (loads design back into editor)**
+10. **Club editor sends test email → ✅ Works (to any email address)**
+11. **Club editor sends campaign → ✅ Works (sends to all subscribers immediately)**
+12. **Campaign stats tracked → ✅ Works (sent/delivered/bounced/complained/failed)**
 
 ⚠️ **What's Missing**:
 - Scheduling campaigns for future delivery
 - Advanced analytics (open/click tracking requires tracking pixels)
-- Email list CRUD UI
 - Club member management UI
+- Moving subscribers between lists
 
 ## Next Immediate Priority
 
-~~To make the platform fully functional, implement:~~
-~~1. **Campaign Edit Page** - Load design JSON back into editor~~
-~~2. **Send Campaign UI** - Button to send/schedule with confirmation~~
-~~3. **Test Send** - Send preview to specific email addresses~~
+✅ **ALL ENHANCED MVP FEATURES COMPLETE!**
 
-✅ **ALL CORE FEATURES COMPLETE!**
-
-The platform now has a **complete email campaign workflow**:
+The platform now has a **complete email campaign workflow with full data management**:
 - ✅ Create clubs and configure settings
-- ✅ Manage subscribers with CSV import
+- ✅ Create and manage multiple email lists
+- ✅ Manage subscribers with CSV import/export
+- ✅ Edit and delete individual subscribers
 - ✅ Build beautiful emails with drag-and-drop editor
 - ✅ Edit campaigns before sending
 - ✅ Send test emails to verify content
@@ -316,7 +330,8 @@ The platform now has a **complete email campaign workflow**:
 
 **Ready for production use!** 🚀
 
-The main enhancement would be **scheduling** (sending at a future date/time) which requires:
-1. Add `scheduledFor` timestamp field to Campaign model
-2. Background worker to check for scheduled campaigns
-3. UI to select date/time when sending
+Optional enhancements for the future:
+1. **Scheduling** - Send campaigns at a future date/time
+2. **Analytics** - Open/click tracking (requires tracking pixels + SNS webhooks)
+3. **Club Member Management UI** - Manage members, roles, and permissions
+4. **Advanced Editor Features** - Rich text, templates, image upload
