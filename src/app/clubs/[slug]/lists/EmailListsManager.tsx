@@ -31,14 +31,6 @@ export default function EmailListsManager({
 
   const { data: emailLists } = api.emailLists.listLists.useQuery({ clubId });
 
-  if (!emailLists) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        Loading email lists...
-      </div>
-    );
-  }
-
   const createList = api.emailLists.createList.useMutation({
     onSuccess: () => {
       void utils.emailLists.listLists.invalidate();
@@ -63,6 +55,14 @@ export default function EmailListsManager({
       setDeletingList(null);
     },
   });
+
+  if (!emailLists) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        Loading email lists...
+      </div>
+    );
+  }
 
   const handleCreateList = (e: React.FormEvent) => {
     e.preventDefault();
