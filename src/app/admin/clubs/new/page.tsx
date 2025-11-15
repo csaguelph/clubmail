@@ -128,7 +128,7 @@ export default function NewClubPage() {
             />
             <p className="mt-1 text-xs text-gray-500">
               Comma-separated email addresses. These users will be created as stub
-              users if they don't exist and will be given CLUB_OWNER role.
+              users if they don&apos;t exist and will be given CLUB_OWNER role.
             </p>
           </div>
 

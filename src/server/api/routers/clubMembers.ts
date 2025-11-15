@@ -49,16 +49,14 @@ export const clubMembersRouter = createTRPCRouter({
       });
 
       // If user doesn't exist, create stub user
-      if (!user) {
-        user = await ctx.db.user.create({
-          data: {
-            id: `stub_${Date.now()}_${Math.random()}`,
-            email: input.userEmail,
-            name: input.userEmail.split("@")[0] ?? "User",
-            emailVerified: false,
-          },
-        });
-      }
+      user ??= await ctx.db.user.create({
+        data: {
+          id: `stub_${Date.now()}_${Math.random()}`,
+          email: input.userEmail,
+          name: input.userEmail.split("@")[0] ?? "User",
+          emailVerified: false,
+        },
+      });
 
       // Check if already a member
       const existingMember = await ctx.db.clubMember.findUnique({

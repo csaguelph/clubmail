@@ -412,7 +412,7 @@ export const subscribersRouter = createTRPCRouter({
         "email,name,status,subscribed_date", // Header
         ...subscribers.map(
           (sub) =>
-            `${sub.email},"${sub.name || ""}",${sub.status},${sub.createdAt.toISOString()}`
+            `${sub.email},"${sub.name ?? ""}",${sub.status},${sub.createdAt.toISOString()}`
         ),
       ];
 

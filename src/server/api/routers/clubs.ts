@@ -204,7 +204,7 @@ export const clubsRouter = createTRPCRouter({
         },
       });
 
-      if (!club || !club.isActive) {
+      if (!club?.isActive) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Club not found",

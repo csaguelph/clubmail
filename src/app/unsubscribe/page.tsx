@@ -45,7 +45,7 @@ export default async function UnsubscribePage({
             Test Email Unsubscribe Link
           </h1>
           <p className="mt-4 text-gray-600">
-            This is a test email, so this unsubscribe link won't actually
+            This is a test email, so this unsubscribe link won&apos;t actually
             unsubscribe anyone. In a real campaign, clicking this link would
             unsubscribe the recipient from the mailing list.
           </p>

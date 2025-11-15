@@ -57,10 +57,11 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setLink = useCallback(() => {
     if (!editor) return;
 
-    const previousUrl = editor.getAttributes('link').href || '';
-    const previousTarget = editor.getAttributes('link').target === '_blank';
-    
-    setLinkUrl(previousUrl);
+  const linkAttrs = editor.getAttributes('link') as Record<string, unknown> | undefined;
+  const previousUrl = (linkAttrs?.href as string) ?? '';
+  const previousTarget = (linkAttrs?.target as string) === '_blank';
+
+  setLinkUrl(previousUrl);
     // Default to true for new links, preserve existing value for editing
     setLinkTarget(previousUrl ? previousTarget : true);
     setShowLinkModal(true);

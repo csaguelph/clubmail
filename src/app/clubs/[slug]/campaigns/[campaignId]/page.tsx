@@ -34,7 +34,7 @@ export default async function CampaignDetailPage({
   // This ensures the preview uses the latest rendering logic (like auto text color)
   // Include test unsubscribe URL so the preview shows the unsubscribe link
   const blocks = parseDesignJSON(campaign.designJson);
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
   const previewHtml = await generateEmailHTML(blocks, club.name, settings.brandColor, testUnsubscribeUrl);
 
@@ -132,7 +132,7 @@ export default async function CampaignDetailPage({
             <div>
               <dt className="text-sm font-medium text-gray-500">Subject</dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {campaign.subject || "No subject"}
+                {campaign.subject ?? "No subject"}
               </dd>
             </div>
             {campaign.preheaderText && (

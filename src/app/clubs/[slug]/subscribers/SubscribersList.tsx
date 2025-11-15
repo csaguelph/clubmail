@@ -24,7 +24,7 @@ export default function SubscribersList({
   emailLists,
 }: SubscribersListProps) {
   const [selectedListId, setSelectedListId] = useState(
-    emailLists.find((l) => l.isDefault)?.id || emailLists[0]?.id || ""
+    emailLists.find((l) => l.isDefault)?.id ?? emailLists[0]?.id ?? ""
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -48,7 +48,7 @@ export default function SubscribersList({
   const { data: subscribers, isLoading } = api.subscribers.listSubscribers.useQuery(
     {
       clubId,
-      listId: selectedListId || undefined,
+      listId: selectedListId ?? undefined,
       limit: 100,
     },
     {
@@ -92,7 +92,7 @@ export default function SubscribersList({
   const { refetch: triggerExport } = api.subscribers.exportSubscribers.useQuery(
     {
       clubId,
-      listId: selectedListId || undefined,
+      listId: selectedListId ?? undefined,
     },
     {
       enabled: false, // Don't run on mount, only when explicitly triggered
@@ -124,7 +124,7 @@ export default function SubscribersList({
     // Skip header row and parse data
     const subscribersData = lines.slice(1).map((line) => {
       const [email, name] = line.split(",").map((s) => s.trim());
-      return { email: email || "", name };
+      return { email: email ?? "", name };
     }).filter((s) => s.email); // Filter out empty emails
 
     bulkImport.mutate({
@@ -222,8 +222,8 @@ export default function SubscribersList({
       {/* Subscribers Table */}
       <div className="rounded-lg border border-gray-200 bg-white shadow">
         <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Subscribers ({subscribers?.subscribers.length || 0})
+            <h2 className="text-lg font-semibold text-gray-900">
+            Subscribers ({subscribers?.subscribers.length ?? 0})
           </h2>
         </div>
 
@@ -270,7 +270,7 @@ export default function SubscribersList({
                       {subscriber.email}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {subscriber.name || "-"}
+                      {subscriber.name ?? "-"}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm">
                       <span
@@ -518,7 +518,7 @@ export default function SubscribersList({
                   type="email"
                   id="edit-email"
                   disabled
-                  value={editingSubscriber?.email || ""}
+                  value={editingSubscriber?.email ?? ""}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 shadow-sm"
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -536,7 +536,7 @@ export default function SubscribersList({
                 <input
                   type="text"
                   id="edit-name"
-                  value={editingSubscriber?.name || ""}
+                  value={editingSubscriber?.name ?? ""}
                   onChange={(e) =>
                     setEditingSubscriber(
                       editingSubscriber

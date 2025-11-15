@@ -16,10 +16,7 @@ export default function NewCampaignPage() {
   const [blocks, setBlocks] = useState<EmailBlock[]>([]);
 
   const { data: club } = api.clubs.getClubBySlug.useQuery({ slug: params.slug });
-  const { data: clubDetails } = api.clubs.getClubDetails.useQuery(
-    { clubId: club?.id ?? "" },
-    { enabled: !!club?.id }
-  );
+  // club details query removed because it's not used in this page
   const { data: emailLists } = api.emailLists.listLists.useQuery(
     { clubId: club?.id ?? "" },
     { enabled: !!club?.id }

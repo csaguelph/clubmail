@@ -25,10 +25,10 @@ export default function SettingsForm({
   const router = useRouter();
   const [fromName, setFromName] = useState(initialSettings.fromName);
   const [replyToEmail, setReplyToEmail] = useState(
-    initialSettings.replyToEmail || ""
+    initialSettings.replyToEmail ?? ""
   );
   const [defaultSubjectPrefix, setDefaultSubjectPrefix] = useState(
-    initialSettings.defaultSubjectPrefix || ""
+    initialSettings.defaultSubjectPrefix ?? ""
   );
   const [brandColor, setBrandColor] = useState(initialSettings.brandColor);
   const [enableTracking, setEnableTracking] = useState(
@@ -79,7 +79,7 @@ export default function SettingsForm({
               placeholder="Computer Science Club"
             />
             <p className="mt-1 text-xs text-gray-500">
-              The name that will appear in the "From" field of emails
+              The name that will appear in the &quot;From&quot; field of emails
             </p>
           </div>
 

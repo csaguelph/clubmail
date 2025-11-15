@@ -248,7 +248,7 @@ export default async function ClubPage({
             <div>
               <dt className="text-sm font-medium text-gray-500">Your Role</dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {club.myRole?.replace("CLUB_", "") || "Member"}
+                {club.myRole?.replace("CLUB_", "") ?? "Member"}
               </dd>
             </div>
           </dl>

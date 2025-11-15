@@ -36,7 +36,7 @@ export default async function ClubsPage() {
             No clubs yet
           </h3>
           <p className="mt-2 text-sm text-gray-500">
-            You haven't been added to any clubs yet. Contact your club's
+            You haven&apos;t been added to any clubs yet. Contact your club&apos;s
             primary contacts or a platform administrator to get access.
           </p>
         </div>
@@ -85,7 +85,7 @@ export default async function ClubsPage() {
 
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-xs text-gray-500">
-                  {club.settings?.fromName || "No sender configured"}
+                  {club.settings?.fromName ?? "No sender configured"}
                 </span>
                 <svg
                   className="h-5 w-5 text-gray-400 group-hover:text-[#b1d135]"

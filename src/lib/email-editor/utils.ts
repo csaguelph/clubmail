@@ -76,8 +76,15 @@ export function generateDesignJSON(blocks: EmailBlock[]): string {
 
 export function parseDesignJSON(json: string): EmailBlock[] {
   try {
-    const parsed = JSON.parse(json);
-    return parsed.blocks || [];
+    const parsed: unknown = JSON.parse(json);
+
+    if (!parsed || typeof parsed !== "object") return [];
+
+    const maybe = parsed as { blocks?: unknown };
+
+    if (!maybe.blocks || !Array.isArray(maybe.blocks)) return [];
+
+    return maybe.blocks as EmailBlock[];
   } catch {
     return [];
   }

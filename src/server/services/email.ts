@@ -166,7 +166,7 @@ export async function sendTestEmail(params: {
  * Generate unsubscribe link for a subscriber
  */
 export function generateUnsubscribeLink(unsubscribeToken: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
 }
 
