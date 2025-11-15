@@ -17,6 +17,11 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    // AWS SES configuration for sending emails
+    AWS_SES_REGION: z.string().optional(), // AWS region (e.g., us-east-1)
+    AWS_SES_ACCESS_KEY_ID: z.string().optional(), // AWS access key
+    AWS_SES_SECRET_ACCESS_KEY: z.string().optional(), // AWS secret key
+    AWS_SES_FROM_EMAIL: z.string().email().optional(), // Verified sender email address
   },
 
   /**
@@ -25,7 +30,8 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_GIT_COMMIT_SHA: z.string().optional(),
   },
 
   /**
@@ -39,6 +45,12 @@ export const env = createEnv({
       process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+    AWS_SES_REGION: process.env.AWS_SES_REGION,
+    AWS_SES_ACCESS_KEY_ID: process.env.AWS_SES_ACCESS_KEY_ID,
+    AWS_SES_SECRET_ACCESS_KEY: process.env.AWS_SES_SECRET_ACCESS_KEY,
+    AWS_SES_FROM_EMAIL: process.env.AWS_SES_FROM_EMAIL,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_GIT_COMMIT_SHA: process.env.NEXT_PUBLIC_GIT_COMMIT_SHA,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

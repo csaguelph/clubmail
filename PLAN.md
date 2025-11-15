@@ -2,7 +2,7 @@
 
 ## 0. Context & Assumptions
 
-- Existing stack: T3 (Next.js, tRPC, Prisma, NextAuth/Auth.js, Tailwind, etc.).
+- Existing stack: T3 (Next.js, tRPC, Prisma, BetterAuth, Tailwind, etc.).
 - User auth is **already implemented**.
 - This file is a **high-level technical and product outline**, meant to guide Copilot/Claude when generating code and tasks.
 - Primary goal: let student clubs send emails to their members safely, without giving them direct access to shared Outlook/Gmail lists.
