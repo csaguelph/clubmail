@@ -5,7 +5,16 @@ import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Link2, List, ListOrdered, Redo, Underline as UnderlineIcon, Undo } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Link2,
+  List,
+  ListOrdered,
+  Redo,
+  Underline as UnderlineIcon,
+  Undo,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 interface RichTextEditorProps {
@@ -16,7 +25,7 @@ interface RichTextEditorProps {
 export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const [, setUpdateTrigger] = useState(0);
   const [showLinkModal, setShowLinkModal] = useState(false);
-  const [linkUrl, setLinkUrl] = useState('');
+  const [linkUrl, setLinkUrl] = useState("");
   const [linkTarget, setLinkTarget] = useState(false);
 
   const editor = useEditor({
@@ -31,7 +40,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline',
+          class: "text-blue-600 underline",
         },
       }),
     ],
@@ -39,7 +48,8 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[150px] px-3 py-2",
+        class:
+          "prose prose-sm max-w-none focus:outline-none min-h-[150px] px-3 py-2",
       },
     },
     onUpdate: ({ editor }) => {
@@ -57,11 +67,13 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const setLink = useCallback(() => {
     if (!editor) return;
 
-  const linkAttrs = editor.getAttributes('link') as Record<string, unknown> | undefined;
-  const previousUrl = (linkAttrs?.href as string) ?? '';
-  const previousTarget = (linkAttrs?.target as string) === '_blank';
+    const linkAttrs = editor.getAttributes("link") as
+      | Record<string, unknown>
+      | undefined;
+    const previousUrl = (linkAttrs?.href as string) ?? "";
+    const previousTarget = (linkAttrs?.target as string) === "_blank";
 
-  setLinkUrl(previousUrl);
+    setLinkUrl(previousUrl);
     // Default to true for new links, preserve existing value for editing
     setLinkTarget(previousUrl ? previousTarget : true);
     setShowLinkModal(true);
@@ -71,8 +83,8 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     if (!editor) return;
 
     // empty
-    if (linkUrl === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    if (linkUrl === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
       setShowLinkModal(false);
       return;
     }
@@ -81,13 +93,13 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     editor
       .chain()
       .focus()
-      .extendMarkRange('link')
-      .setLink({ 
+      .extendMarkRange("link")
+      .setLink({
         href: linkUrl,
-        target: linkTarget ? '_blank' : null,
+        target: linkTarget ? "_blank" : null,
       })
       .run();
-    
+
     setShowLinkModal(false);
   }, [editor, linkUrl, linkTarget]);
 
@@ -103,9 +115,9 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   }
 
   return (
-    <div className="border border-gray-300 rounded-md overflow-hidden">
+    <div className="overflow-hidden rounded-md border border-gray-300">
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-1 p-2 border-b border-gray-200 bg-gray-50">
+      <div className="flex flex-wrap gap-1 border-b border-gray-200 bg-gray-50 p-2">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
@@ -130,7 +142,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <UnderlineIcon className="h-4 w-4" />
         </ToolbarButton>
 
-        <div className="w-px bg-gray-300 mx-1" />
+        <div className="mx-1 w-px bg-gray-300" />
 
         <ToolbarButton
           onClick={setLink}
@@ -140,7 +152,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <Link2 className="h-4 w-4" />
         </ToolbarButton>
 
-        <div className="w-px bg-gray-300 mx-1" />
+        <div className="mx-1 w-px bg-gray-300" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -158,7 +170,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
 
-        <div className="w-px bg-gray-300 mx-1" />
+        <div className="mx-1 w-px bg-gray-300" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -181,7 +193,11 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       <EditorContent editor={editor} />
 
       {/* Link Modal */}
-      <Dialog open={showLinkModal} onClose={() => setShowLinkModal(false)} className="relative z-50">
+      <Dialog
+        open={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        className="relative z-50"
+      >
         {/* Backdrop */}
         <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
 
@@ -191,10 +207,13 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
             <DialogTitle className="mb-4 text-lg font-semibold text-gray-900">
               Add/Edit Link
             </DialogTitle>
-            
+
             <div className="space-y-4">
               <div>
-                <label htmlFor="link-url" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="link-url"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
                   URL
                 </label>
                 <input
@@ -203,12 +222,12 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   autoFocus
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       applyLink();
-                    } else if (e.key === 'Escape') {
+                    } else if (e.key === "Escape") {
                       setShowLinkModal(false);
                     }
                   }}
@@ -223,7 +242,10 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                   onChange={(e) => setLinkTarget(e.target.checked)}
                   className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
                 />
-                <label htmlFor="link-target" className="ml-2 text-sm text-gray-700">
+                <label
+                  htmlFor="link-target"
+                  className="ml-2 text-sm text-gray-700"
+                >
                   Open in new tab
                 </label>
               </div>
@@ -271,11 +293,11 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`p-1.5 rounded transition ${
+      className={`rounded p-1.5 transition ${
         isActive
           ? "bg-[#b1d135] text-gray-900"
           : "bg-white text-gray-700 hover:bg-gray-100"
-      } ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}
+      } ${disabled ? "cursor-not-allowed opacity-30" : ""}`}
     >
       {children}
     </button>

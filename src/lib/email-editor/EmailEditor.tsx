@@ -8,7 +8,19 @@
 */
 /* eslint-disable jsx-a11y/alt-text */
 
-import { ChevronDown, ChevronUp, Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  GripVertical,
+  Heading1,
+  Image,
+  Link,
+  Minus,
+  Plus,
+  Trash2,
+  Type,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { RichTextEditor } from "./RichTextEditor";
 import type { EmailBlock, EmailBlockType } from "./types";
@@ -21,7 +33,12 @@ interface EmailEditorProps {
   brandColor?: string;
 }
 
-export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandColor = "#b1d135" }: EmailEditorProps) {
+export function EmailEditor({
+  blocks,
+  onChange,
+  clubName = "Your Club",
+  brandColor = "#b1d135",
+}: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
@@ -35,8 +52,8 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandCol
   const updateBlock = (id: string, updates: Partial<EmailBlock>) => {
     onChange(
       blocks.map((block) =>
-        block.id === id ? ({ ...block, ...updates } as EmailBlock) : block
-      )
+        block.id === id ? ({ ...block, ...updates } as EmailBlock) : block,
+      ),
     );
   };
 
@@ -104,7 +121,9 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandCol
 
       <div className="flex gap-6">
         {/* Block List */}
-        <div className={`space-y-2 ${showPreview ? 'flex-1' : selectedBlock ? 'flex-1' : 'w-full'}`}>
+        <div
+          className={`space-y-2 ${showPreview ? "flex-1" : selectedBlock ? "flex-1" : "w-full"}`}
+        >
           <div className="mb-4 flex items-center justify-between">
             <BlockMenu onAddBlock={addBlock} />
           </div>
@@ -140,7 +159,9 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandCol
 
         {/* Block Editor */}
         {selectedBlock && (
-          <div className={`rounded-lg border border-gray-200 bg-white p-4 sticky top-4 self-start max-h-[600px] overflow-y-auto ${showPreview ? 'w-80' : 'flex-1'}`}>
+          <div
+            className={`sticky top-4 max-h-[600px] self-start overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 ${showPreview ? "w-80" : "flex-1"}`}
+          >
             <h3 className="mb-4 text-sm font-medium text-gray-900">
               Edit {selectedBlock.type}
             </h3>
@@ -152,13 +173,15 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandCol
         {showPreview && (
           <div className="flex-1">
             <div className="sticky top-4">
-              <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-                <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
-                  <p className="text-xs font-medium text-gray-600">Live Preview</p>
+              <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                <div className="border-b border-gray-200 bg-gray-50 px-4 py-2">
+                  <p className="text-xs font-medium text-gray-600">
+                    Live Preview
+                  </p>
                 </div>
                 <div className="h-[600px]">
-                  <EmailPreview 
-                    blocks={blocks} 
+                  <EmailPreview
+                    blocks={blocks}
                     clubName={clubName}
                     brandColor={brandColor}
                   />
@@ -172,24 +195,25 @@ export function EmailEditor({ blocks, onChange, clubName = "Your Club", brandCol
   );
 }
 
-function EmailPreview({ 
-  blocks, 
+function EmailPreview({
+  blocks,
   clubName,
   brandColor,
-}: { 
+}: {
   blocks: EmailBlock[];
   clubName: string;
   brandColor: string;
 }) {
-  const [html, setHtml] = useState<string>('');
+  const [html, setHtml] = useState<string>("");
 
   useEffect(() => {
     // Include test unsubscribe URL in preview
-    const baseUrl = typeof window !== 'undefined' 
-      ? window.location.origin 
-      : 'http://localhost:3000';
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000";
     const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
-    
+
     generateEmailHTML(blocks, clubName, brandColor, testUnsubscribeUrl)
       .then(setHtml)
       .catch((err) => console.error("Failed to generate email preview:", err));
@@ -197,7 +221,7 @@ function EmailPreview({
 
   if (!html) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
+      <div className="flex h-full items-center justify-center text-gray-500">
         Generating preview...
       </div>
     );
@@ -206,7 +230,7 @@ function EmailPreview({
   return (
     <iframe
       srcDoc={html}
-      className="w-full h-full border-0"
+      className="h-full w-full border-0"
       title="Email Preview"
       sandbox="allow-same-origin"
     />
@@ -220,7 +244,11 @@ function createDefaultBlock(type: EmailBlockType): EmailBlock {
     case "heading":
       return { id, type: "heading", content: "Heading", level: 1 };
     case "richtext":
-      return { id, type: "richtext", content: "<p>Enter your rich text here...</p>" };
+      return {
+        id,
+        type: "richtext",
+        content: "<p>Enter your rich text here...</p>",
+      };
     case "button":
       return {
         id,
@@ -238,12 +266,28 @@ function createDefaultBlock(type: EmailBlockType): EmailBlock {
   }
 }
 
-function BlockMenu({ onAddBlock }: { onAddBlock: (type: EmailBlockType) => void }) {
+function BlockMenu({
+  onAddBlock,
+}: {
+  onAddBlock: (type: EmailBlockType) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const blockTypes: { type: EmailBlockType; label: string; icon: React.ReactNode }[] = [
-    { type: "heading", label: "Heading", icon: <Heading1 className="h-4 w-4" /> },
-    { type: "richtext", label: "Rich Text", icon: <Type className="h-4 w-4" /> },
+  const blockTypes: {
+    type: EmailBlockType;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      type: "heading",
+      label: "Heading",
+      icon: <Heading1 className="h-4 w-4" />,
+    },
+    {
+      type: "richtext",
+      label: "Rich Text",
+      icon: <Type className="h-4 w-4" />,
+    },
     { type: "button", label: "Button", icon: <Link className="h-4 w-4" /> },
     { type: "image", label: "Image", icon: <Image className="h-4 w-4" /> },
     { type: "divider", label: "Divider", icon: <Minus className="h-4 w-4" /> },
@@ -361,7 +405,7 @@ function BlockItem({
         draggable
         onDragStart={handleDragStart}
         onDragEnd={onDragEnd}
-        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+        className="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing"
         onClick={(e) => e.stopPropagation()}
       >
         <GripVertical className="h-5 w-5" />
@@ -396,7 +440,9 @@ function BlockItem({
         <div className="text-xs font-medium text-gray-500 uppercase">
           {block.type}
         </div>
-        <div className="text-sm text-gray-900 truncate">{getBlockPreview()}</div>
+        <div className="truncate text-sm text-gray-900">
+          {getBlockPreview()}
+        </div>
       </div>
 
       <button
@@ -435,7 +481,7 @@ function BlockEditor({
                   level: parseInt(e.target.value) as 1 | 2 | 3,
                 })
               }
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             >
               <option value="1">H1</option>
               <option value="2">H2</option>
@@ -450,7 +496,7 @@ function BlockEditor({
               type="text"
               value={block.content}
               onChange={(e) => onChange(block.id, { content: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
         </div>
@@ -459,7 +505,7 @@ function BlockEditor({
     case "richtext":
       return (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             Rich Text Content
           </label>
           <RichTextEditor
@@ -480,7 +526,7 @@ function BlockEditor({
               type="text"
               value={block.text}
               onChange={(e) => onChange(block.id, { text: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
           <div>
@@ -491,7 +537,7 @@ function BlockEditor({
               type="url"
               value={block.url}
               onChange={(e) => onChange(block.id, { url: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
           <div>
@@ -505,7 +551,7 @@ function BlockEditor({
                   align: e.target.value as "left" | "center" | "right",
                 })
               }
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             >
               <option value="left">Left</option>
               <option value="center">Center</option>
@@ -527,7 +573,7 @@ function BlockEditor({
               value={block.url}
               onChange={(e) => onChange(block.id, { url: e.target.value })}
               placeholder="https://"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
           <div>
@@ -538,7 +584,7 @@ function BlockEditor({
               type="text"
               value={block.alt}
               onChange={(e) => onChange(block.id, { alt: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
           <div>
@@ -554,7 +600,7 @@ function BlockEditor({
                 })
               }
               placeholder="Auto"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
         </div>
@@ -574,7 +620,7 @@ function BlockEditor({
             }
             min="10"
             max="200"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
           />
         </div>
       );

@@ -20,8 +20,7 @@ export default async function CampaignDetailPage({
   const clubInfo = await api.clubs.getClubBySlug({ slug });
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
 
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   const campaign = await api.campaigns.getCampaign({
     clubId: club.id,
@@ -37,7 +36,12 @@ export default async function CampaignDetailPage({
   const blocks = parseDesignJSON(campaign.designJson);
   const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
-  const previewHtml = await generateEmailHTML(blocks, club.name, settings.brandColor, testUnsubscribeUrl);
+  const previewHtml = await generateEmailHTML(
+    blocks,
+    club.name,
+    settings.brandColor,
+    testUnsubscribeUrl,
+  );
 
   const stats = await api.campaigns.getCampaignStats({
     clubId: club.id,
@@ -69,7 +73,8 @@ export default async function CampaignDetailPage({
     return styles[status as keyof typeof styles] || styles.DRAFT;
   };
 
-  const canEditCampaign = canEdit && (campaign.status === "DRAFT" || campaign.status === "SCHEDULED");
+  const canEditCampaign =
+    canEdit && (campaign.status === "DRAFT" || campaign.status === "SCHEDULED");
   const canSendCampaign = canEdit && campaign.status === "DRAFT";
   const canDeleteCampaign = canEdit && campaign.status === "DRAFT";
 
@@ -105,7 +110,7 @@ export default async function CampaignDetailPage({
             {canEditCampaign && (
               <Link
                 href={`/clubs/${slug}/campaigns/${campaignId}/edit`}
-                className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
               >
                 <Pencil className="h-4 w-4" />
                 Edit
@@ -195,7 +200,9 @@ export default async function CampaignDetailPage({
           </h2>
           <dl className="space-y-3">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Total Recipients</dt>
+              <dt className="text-sm font-medium text-gray-500">
+                Total Recipients
+              </dt>
               <dd className="mt-1 text-2xl font-bold text-gray-900">
                 {stats.total}
               </dd>
@@ -209,7 +216,9 @@ export default async function CampaignDetailPage({
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Delivered</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Delivered
+                  </dt>
                   <dd className="text-sm font-semibold text-green-600">
                     {stats.delivered}
                   </dd>
@@ -221,7 +230,9 @@ export default async function CampaignDetailPage({
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Complained</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Complained
+                  </dt>
                   <dd className="text-sm font-semibold text-red-600">
                     {stats.complained}
                   </dd>
@@ -274,11 +285,17 @@ export default async function CampaignDetailPage({
               )}
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Click-to-Open Rate</dt>
+              <dt className="text-sm font-medium text-gray-500">
+                Click-to-Open Rate
+              </dt>
               <dd className="mt-1 text-2xl font-bold text-gray-900">
                 {engagement.uniqueOpens > 0
-                  ? ((engagement.uniqueClicks / engagement.uniqueOpens) * 100).toFixed(1)
-                  : "0"}%
+                  ? (
+                      (engagement.uniqueClicks / engagement.uniqueOpens) *
+                      100
+                    ).toFixed(1)
+                  : "0"}
+                %
               </dd>
               <dd className="mt-1 text-xs text-gray-500">
                 of those who opened
@@ -317,7 +334,8 @@ export default async function CampaignDetailPage({
                       {urlData.url}
                     </a>
                     <span className="text-sm font-semibold text-gray-900">
-                      {urlData.clicks} {urlData.clicks === 1 ? "click" : "clicks"}
+                      {urlData.clicks}{" "}
+                      {urlData.clicks === 1 ? "click" : "clicks"}
                     </span>
                   </div>
                 ))}
@@ -336,7 +354,7 @@ export default async function CampaignDetailPage({
             </h2>
             <PreviewButton html={previewHtml} />
           </div>
-          <div className="rounded border border-gray-200 overflow-hidden">
+          <div className="overflow-hidden rounded border border-gray-200">
             <iframe
               srcDoc={previewHtml}
               className="h-[600px] w-full"

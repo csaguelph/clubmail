@@ -5,12 +5,12 @@ import { NextResponse } from "next/server";
 // 1x1 transparent GIF (base64 encoded)
 const TRACKING_PIXEL = Buffer.from(
   "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-  "base64"
+  "base64",
 );
 
 export async function GET(
   request: NextRequest,
-  props: { params: Promise<{ token: string }> }
+  props: { params: Promise<{ token: string }> },
 ) {
   const params = await props.params;
   const token = params.token;

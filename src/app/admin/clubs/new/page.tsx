@@ -19,7 +19,7 @@ export default function NewClubPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const emails = primaryContactEmails
       .split(",")
       .map((email) => email.trim())
@@ -57,7 +57,9 @@ export default function NewClubPage() {
           <span>/</span>
           <span className="text-gray-900">New Club</span>
         </div>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">Create New Club</h1>
+        <h1 className="mt-2 text-3xl font-bold text-gray-900">
+          Create New Club
+        </h1>
         <p className="mt-2 text-sm text-gray-600">
           Set up a new club with default settings and primary contacts
         </p>
@@ -78,7 +80,7 @@ export default function NewClubPage() {
               required
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="e.g., Computer Science Club"
             />
           </div>
@@ -101,7 +103,7 @@ export default function NewClubPage() {
                 pattern="[a-z0-9-]+"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="block w-full rounded-none rounded-r-md border border-gray-300 px-3 py-2 focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="block w-full rounded-none rounded-r-md border border-gray-300 px-3 py-2 focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                 placeholder="computer-science-club"
               />
             </div>
@@ -123,12 +125,13 @@ export default function NewClubPage() {
               value={primaryContactEmails}
               onChange={(e) => setPrimaryContactEmails(e.target.value)}
               rows={3}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="email1@example.com, email2@example.com"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Comma-separated email addresses. These users will be created as stub
-              users if they don&apos;t exist and will be given CLUB_OWNER role.
+              Comma-separated email addresses. These users will be created as
+              stub users if they don&apos;t exist and will be given CLUB_OWNER
+              role.
             </p>
           </div>
 

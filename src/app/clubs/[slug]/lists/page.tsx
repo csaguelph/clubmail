@@ -20,8 +20,7 @@ export default async function EmailListsPage({ params }: PageProps) {
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
 
   // Must be CLUB_EDITOR or CLUB_OWNER to manage lists
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   if (!canEdit) {
     redirect(`/clubs/${slug}`);

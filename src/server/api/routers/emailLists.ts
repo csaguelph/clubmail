@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-    clubEditorProcedure,
-    clubViewerProcedure,
-    createTRPCRouter,
+  clubEditorProcedure,
+  clubViewerProcedure,
+  createTRPCRouter,
 } from "@/server/api/trpc";
 
 export const emailListsRouter = createTRPCRouter({
@@ -14,10 +14,7 @@ export const emailListsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const lists = await ctx.db.emailList.findMany({
         where: { clubId: input.clubId },
-        orderBy: [
-          { isDefault: "desc" },
-          { createdAt: "asc" },
-        ],
+        orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
         include: {
           _count: {
             select: {
@@ -66,7 +63,7 @@ export const emailListsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         listId: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const list = await ctx.db.emailList.findFirst({
@@ -101,7 +98,7 @@ export const emailListsRouter = createTRPCRouter({
         clubId: z.string(),
         name: z.string().min(1).max(255),
         description: z.string().optional().nullable(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const list = await ctx.db.emailList.create({
@@ -124,7 +121,7 @@ export const emailListsRouter = createTRPCRouter({
         listId: z.string(),
         name: z.string().min(1).max(255).optional(),
         description: z.string().optional().nullable(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { clubId, listId, ...updateData } = input;
@@ -158,7 +155,7 @@ export const emailListsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         listId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify list belongs to club

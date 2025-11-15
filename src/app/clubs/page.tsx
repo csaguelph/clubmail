@@ -36,8 +36,9 @@ export default async function ClubsPage() {
             No clubs yet
           </h3>
           <p className="mt-2 text-sm text-gray-500">
-            You haven&apos;t been added to any clubs yet. Contact your club&apos;s
-            primary contacts or a platform administrator to get access.
+            You haven&apos;t been added to any clubs yet. Contact your
+            club&apos;s primary contacts or a platform administrator to get
+            access.
           </p>
         </div>
       ) : (
@@ -46,7 +47,7 @@ export default async function ClubsPage() {
             <Link
               key={club.id}
               href={`/clubs/${club.slug}`}
-              className="group rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+              className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -55,7 +56,9 @@ export default async function ClubsPage() {
                   </h3>
                   <p className="mt-1 text-sm text-gray-500">/{club.slug}</p>
                 </div>
-                {("myRole" in club && club.myRole && typeof club.myRole === "string") ? (
+                {"myRole" in club &&
+                club.myRole &&
+                typeof club.myRole === "string" ? (
                   <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                     {club.myRole.replace("CLUB_", "")}
                   </span>

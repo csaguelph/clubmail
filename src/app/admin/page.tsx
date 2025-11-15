@@ -30,7 +30,9 @@ export default async function AdminPage() {
         {/* Stats */}
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Total Clubs</h3>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{clubs.length}</p>
+          <p className="mt-2 text-3xl font-semibold text-gray-900">
+            {clubs.length}
+          </p>
         </div>
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Active Clubs</h3>
@@ -48,7 +50,7 @@ export default async function AdminPage() {
 
       {/* Clubs List */}
       <div className="mt-8 rounded-lg bg-white shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">All Clubs</h2>
         </div>
         <div className="divide-y divide-gray-200">
@@ -67,7 +69,7 @@ export default async function AdminPage() {
               <Link
                 key={club.id}
                 href={`/admin/clubs/${club.id}`}
-                className="block px-6 py-4 hover:bg-gray-50 transition"
+                className="block px-6 py-4 transition hover:bg-gray-50"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

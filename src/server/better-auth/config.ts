@@ -19,9 +19,7 @@ export const auth = betterAuth({
       redirectURI: `${env.NEXT_PUBLIC_BASE_URL}/api/auth/callback/github`,
     },
   },
-  plugins: [
-    nextCookies()
-  ]
+  plugins: [nextCookies()],
 });
 
 export type Session = typeof auth.$Infer.Session;

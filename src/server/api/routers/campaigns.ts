@@ -2,13 +2,13 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-    clubEditorProcedure,
-    clubViewerProcedure,
-    createTRPCRouter,
+  clubEditorProcedure,
+  clubViewerProcedure,
+  createTRPCRouter,
 } from "@/server/api/trpc";
 import {
-    batchSendCampaignEmails,
-    sendTestEmail,
+  batchSendCampaignEmails,
+  sendTestEmail,
 } from "@/server/services/email";
 
 export const campaignsRouter = createTRPCRouter({
@@ -18,16 +18,29 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         status: z
-          .enum(["DRAFT", "SCHEDULED", "SENDING", "SENT", "FAILED", "CANCELLED"])
+          .enum([
+            "DRAFT",
+            "SCHEDULED",
+            "SENDING",
+            "SENT",
+            "FAILED",
+            "CANCELLED",
+          ])
           .optional(),
         limit: z.number().min(1).max(100).default(50),
         cursor: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const where: {
         clubId: string;
-        status?: "DRAFT" | "SCHEDULED" | "SENDING" | "SENT" | "FAILED" | "CANCELLED";
+        status?:
+          | "DRAFT"
+          | "SCHEDULED"
+          | "SENDING"
+          | "SENT"
+          | "FAILED"
+          | "CANCELLED";
       } = {
         clubId: input.clubId,
       };
@@ -81,7 +94,7 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         campaignId: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const campaign = await ctx.db.campaign.findFirst({
@@ -127,7 +140,7 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         campaignId: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       // Verify campaign belongs to club
@@ -199,7 +212,7 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         campaignId: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       // Verify campaign belongs to club
@@ -285,7 +298,7 @@ export const campaignsRouter = createTRPCRouter({
         emailListId: z.string(),
         designJson: z.string().optional(),
         html: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify email list belongs to club
@@ -311,7 +324,8 @@ export const campaignsRouter = createTRPCRouter({
       if (!settings) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Club settings not found. Please configure your club settings first.",
+          message:
+            "Club settings not found. Please configure your club settings first.",
         });
       }
 
@@ -347,7 +361,7 @@ export const campaignsRouter = createTRPCRouter({
         fromName: z.string().optional(),
         designJson: z.string().optional(),
         html: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { clubId, campaignId, ...updateData } = input;
@@ -389,7 +403,7 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         campaignId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify campaign belongs to club
@@ -429,7 +443,7 @@ export const campaignsRouter = createTRPCRouter({
         clubId: z.string(),
         campaignId: z.string(),
         testEmail: z.string().email(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify campaign belongs to club
@@ -451,7 +465,8 @@ export const campaignsRouter = createTRPCRouter({
       if (!campaign.subject || !campaign.html) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Campaign must have a subject and content before sending test",
+          message:
+            "Campaign must have a subject and content before sending test",
         });
       }
 
@@ -497,7 +512,7 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         campaignId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify campaign belongs to club
@@ -607,13 +622,16 @@ export const campaignsRouter = createTRPCRouter({
                 trackingToken: true,
                 subscriberId: true,
               },
-            })
-          )
+            }),
+          ),
         );
 
         // Create a map of subscriberId to trackingToken for easy lookup
         const trackingTokenMap = new Map(
-          emailRecords.map((record) => [record.subscriberId, record.trackingToken])
+          emailRecords.map((record) => [
+            record.subscriberId,
+            record.trackingToken,
+          ]),
         );
 
         // Send emails in batch with rate limiting
@@ -640,7 +658,7 @@ export const campaignsRouter = createTRPCRouter({
         await Promise.all(
           results.map((result) => {
             const emailRecord = emailRecords.find(
-              (r) => r.subscriberId === result.subscriberId
+              (r) => r.subscriberId === result.subscriberId,
             );
             if (!emailRecord) return Promise.resolve();
 
@@ -653,7 +671,7 @@ export const campaignsRouter = createTRPCRouter({
                 sentAt: result.success ? new Date() : null,
               },
             });
-          })
+          }),
         );
 
         // Update campaign status

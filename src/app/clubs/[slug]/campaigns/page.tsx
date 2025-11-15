@@ -14,9 +14,8 @@ export default async function CampaignsPage({
   const { slug } = await params;
   const clubInfo = await api.clubs.getClubBySlug({ slug });
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
-  
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   const { campaigns } = await api.campaigns.listCampaigns({
     clubId: club.id,
@@ -126,7 +125,7 @@ export default async function CampaignsPage({
             <Link
               key={campaign.id}
               href={`/clubs/${slug}/campaigns/${campaign.id}`}
-              className="block rounded-lg bg-white p-6 shadow hover:shadow-lg transition"
+              className="block rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -147,13 +146,15 @@ export default async function CampaignsPage({
                     <span>To: {campaign.emailList.name}</span>
                     <span>•</span>
                     <span>
-                      Created {new Date(campaign.createdAt).toLocaleDateString()}
+                      Created{" "}
+                      {new Date(campaign.createdAt).toLocaleDateString()}
                     </span>
                     {campaign.startedAt && (
                       <>
                         <span>•</span>
                         <span>
-                          Sent {new Date(campaign.startedAt).toLocaleDateString()}
+                          Sent{" "}
+                          {new Date(campaign.startedAt).toLocaleDateString()}
                         </span>
                       </>
                     )}

@@ -11,12 +11,14 @@ export default function PrivacyPage() {
 
         <div className="mt-8 space-y-8">
           <section>
-            <h2 className="text-2xl font-semibold text-gray-900">Introduction</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Introduction
+            </h2>
             <p className="mt-4 text-gray-600">
-              ClubMail is operated by the Central Student Association (CSA) at the
-              University of Guelph. This privacy policy explains how we collect, use,
-              and protect your personal information when you use our email management
-              platform.
+              ClubMail is operated by the Central Student Association (CSA) at
+              the University of Guelph. This privacy policy explains how we
+              collect, use, and protect your personal information when you use
+              our email management platform.
             </p>
           </section>
 
@@ -30,8 +32,8 @@ export default function PrivacyPage() {
                   User Account Information
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  When you sign in, we collect your name, email address,
-                  and profile information.
+                  When you sign in, we collect your name, email address, and
+                  profile information.
                 </p>
               </div>
               <div>
@@ -39,8 +41,8 @@ export default function PrivacyPage() {
                   Subscriber Information
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  Club administrators may collect subscriber email addresses and names
-                  for the purpose of sending club communications.
+                  Club administrators may collect subscriber email addresses and
+                  names for the purpose of sending club communications.
                 </p>
               </div>
               <div>
@@ -48,8 +50,9 @@ export default function PrivacyPage() {
                   Email Analytics
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  We collect email delivery status, bounces, and complaint information
-                  from AWS SES to improve deliverability and compliance.
+                  We collect email delivery status, bounces, and complaint
+                  information from AWS SES to improve deliverability and
+                  compliance.
                 </p>
               </div>
             </div>
@@ -69,16 +72,20 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-gray-900">Data Sharing</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Data Sharing
+            </h2>
             <p className="mt-4 text-gray-600">
-              We do not sell, rent, or share your personal information with third
-              parties except:
+              We do not sell, rent, or share your personal information with
+              third parties except:
             </p>
             <ul className="mt-4 list-inside list-disc space-y-2 text-gray-600">
               <li>With AWS SES for email delivery</li>
               <li>With Microsoft for authentication</li>
               <li>When required by law or legal process</li>
-              <li>With club administrators for the clubs you&apos;re subscribed to</li>
+              <li>
+                With club administrators for the clubs you&apos;re subscribed to
+              </li>
             </ul>
           </section>
 
@@ -101,14 +108,16 @@ export default function PrivacyPage() {
               Unsubscribing
             </h2>
             <p className="mt-4 text-gray-600">
-              Every email includes an unsubscribe link. Clicking this link
-              will immediately remove you from that club&apos;s mailing list. You can also
-              contact the club directly to request removal.
+              Every email includes an unsubscribe link. Clicking this link will
+              immediately remove you from that club&apos;s mailing list. You can
+              also contact the club directly to request removal.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-gray-900">Data Security</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Data Security
+            </h2>
             <p className="mt-4 text-gray-600">
               We implement appropriate technical and organizational measures to
               protect your personal information, including:
@@ -142,16 +151,17 @@ export default function PrivacyPage() {
               Changes to This Policy
             </h2>
             <p className="mt-4 text-gray-600">
-              We may update this privacy policy from time to time. We will notify
-              users of significant changes via email or platform notification.
+              We may update this privacy policy from time to time. We will
+              notify users of significant changes via email or platform
+              notification.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-semibold text-gray-900">Contact Us</h2>
             <p className="mt-4 text-gray-600">
-              If you have questions about this privacy policy or wish to exercise your
-              rights, please contact:
+              If you have questions about this privacy policy or wish to
+              exercise your rights, please contact:
             </p>
             <div className="mt-4 text-gray-600">
               <p>Central Student Association</p>

@@ -66,7 +66,7 @@ export default function CampaignActions({
       <div className="flex items-center space-x-3">
         <button
           onClick={() => setShowTestModal(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
         >
           <Mail className="h-4 w-4" />
           Send Test
@@ -81,7 +81,7 @@ export default function CampaignActions({
         {canDelete && (
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-red-300 ring-inset hover:bg-red-50"
           >
             <Trash2 className="h-4 w-4" />
             Delete
@@ -115,7 +115,7 @@ export default function CampaignActions({
               <button
                 onClick={() => setShowSendModal(false)}
                 disabled={sendCampaign.isPending}
-                className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -186,7 +186,7 @@ export default function CampaignActions({
                 onChange={(e) => setTestEmail(e.target.value)}
                 required
                 placeholder="your@email.com"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:outline-none focus:ring-1 focus:ring-[#b1d135]"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               />
               {sendTest.error && (
                 <p className="mt-2 text-sm text-red-600">
@@ -203,7 +203,7 @@ export default function CampaignActions({
                   type="button"
                   onClick={() => setShowTestModal(false)}
                   disabled={sendTest.isPending}
-                  className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                  className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -274,7 +274,7 @@ export default function CampaignActions({
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={deleteCampaign.isPending}
-                className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
               </button>

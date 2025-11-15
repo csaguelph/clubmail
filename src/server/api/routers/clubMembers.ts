@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-    clubOwnerProcedure,
-    clubViewerProcedure,
-    createTRPCRouter,
+  clubOwnerProcedure,
+  clubViewerProcedure,
+  createTRPCRouter,
 } from "@/server/api/trpc";
 
 export const clubMembersRouter = createTRPCRouter({
@@ -40,7 +40,7 @@ export const clubMembersRouter = createTRPCRouter({
         clubId: z.string(),
         userEmail: z.string().email(),
         role: z.enum(["CLUB_OWNER", "CLUB_EDITOR", "CLUB_VIEWER"]),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Find user by email
@@ -104,7 +104,7 @@ export const clubMembersRouter = createTRPCRouter({
         clubId: z.string(),
         userId: z.string(),
         role: z.enum(["CLUB_OWNER", "CLUB_EDITOR", "CLUB_VIEWER"]),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Check if member exists
@@ -173,7 +173,7 @@ export const clubMembersRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         userId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Check if member exists

@@ -17,8 +17,7 @@ export default async function ClubSettingsPage({
   const club = await api.clubs.getClubDetails({ clubId: clubInfo.id });
 
   // Only owners and editors can edit settings
-  const canEdit =
-    club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
+  const canEdit = club.myRole === "CLUB_OWNER" || club.myRole === "CLUB_EDITOR";
 
   if (!canEdit) {
     redirect(`/clubs/${slug}`);
