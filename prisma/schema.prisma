@@ -15,16 +15,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ========================================
+// User & Auth Models
+// ========================================
 
-  createdBy   User   @relation(fields: [createdById], references: [id])
-  createdById String
-
-  @@index([name])
+enum UserRole {
+  ADMIN
+  USER
 }
 
 model User {
@@ -33,14 +30,207 @@ model User {
   email         String
   emailVerified Boolean   @default(false)
   image         String? //@db.Text
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
-  posts         Post[]
+
+  // Club relationships
+  clubsCreated   Club[]
+  clubMemberships ClubMember[]
+  campaignsCreated Campaign[]
 
   @@unique([email])
   @@map("user")
+}
+
+// ========================================
+// Club Models
+// ========================================
+
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  members      ClubMember[]
+  settings     ClubSettings?
+  emailLists   EmailList[]
+  subscribers  Subscriber[]
+  campaigns    Campaign[]
+
+  @@index([slug])
+  @@index([createdById])
+}
+
+enum ClubRole {
+  CLUB_OWNER
+  CLUB_EDITOR
+  CLUB_VIEWER
+}
+
+model ClubMember {
+  id        String   @id @default(cuid())
+  role      ClubRole
+  createdAt DateTime @default(now())
+
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([clubId, userId])
+  @@index([userId])
+}
+
+model ClubSettings {
+  id                    String  @id @default(cuid())
+  fromName              String
+  fromEmail             String
+  replyToEmail          String?
+  defaultSubjectPrefix  String?
+  footerText            String?
+  physicalAddress       String?
+
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String @unique
+}
+
+// ========================================
+// Email List & Subscriber Models
+// ========================================
+
+model EmailList {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String
+
+  memberships SubscriberListMembership[]
+  campaigns   Campaign[]
+
+  @@index([clubId])
+}
+
+enum SubscriberStatus {
+  SUBSCRIBED
+  UNSUBSCRIBED
+  BOUNCED
+}
+
+model Subscriber {
+  id                String           @id @default(cuid())
+  email             String
+  name              String?
+  status            SubscriberStatus @default(SUBSCRIBED)
+  unsubscribeToken  String           @unique @default(cuid())
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String
+
+  listMemberships SubscriberListMembership[]
+  emailEvents     EmailEvent[]
+
+  @@unique([clubId, email])
+  @@index([clubId])
+  @@index([email])
+}
+
+model SubscriberListMembership {
+  subscribedAt   DateTime? @default(now())
+  unsubscribedAt DateTime?
+
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  subscriberId String
+  emailList    EmailList  @relation(fields: [emailListId], references: [id], onDelete: Cascade)
+  emailListId  String
+
+  @@id([subscriberId, emailListId])
+  @@index([emailListId])
+}
+
+// ========================================
+// Campaign Models
+// ========================================
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model Campaign {
+  id            String         @id @default(cuid())
+  name          String
+  subject       String
+  preheaderText String?
+  fromName      String
+  fromEmail     String
+  designJson    String         @db.Text
+  html          String         @db.Text
+  status        CampaignStatus @default(DRAFT)
+  scheduledAt   DateTime?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String
+
+  emailList   EmailList @relation(fields: [emailListId], references: [id])
+  emailListId String
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  emailEvents EmailEvent[]
+
+  @@index([clubId])
+  @@index([status])
+}
+
+enum EmailEventStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  BOUNCED
+  COMPLAINED
+  FAILED
+}
+
+model EmailEvent {
+  id                 String           @id @default(cuid())
+  providerMessageId  String?
+  status             EmailEventStatus @default(QUEUED)
+  errorMessage       String?
+  timestamp          DateTime         @default(now())
+
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId String
+
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id])
+  subscriberId String
+
+  @@index([campaignId])
+  @@index([subscriberId])
+  @@index([status])
 }
 
 model Session {

@@ -121,22 +121,101 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.PostScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdById: 'createdById'
-};
-
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ClubScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  createdById: 'createdById'
+};
+
+exports.Prisma.ClubMemberScalarFieldEnum = {
+  id: 'id',
+  role: 'role',
+  createdAt: 'createdAt',
+  clubId: 'clubId',
+  userId: 'userId'
+};
+
+exports.Prisma.ClubSettingsScalarFieldEnum = {
+  id: 'id',
+  fromName: 'fromName',
+  fromEmail: 'fromEmail',
+  replyToEmail: 'replyToEmail',
+  defaultSubjectPrefix: 'defaultSubjectPrefix',
+  footerText: 'footerText',
+  physicalAddress: 'physicalAddress',
+  clubId: 'clubId'
+};
+
+exports.Prisma.EmailListScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  clubId: 'clubId'
+};
+
+exports.Prisma.SubscriberScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  status: 'status',
+  unsubscribeToken: 'unsubscribeToken',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  clubId: 'clubId'
+};
+
+exports.Prisma.SubscriberListMembershipScalarFieldEnum = {
+  subscribedAt: 'subscribedAt',
+  unsubscribedAt: 'unsubscribedAt',
+  subscriberId: 'subscriberId',
+  emailListId: 'emailListId'
+};
+
+exports.Prisma.CampaignScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  subject: 'subject',
+  preheaderText: 'preheaderText',
+  fromName: 'fromName',
+  fromEmail: 'fromEmail',
+  designJson: 'designJson',
+  html: 'html',
+  status: 'status',
+  scheduledAt: 'scheduledAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  clubId: 'clubId',
+  emailListId: 'emailListId',
+  createdById: 'createdById'
+};
+
+exports.Prisma.EmailEventScalarFieldEnum = {
+  id: 'id',
+  providerMessageId: 'providerMessageId',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  timestamp: 'timestamp',
+  campaignId: 'campaignId',
+  subscriberId: 'subscriberId'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
@@ -189,11 +268,51 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.UserRole = exports.$Enums.UserRole = {
+  ADMIN: 'ADMIN',
+  USER: 'USER'
+};
 
+exports.ClubRole = exports.$Enums.ClubRole = {
+  CLUB_OWNER: 'CLUB_OWNER',
+  CLUB_EDITOR: 'CLUB_EDITOR',
+  CLUB_VIEWER: 'CLUB_VIEWER'
+};
+
+exports.SubscriberStatus = exports.$Enums.SubscriberStatus = {
+  SUBSCRIBED: 'SUBSCRIBED',
+  UNSUBSCRIBED: 'UNSUBSCRIBED',
+  BOUNCED: 'BOUNCED'
+};
+
+exports.CampaignStatus = exports.$Enums.CampaignStatus = {
+  DRAFT: 'DRAFT',
+  SCHEDULED: 'SCHEDULED',
+  SENDING: 'SENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.EmailEventStatus = exports.$Enums.EmailEventStatus = {
+  QUEUED: 'QUEUED',
+  SENT: 'SENT',
+  DELIVERED: 'DELIVERED',
+  BOUNCED: 'BOUNCED',
+  COMPLAINED: 'COMPLAINED',
+  FAILED: 'FAILED'
+};
 
 exports.Prisma.ModelName = {
-  Post: 'Post',
   User: 'User',
+  Club: 'Club',
+  ClubMember: 'ClubMember',
+  ClubSettings: 'ClubSettings',
+  EmailList: 'EmailList',
+  Subscriber: 'Subscriber',
+  SubscriberListMembership: 'SubscriberListMembership',
+  Campaign: 'Campaign',
+  EmailEvent: 'EmailEvent',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification'

@@ -132,3 +132,162 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Admin-only procedure
+ *
+ * This procedure is only accessible to users with the ADMIN role.
+ */
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const user = await ctx.db.user.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role !== "ADMIN") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+  }
+
+  return next({ ctx });
+});
+
+/**
+ * Club owner procedure
+ *
+ * Requires the user to be a CLUB_OWNER of the specified club (or an admin).
+ */
+export const clubOwnerProcedure = protectedProcedure.use(async ({ ctx, next, input }) => {
+  const allowedRoles = ["CLUB_OWNER"];
+  
+  // Check if user is admin (admins bypass club role checks)
+  const user = await ctx.db.user.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role === "ADMIN") {
+    return next({ ctx });
+  }
+
+  // Extract clubId from input
+  const typedInput = input as { clubId?: string };
+  if (!typedInput.clubId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "clubId is required",
+    });
+  }
+
+  // Check club membership
+  const membership = await ctx.db.clubMember.findUnique({
+    where: {
+      clubId_userId: {
+        clubId: typedInput.clubId,
+        userId: ctx.session.user.id,
+      },
+    },
+  });
+
+  if (!membership || !allowedRoles.includes(membership.role)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Insufficient permissions for this club",
+    });
+  }
+
+  return next({ ctx });
+});
+
+/**
+ * Club editor procedure
+ *
+ * Requires the user to be a CLUB_OWNER or CLUB_EDITOR of the specified club (or an admin).
+ */
+export const clubEditorProcedure = protectedProcedure.use(async ({ ctx, next, input }) => {
+  const allowedRoles = ["CLUB_OWNER", "CLUB_EDITOR"];
+  
+  // Check if user is admin (admins bypass club role checks)
+  const user = await ctx.db.user.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role === "ADMIN") {
+    return next({ ctx });
+  }
+
+  // Extract clubId from input
+  const typedInput = input as { clubId?: string };
+  if (!typedInput.clubId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "clubId is required",
+    });
+  }
+
+  // Check club membership
+  const membership = await ctx.db.clubMember.findUnique({
+    where: {
+      clubId_userId: {
+        clubId: typedInput.clubId,
+        userId: ctx.session.user.id,
+      },
+    },
+  });
+
+  if (!membership || !allowedRoles.includes(membership.role)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Insufficient permissions for this club",
+    });
+  }
+
+  return next({ ctx });
+});
+
+/**
+ * Club viewer procedure
+ *
+ * Requires the user to be a member of the specified club in any role (or an admin).
+ */
+export const clubViewerProcedure = protectedProcedure.use(async ({ ctx, next, input }) => {
+  const allowedRoles = ["CLUB_OWNER", "CLUB_EDITOR", "CLUB_VIEWER"];
+  
+  // Check if user is admin (admins bypass club role checks)
+  const user = await ctx.db.user.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role === "ADMIN") {
+    return next({ ctx });
+  }
+
+  // Extract clubId from input
+  const typedInput = input as { clubId?: string };
+  if (!typedInput.clubId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "clubId is required",
+    });
+  }
+
+  // Check club membership
+  const membership = await ctx.db.clubMember.findUnique({
+    where: {
+      clubId_userId: {
+        clubId: typedInput.clubId,
+        userId: ctx.session.user.id,
+      },
+    },
+  });
+
+  if (!membership || !allowedRoles.includes(membership.role)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Insufficient permissions for this club",
+    });
+  }
+
+  return next({ ctx });
+});
