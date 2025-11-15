@@ -180,7 +180,13 @@ export default function CampaignEditForm({
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Email Content
         </h2>
-        <EmailEditor blocks={blocks} onChange={setBlocks} />
+        <EmailEditor 
+          blocks={blocks} 
+          onChange={setBlocks}
+          clubName={clubName}
+          footerText={footerText || undefined}
+          physicalAddress={physicalAddress || undefined}
+        />
       </div>
 
       {/* Actions */}

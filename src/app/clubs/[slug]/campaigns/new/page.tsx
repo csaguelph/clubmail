@@ -188,7 +188,13 @@ export default function NewCampaignPage() {
               </p>
             </div>
             <div className="pt-4">
-              <EmailEditor blocks={blocks} onChange={setBlocks} />
+              <EmailEditor 
+                blocks={blocks} 
+                onChange={setBlocks}
+                clubName={club.name}
+                footerText={settings?.footerText || undefined}
+                physicalAddress={settings?.physicalAddress || undefined}
+              />
             </div>
           </div>
         </div>

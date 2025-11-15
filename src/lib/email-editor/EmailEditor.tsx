@@ -1,16 +1,20 @@
 "use client";
 
-import { GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
+import { Eye, GripVertical, Heading1, Image, Link, Minus, Plus, Trash2, Type } from "lucide-react";
 import { useState } from "react";
 import type { EmailBlock, EmailBlockType } from "./types";
 
 interface EmailEditorProps {
   blocks: EmailBlock[];
   onChange: (blocks: EmailBlock[]) => void;
+  clubName?: string;
+  footerText?: string;
+  physicalAddress?: string;
 }
 
-export function EmailEditor({ blocks, onChange }: EmailEditorProps) {
+export function EmailEditor({ blocks, onChange, clubName = "Your Club", footerText, physicalAddress }: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(true);
 
   const addBlock = (type: EmailBlockType) => {
     const newBlock: EmailBlock = createDefaultBlock(type);
@@ -51,50 +55,244 @@ export function EmailEditor({ blocks, onChange }: EmailEditorProps) {
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
 
   return (
-    <div className="flex gap-6">
-      {/* Block List */}
-      <div className="flex-1 space-y-2">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700">Email Content</h3>
-          <BlockMenu onAddBlock={addBlock} />
+    <div className="space-y-4">
+      {/* Preview Toggle */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-gray-700">Email Content</h3>
+        <button
+          type="button"
+          onClick={() => setShowPreview(!showPreview)}
+          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          <Eye className="h-4 w-4" />
+          {showPreview ? "Hide Preview" : "Show Preview"}
+        </button>
+      </div>
+
+      <div className="flex gap-6">
+        {/* Block List */}
+        <div className={`space-y-2 ${showPreview || selectedBlock ? 'flex-1' : 'w-full'}`}>
+          <div className="mb-4 flex items-center justify-between">
+            <BlockMenu onAddBlock={addBlock} />
+          </div>
+
+          {blocks.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+              <p className="text-sm text-gray-500">
+                No blocks yet. Click the + button to add content.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {blocks.map((block, index) => (
+                <BlockItem
+                  key={block.id}
+                  block={block}
+                  isSelected={selectedBlockId === block.id}
+                  isFirst={index === 0}
+                  isLast={index === blocks.length - 1}
+                  onSelect={() => setSelectedBlockId(block.id)}
+                  onDelete={() => deleteBlock(block.id)}
+                  onMoveUp={() => moveBlock(block.id, "up")}
+                  onMoveDown={() => moveBlock(block.id, "down")}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {blocks.length === 0 ? (
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
-            <p className="text-sm text-gray-500">
-              No blocks yet. Click the + button to add content.
-            </p>
+        {/* Block Editor */}
+        {selectedBlock && (
+          <div className="w-80 rounded-lg border border-gray-200 bg-white p-4 sticky top-4 self-start max-h-[600px] overflow-y-auto">
+            <h3 className="mb-4 text-sm font-medium text-gray-900">
+              Edit {selectedBlock.type}
+            </h3>
+            <BlockEditor block={selectedBlock} onChange={updateBlock} />
           </div>
-        ) : (
-          <div className="space-y-2">
-            {blocks.map((block, index) => (
-              <BlockItem
-                key={block.id}
-                block={block}
-                isSelected={selectedBlockId === block.id}
-                isFirst={index === 0}
-                isLast={index === blocks.length - 1}
-                onSelect={() => setSelectedBlockId(block.id)}
-                onDelete={() => deleteBlock(block.id)}
-                onMoveUp={() => moveBlock(block.id, "up")}
-                onMoveDown={() => moveBlock(block.id, "down")}
-              />
-            ))}
+        )}
+
+        {/* Live Preview */}
+        {showPreview && (
+          <div className="flex-1">
+            <div className="sticky top-4">
+              <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+                <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+                  <p className="text-xs font-medium text-gray-600">Live Preview</p>
+                </div>
+                <div className="p-6 max-h-[600px] overflow-y-auto">
+                  <EmailPreview 
+                    blocks={blocks} 
+                    clubName={clubName}
+                    footerText={footerText}
+                    physicalAddress={physicalAddress}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Block Editor */}
-      {selectedBlock && (
-        <div className="w-80 rounded-lg border border-gray-200 bg-white p-4">
-          <h3 className="mb-4 text-sm font-medium text-gray-900">
-            Edit {selectedBlock.type}
-          </h3>
-          <BlockEditor block={selectedBlock} onChange={updateBlock} />
-        </div>
-      )}
     </div>
   );
+}
+
+function EmailPreview({ 
+  blocks, 
+  clubName,
+  footerText,
+  physicalAddress 
+}: { 
+  blocks: EmailBlock[];
+  clubName: string;
+  footerText?: string;
+  physicalAddress?: string;
+}) {
+  return (
+    <div style={{ 
+      fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+      backgroundColor: '#ffffff',
+      maxWidth: '600px',
+      margin: '0 auto'
+    }}>
+      {blocks.map((block) => (
+        <div key={block.id} style={{ marginBottom: '16px' }}>
+          {renderPreviewBlock(block)}
+        </div>
+      ))}
+      
+      {/* Footer Preview */}
+      <div style={{ 
+        borderTop: '1px solid #e6ebf1', 
+        marginTop: '32px',
+        paddingTop: '20px'
+      }}>
+        {footerText && (
+          <p style={{ 
+            fontSize: '12px', 
+            lineHeight: '1.5', 
+            color: '#8898aa',
+            marginBottom: '8px'
+          }}>
+            {footerText}
+          </p>
+        )}
+        {physicalAddress && (
+          <p style={{ 
+            fontSize: '12px', 
+            lineHeight: '1.5', 
+            color: '#8898aa',
+            marginBottom: '8px'
+          }}>
+            {physicalAddress}
+          </p>
+        )}
+        <p style={{ 
+          fontSize: '12px', 
+          lineHeight: '1.5', 
+          color: '#8898aa',
+          marginBottom: '8px'
+        }}>
+          Sent by {clubName} • <span style={{ color: '#b1d135', textDecoration: 'underline' }}>Unsubscribe</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function renderPreviewBlock(block: EmailBlock) {
+  switch (block.type) {
+    case "heading":
+      const headingStyle = {
+        1: { fontSize: '32px', lineHeight: '1.3', fontWeight: '700', color: '#484848', marginBottom: '16px' },
+        2: { fontSize: '24px', lineHeight: '1.3', fontWeight: '700', color: '#484848', marginBottom: '16px' },
+        3: { fontSize: '20px', lineHeight: '1.3', fontWeight: '700', color: '#484848', marginBottom: '16px' },
+      };
+      const HeadingTag = `h${block.level}` as 'h1' | 'h2' | 'h3';
+      return (
+        <HeadingTag style={headingStyle[block.level]}>
+          {block.content || 'Heading'}
+        </HeadingTag>
+      );
+
+    case "text":
+      return (
+        <p style={{ 
+          fontSize: '16px', 
+          lineHeight: '1.5', 
+          color: '#484848',
+          whiteSpace: 'pre-wrap',
+          marginBottom: '16px'
+        }}>
+          {block.content || 'Enter your text here...'}
+        </p>
+      );
+
+    case "button":
+      const buttonAlign = {
+        left: 'flex-start',
+        center: 'center',
+        right: 'flex-end',
+      };
+      return (
+        <div style={{ display: 'flex', justifyContent: buttonAlign[block.align] }}>
+          <a
+            href={block.url}
+            style={{
+              backgroundColor: '#b1d135',
+              borderRadius: '5px',
+              color: '#000',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              textAlign: 'center',
+              display: 'inline-block',
+              padding: '12px 24px',
+            }}
+          >
+            {block.text || 'Button'}
+          </a>
+        </div>
+      );
+
+    case "image":
+      if (!block.url) {
+        return (
+          <div style={{
+            border: '2px dashed #e6ebf1',
+            borderRadius: '4px',
+            padding: '32px',
+            textAlign: 'center',
+            color: '#8898aa',
+            fontSize: '14px'
+          }}>
+            No image URL provided
+          </div>
+        );
+      }
+      return (
+        <img
+          src={block.url}
+          alt={block.alt}
+          width={block.width}
+          style={{ maxWidth: '100%', height: 'auto' }}
+        />
+      );
+
+    case "divider":
+      return (
+        <hr style={{ 
+          borderColor: '#e6ebf1',
+          borderWidth: '1px 0 0 0',
+          margin: '20px 0' 
+        }} />
+      );
+
+    case "spacer":
+      return <div style={{ height: block.height }} />;
+
+    default:
+      return null;
+  }
 }
 
 function createDefaultBlock(type: EmailBlockType): EmailBlock {

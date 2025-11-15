@@ -1,14 +1,14 @@
 import {
-    Body,
-    Button,
-    Container,
-    Head,
-    Heading,
-    Hr,
-    Html,
-    Img,
-    Section,
-    Text,
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Section,
+  Text,
 } from "@react-email/components";
 import type { EmailBlock } from "./types";
 
@@ -143,6 +143,7 @@ const text = {
   lineHeight: "1.5",
   color: "#484848",
   marginBottom: "16px",
+  whiteSpace: "pre-wrap" as const,
 };
 
 const button = {
