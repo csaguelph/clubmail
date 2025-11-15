@@ -66,6 +66,12 @@
   text-decoration: underline;
 }
 
+.ProseMirror a {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .ProseMirror code {
   background-color: #f3f4f6;
   padding: 0.125em 0.25em;

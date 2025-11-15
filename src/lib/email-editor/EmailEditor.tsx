@@ -283,6 +283,10 @@ function renderPreviewBlock(block: EmailBlock) {
             .richtext-preview u {
               text-decoration: underline;
             }
+            .richtext-preview a {
+              color: #3b82f6;
+              text-decoration: underline;
+            }
             .richtext-preview br {
               display: block;
               content: "";

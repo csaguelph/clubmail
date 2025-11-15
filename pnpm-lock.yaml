@@ -29,6 +29,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.69.0
         version: 5.90.9(react@19.2.0)
+      '@tiptap/extension-link':
+        specifier: ^3.10.7
+        version: 3.10.7(@tiptap/core@3.10.7(@tiptap/pm@3.10.7))(@tiptap/pm@3.10.7)
       '@tiptap/extension-underline':
         specifier: ^3.10.7
         version: 3.10.7(@tiptap/core@3.10.7(@tiptap/pm@3.10.7))
