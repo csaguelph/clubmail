@@ -236,7 +236,7 @@ export default async function ClubPage({
           <h2 className="text-lg font-semibold text-gray-900">Club Information</h2>
         </div>
         <div className="px-6 py-4">
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <dt className="text-sm font-medium text-gray-500">Club Name</dt>
               <dd className="mt-1 text-sm text-gray-900">{club.name}</dd>
@@ -244,12 +244,6 @@ export default async function ClubPage({
             <div>
               <dt className="text-sm font-medium text-gray-500">Slug</dt>
               <dd className="mt-1 text-sm text-gray-900">/{club.slug}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">From Email</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {club.settings?.fromEmail || "Not configured"}
-              </dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Your Role</dt>

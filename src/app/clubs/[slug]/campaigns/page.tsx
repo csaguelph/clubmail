@@ -63,6 +63,33 @@ export default async function CampaignsPage({
           )}
         </div>
       </div>
+      {/* Quick Stats */}
+      <div className="mb-8 grid gap-6 md:grid-cols-4">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="text-sm font-medium text-gray-500">Total Campaigns</h3>
+          <p className="mt-2 text-3xl font-semibold text-gray-900">
+            {campaigns.length}
+          </p>
+        </div>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="text-sm font-medium text-gray-500">Drafts</h3>
+          <p className="mt-2 text-3xl font-semibold text-gray-900">
+            {campaigns.filter((c) => c.status === "DRAFT").length}
+          </p>
+        </div>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="text-sm font-medium text-gray-500">Sent</h3>
+          <p className="mt-2 text-3xl font-semibold text-gray-900">
+            {campaigns.filter((c) => c.status === "SENT").length}
+          </p>
+        </div>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="text-sm font-medium text-gray-500">Total Emails</h3>
+          <p className="mt-2 text-3xl font-semibold text-gray-900">
+            {campaigns.reduce((sum, c) => sum + c._count.emailEvents, 0)}
+          </p>
+        </div>
+      </div>
       {campaigns.length === 0 ? (
         <div className="rounded-lg bg-white px-6 py-12 text-center shadow">
           <svg
@@ -158,34 +185,6 @@ export default async function CampaignsPage({
           ))}
         </div>
       )}
-
-      {/* Quick Stats */}
-      <div className="mt-8 grid gap-6 md:grid-cols-4">
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-sm font-medium text-gray-500">Total Campaigns</h3>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">
-            {campaigns.length}
-          </p>
-        </div>
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-sm font-medium text-gray-500">Drafts</h3>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">
-            {campaigns.filter((c) => c.status === "DRAFT").length}
-          </p>
-        </div>
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-sm font-medium text-gray-500">Sent</h3>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">
-            {campaigns.filter((c) => c.status === "SENT").length}
-          </p>
-        </div>
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="text-sm font-medium text-gray-500">Total Emails</h3>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">
-            {campaigns.reduce((sum, c) => sum + c._count.emailEvents, 0)}
-          </p>
-        </div>
-      </div>
     </PageContainer>
   );
 }
