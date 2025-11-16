@@ -40,6 +40,7 @@ model User {
   clubsCreated   Club[]
   clubMemberships ClubMember[]
   campaignsCreated Campaign[]
+  mediaUploads   Media[]
 
   @@unique([email])
   @@map("user")
@@ -67,6 +68,7 @@ model Club {
   emailLists   EmailList[]
   subscribers  Subscriber[]
   campaigns    Campaign[]
+  media        Media[]
 
   @@index([slug])
   @@index([createdById])
@@ -324,6 +326,35 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+// ========================================
+// Media Upload Models
+// ========================================
+
+model Media {
+  id          String   @id @default(cuid())
+  filename    String // Original filename
+  key         String   @unique // Storage key in R2
+  url         String // Public URL
+  mimeType    String
+  size        Int // File size in bytes
+  width       Int? // For images
+  height      Int? // For images
+  altText     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  club   Club?   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId String?
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+
+  @@index([clubId])
+  @@index([uploadedById])
+  @@index([mimeType])
+  @@index([createdAt])
 }
 
 // ========================================

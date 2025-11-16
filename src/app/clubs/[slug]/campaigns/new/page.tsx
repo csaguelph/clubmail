@@ -196,6 +196,7 @@ export default function NewCampaignPage() {
                 onChange={setBlocks}
                 clubName={club.name}
                 brandColor={settings?.brandColor}
+                clubId={club.id}
               />
             </div>
           </div>
