@@ -4,6 +4,7 @@ import { clubMembersRouter } from "@/server/api/routers/clubMembers";
 import { clubsRouter } from "@/server/api/routers/clubs";
 import { clubSettingsRouter } from "@/server/api/routers/clubSettings";
 import { emailListsRouter } from "@/server/api/routers/emailLists";
+import { platformSettingsRouter } from "@/server/api/routers/platformSettings";
 import { subscribersRouter } from "@/server/api/routers/subscribers";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   emailLists: emailListsRouter,
   subscribers: subscribersRouter,
   campaigns: campaignsRouter,
+  platformSettings: platformSettingsRouter,
 });
 
 // export type definition of API

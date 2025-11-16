@@ -129,6 +129,7 @@ enum SubscriberStatus {
   SUBSCRIBED
   UNSUBSCRIBED
   BOUNCED
+  BLOCKED // Hard bounces or too many soft bounces
 }
 
 model Subscriber {
@@ -145,6 +146,8 @@ model Subscriber {
 
   listMemberships SubscriberListMembership[]
   emails          Email[]
+  bounces         BounceEvent[]
+  complaints      ComplaintEvent[]
 
   @@unique([clubId, email])
   @@index([clubId])
@@ -228,8 +231,10 @@ model Email {
   subscriber   Subscriber @relation(fields: [subscriberId], references: [id])
   subscriberId String
 
-  opens  EmailOpen[]
-  clicks EmailClick[]
+  opens      EmailOpen[]
+  clicks     EmailClick[]
+  bounces    BounceEvent[]
+  complaints ComplaintEvent[]
 
   @@index([campaignId])
   @@index([subscriberId])
@@ -316,4 +321,93 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+// ========================================
+// Platform Settings (Global Admin Configuration)
+// ========================================
+
+model PlatformSettings {
+  id                        String   @id @default("platform_settings")
+  // Bounce thresholds
+  softBounceThreshold       Int      @default(2) // Number of soft bounces before unsubscribing
+  hardBounceAction          String   @default("BLOCK") // BLOCK or UNSUBSCRIBE
+  // Complaint thresholds
+  complaintThreshold        Int      @default(1) // Number of complaints before unsubscribing
+  complaintAction           String   @default("UNSUBSCRIBE") // BLOCK or UNSUBSCRIBE
+  // Auto-cleanup settings
+  enableAutoCleanup         Boolean  @default(true)
+  // Metadata
+  updatedAt                 DateTime @updatedAt
+  createdAt                 DateTime @default(now())
+}
+
+// ========================================
+// Bounce & Complaint Tracking
+// ========================================
+
+enum BounceType {
+  SOFT // Temporary failure (mailbox full, server down)
+  HARD // Permanent failure (invalid email, domain doesn't exist)
+}
+
+model BounceEvent {
+  id                   String     @id @default(cuid())
+  bounceType           BounceType
+  bounceSubType        String? // e.g., "General", "MailboxFull", "MessageTooLarge"
+  diagnosticCode       String?    @db.Text
+  providerMessageId    String? // SES Message ID
+  feedbackId           String? // SES Feedback ID
+  reportingMTA         String? // Mail Transfer Agent that reported the bounce
+  action               String? // e.g., "failed"
+  status               String? // SMTP status code
+  createdAt            DateTime   @default(now())
+
+  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+  subscriberId String?
+
+  email   Email?  @relation(fields: [emailId], references: [id], onDelete: SetNull)
+  emailId String?
+
+  @@index([subscriberId])
+  @@index([emailId])
+  @@index([createdAt])
+}
+
+model ComplaintEvent {
+  id                   String   @id @default(cuid())
+  complaintFeedbackType String? // e.g., "abuse", "fraud", "virus"
+  userAgent            String?
+  providerMessageId    String? // SES Message ID
+  feedbackId           String? // SES Feedback ID
+  arrivalDate          DateTime?
+  createdAt            DateTime @default(now())
+
+  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+  subscriberId String?
+
+  email   Email?  @relation(fields: [emailId], references: [id], onDelete: SetNull)
+  emailId String?
+
+  @@index([subscriberId])
+  @@index([emailId])
+  @@index([createdAt])
+}
+
+// ========================================
+// SNS Webhook Log (for debugging and audit)
+// ========================================
+
+model SNSWebhookLog {
+  id            String   @id @default(cuid())
+  messageType   String // e.g., "Bounce", "Complaint", "Delivery"
+  messageId     String
+  payload       String   @db.Text
+  processed     Boolean  @default(false)
+  error         String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([messageType])
+  @@index([processed])
+  @@index([createdAt])
 }
