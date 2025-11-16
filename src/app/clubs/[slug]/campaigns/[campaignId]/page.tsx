@@ -1,6 +1,7 @@
 import { Pencil } from "lucide-react";
 import Link from "next/link";
 
+import CancelScheduledCampaign from "@/components/campaigns/CancelScheduledCampaign";
 import PageContainer from "@/components/layout/PageContainer";
 import { env } from "@/env";
 import { generateEmailHTML, parseDesignJSON } from "@/lib/email-editor/utils";
@@ -191,6 +192,16 @@ export default async function CampaignDetailPage({
                 </dd>
               </div>
             )}
+            {campaign.scheduledFor && (
+              <div>
+                <dt className="text-sm font-medium text-gray-500">
+                  Scheduled For
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {new Date(campaign.scheduledFor).toLocaleString()}
+                </dd>
+              </div>
+            )}
           </dl>
         </div>
 
@@ -248,6 +259,15 @@ export default async function CampaignDetailPage({
           </dl>
         </div>
       </div>
+
+      {/* Campaign Scheduling - Show cancel button for scheduled campaigns */}
+      {canEdit && campaign.status === "SCHEDULED" && campaign.scheduledFor && (
+        <CancelScheduledCampaign
+          campaignId={campaign.id}
+          clubId={club.id}
+          scheduledFor={campaign.scheduledFor}
+        />
+      )}
 
       {/* Engagement Stats (if campaign is sent) */}
       {engagement && (

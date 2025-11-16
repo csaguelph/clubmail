@@ -52,7 +52,7 @@ export default async function CampaignsPage({
         </div>
       </div>
       {/* Quick Stats */}
-      <div className="mb-8 grid gap-6 md:grid-cols-4">
+      <div className="mb-8 grid gap-6 md:grid-cols-5">
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Total Campaigns</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">
@@ -65,6 +65,15 @@ export default async function CampaignsPage({
             {campaigns.filter((c) => c.status === "DRAFT").length}
           </p>
         </div>
+        <Link
+          href={`/clubs/${slug}/campaigns/scheduled`}
+          className="rounded-lg bg-white p-6 shadow transition hover:shadow-md"
+        >
+          <h3 className="text-sm font-medium text-gray-500">Scheduled</h3>
+          <p className="mt-2 text-3xl font-semibold text-blue-600">
+            {campaigns.filter((c) => c.status === "SCHEDULED").length}
+          </p>
+        </Link>
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Sent</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">

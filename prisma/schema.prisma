@@ -190,7 +190,9 @@ model Campaign {
   designJson    String         @db.Text
   html          String         @db.Text
   status        CampaignStatus @default(DRAFT)
-  scheduledAt   DateTime?
+  scheduledFor  DateTime?      // When the campaign should be sent (for scheduled campaigns)
+  scheduledAt   DateTime?      // When the campaign was scheduled (timestamp of scheduling action)
+  qstashMessageId String?      // QStash message ID for scheduled campaigns (for cancellation)
   startedAt     DateTime?
   finishedAt    DateTime?
   createdAt     DateTime       @default(now())
@@ -209,6 +211,7 @@ model Campaign {
 
   @@index([clubId])
   @@index([status])
+  @@index([scheduledFor])
 }
 
 // ========================================

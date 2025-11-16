@@ -282,3 +282,191 @@ export async function getQueueStats() {
     qstashEnabled: isQStashEnabled(),
   };
 }
+
+/**
+ * Schedule a campaign for future delivery using QStash
+ *
+ * @param campaignId - Campaign ID
+ * @param scheduledFor - Date/time when the campaign should be sent
+ * @returns Result of scheduling operation
+ */
+export async function scheduleCampaign(
+  campaignId: string,
+  scheduledFor: Date,
+): Promise<{
+  success: boolean;
+  messageId?: string;
+  message: string;
+}> {
+  try {
+    if (!isQStashEnabled()) {
+      return {
+        success: false,
+        message:
+          "QStash is not configured. Cannot schedule campaigns without QStash.",
+      };
+    }
+
+    // Verify campaign exists and is in correct state
+    const campaign = await db.campaign.findUnique({
+      where: { id: campaignId },
+      select: {
+        id: true,
+        status: true,
+        subject: true,
+        html: true,
+      },
+    });
+
+    if (!campaign) {
+      return {
+        success: false,
+        message: "Campaign not found",
+      };
+    }
+
+    if (campaign.status !== "DRAFT") {
+      return {
+        success: false,
+        message: "Only draft campaigns can be scheduled",
+      };
+    }
+
+    // Validate campaign has required fields
+    if (!campaign.subject || !campaign.html) {
+      return {
+        success: false,
+        message: "Campaign must have a subject and content before scheduling",
+      };
+    }
+
+    // Ensure scheduled time is in the future
+    if (scheduledFor <= new Date()) {
+      return {
+        success: false,
+        message: "Scheduled time must be in the future",
+      };
+    }
+
+    const client = getQStashClient();
+    const callbackUrl = `${env.NEXT_PUBLIC_BASE_URL}/api/queue/process-scheduled-campaign`;
+
+    // Schedule the campaign processing using QStash's notBefore parameter
+    const response = await client.publishJSON({
+      url: callbackUrl,
+      body: {
+        campaignId,
+        scheduledFor: scheduledFor.toISOString(),
+      },
+      // Schedule for specific time
+      notBefore: Math.floor(scheduledFor.getTime() / 1000), // Unix timestamp in seconds
+      // Retry configuration
+      retries: 3,
+      // Add headers for easier debugging
+      headers: {
+        "X-Campaign-Id": campaignId,
+        "X-Scheduled-For": scheduledFor.toISOString(),
+      },
+    });
+
+    // Update campaign status to SCHEDULED
+    await db.campaign.update({
+      where: { id: campaignId },
+      data: {
+        status: "SCHEDULED",
+        scheduledFor,
+        scheduledAt: new Date(),
+        qstashMessageId: response.messageId,
+      },
+    });
+
+    return {
+      success: true,
+      messageId: response.messageId,
+      message: `Campaign scheduled for ${scheduledFor.toISOString()}`,
+    };
+  } catch (error) {
+    console.error("Failed to schedule campaign:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Cancel a scheduled campaign
+ *
+ * @param campaignId - Campaign ID
+ * @returns Result of cancellation
+ */
+export async function cancelScheduledCampaign(campaignId: string): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  try {
+    if (!isQStashEnabled()) {
+      return {
+        success: false,
+        message: "QStash is not configured",
+      };
+    }
+
+    const campaign = await db.campaign.findUnique({
+      where: { id: campaignId },
+      select: {
+        id: true,
+        status: true,
+        qstashMessageId: true,
+        scheduledFor: true,
+      },
+    });
+
+    if (!campaign) {
+      return {
+        success: false,
+        message: "Campaign not found",
+      };
+    }
+
+    if (campaign.status !== "SCHEDULED") {
+      return {
+        success: false,
+        message: "Only scheduled campaigns can be cancelled",
+      };
+    }
+
+    // Cancel the QStash message if we have a message ID
+    if (campaign.qstashMessageId) {
+      try {
+        const client = getQStashClient();
+        await client.messages.delete(campaign.qstashMessageId);
+      } catch (error) {
+        console.error("Failed to delete QStash message:", error);
+        // Continue anyway - we'll still update the database
+      }
+    }
+
+    // Update campaign status back to DRAFT and clear scheduling fields
+    await db.campaign.update({
+      where: { id: campaignId },
+      data: {
+        status: "DRAFT",
+        qstashMessageId: null,
+        scheduledFor: null,
+        scheduledAt: null,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Campaign cancelled and reset to draft",
+    };
+  } catch (error) {
+    console.error("Failed to cancel scheduled campaign:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
