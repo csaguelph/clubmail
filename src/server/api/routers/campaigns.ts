@@ -11,8 +11,10 @@ import {
   sendTestEmail,
 } from "@/server/services/email";
 import {
+  cancelScheduledCampaign,
   isQStashEnabled,
   queueCampaignEmails,
+  scheduleCampaign,
 } from "@/server/services/email-queue";
 
 export const campaignsRouter = createTRPCRouter({
@@ -800,5 +802,186 @@ export const campaignsRouter = createTRPCRouter({
       });
 
       return duplicatedCampaign;
+    }),
+
+  // Schedule a campaign for future delivery
+  scheduleCampaign: clubEditorProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        campaignId: z.string(),
+        scheduledFor: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify campaign belongs to club
+      const campaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Verify campaign is in DRAFT status
+      if (campaign.status !== "DRAFT") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Only draft campaigns can be scheduled. This campaign has already been sent or scheduled.",
+        });
+      }
+
+      // Validate campaign has required fields
+      if (!campaign.subject || !campaign.html) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Campaign must have a subject and content before scheduling",
+        });
+      }
+
+      // Ensure scheduled time is in the future
+      if (input.scheduledFor <= new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Scheduled time must be in the future",
+        });
+      }
+
+      // Schedule using QStash
+      const result = await scheduleCampaign(
+        input.campaignId,
+        input.scheduledFor,
+      );
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to schedule campaign: ${result.message}`,
+        });
+      }
+
+      return {
+        success: true,
+        message: result.message,
+        scheduledFor: input.scheduledFor,
+        messageId: result.messageId,
+      };
+    }),
+
+  // Cancel a scheduled campaign
+  cancelCampaign: clubEditorProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        campaignId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify campaign belongs to club
+      const campaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Only allow cancelling scheduled campaigns
+      if (campaign.status !== "SCHEDULED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only scheduled campaigns can be cancelled",
+        });
+      }
+
+      // Note: cancelScheduledCampaign will reset the campaign to DRAFT status
+
+      const result = await cancelScheduledCampaign(input.campaignId);
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to cancel campaign: ${result.message}`,
+        });
+      }
+
+      return {
+        success: true,
+        message: result.message,
+      };
+    }),
+
+  // Get scheduled campaigns for a club (for calendar view)
+  getScheduledCampaigns: clubViewerProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const where: {
+        clubId: string;
+        status: "SCHEDULED";
+        scheduledFor?: {
+          gte?: Date;
+          lte?: Date;
+        };
+      } = {
+        clubId: input.clubId,
+        status: "SCHEDULED",
+      };
+
+      // Add date range filter if provided
+      if (input.startDate || input.endDate) {
+        where.scheduledFor = {};
+        if (input.startDate) {
+          where.scheduledFor.gte = input.startDate;
+        }
+        if (input.endDate) {
+          where.scheduledFor.lte = input.endDate;
+        }
+      }
+
+      const campaigns = await ctx.db.campaign.findMany({
+        where,
+        orderBy: { scheduledFor: "asc" },
+        include: {
+          emailList: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: {
+              emails: true,
+            },
+          },
+        },
+      });
+
+      return campaigns;
     }),
 });

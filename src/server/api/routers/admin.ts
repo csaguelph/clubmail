@@ -469,4 +469,69 @@ export const adminRouter = createTRPCRouter({
 
       return results;
     }),
+
+  // Get all scheduled campaigns across the system (for admin calendar view)
+  getAllScheduledCampaigns: adminProcedure
+    .input(
+      z.object({
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const where: {
+        status: "SCHEDULED";
+        scheduledFor?: {
+          gte?: Date;
+          lte?: Date;
+        };
+      } = {
+        status: "SCHEDULED",
+      };
+
+      // Add date range filter if provided
+      if (input.startDate || input.endDate) {
+        where.scheduledFor = {};
+        if (input.startDate) {
+          where.scheduledFor.gte = input.startDate;
+        }
+        if (input.endDate) {
+          where.scheduledFor.lte = input.endDate;
+        }
+      }
+
+      const campaigns = await ctx.db.campaign.findMany({
+        where,
+        orderBy: { scheduledFor: "asc" },
+        include: {
+          club: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          emailList: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: {
+              emails: true,
+            },
+          },
+        },
+      });
+
+      return campaigns;
+    }),
 });
