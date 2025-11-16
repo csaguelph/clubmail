@@ -10,9 +10,13 @@ import { db } from "@/server/db";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Clubs Mail - CSA",
-  description: "Secure email platform for student organizations",
+  title: "CSA ClubMail",
+  description: "Secure email platform for CSA Clubs",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const geist = Geist({

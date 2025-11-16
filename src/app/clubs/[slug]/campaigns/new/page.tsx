@@ -1,5 +1,6 @@
 "use client";
 
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import {
   EmailEditor,
@@ -74,25 +75,15 @@ export default function NewCampaignPage() {
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <a href={`/clubs/${params.slug}`} className="hover:text-gray-700">
-            {club.name}
-          </a>
-          <span>/</span>
-          <a
-            href={`/clubs/${params.slug}/campaigns`}
-            className="hover:text-gray-700"
-          >
-            Campaigns
-          </a>
-          <span>/</span>
-          <span className="text-gray-900">New</span>
-        </div>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">
-          Create Campaign
-        </h1>
-      </div>
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={params.slug}
+        breadcrumbs={[
+          { label: "Campaigns", href: `/clubs/${params.slug}/campaigns` },
+          { label: "New" },
+        ]}
+        title="Create Campaign"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Campaign Details */}

@@ -9,7 +9,7 @@ import {
 } from "@/server/api/trpc";
 
 export const clubsRouter = createTRPCRouter({
-  // List clubs the current user is a member of
+  // List clubs the current user is a member of (legacy - use listMyClubsInfinite for better performance)
   listMyClubs: protectedProcedure.query(async ({ ctx }) => {
     // Check if user is admin
     const user = await ctx.db.user.findUnique({
@@ -61,6 +61,122 @@ export const clubsRouter = createTRPCRouter({
         myRole: m.role,
       }));
   }),
+
+  // List clubs with pagination and search
+  listMyClubsInfinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(20),
+        cursor: z.string().optional(),
+        search: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { limit, cursor, search } = input;
+
+      // Check if user is admin
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { role: true },
+      });
+
+      if (user?.role === "ADMIN") {
+        // Admin: get all active clubs
+        const clubs = await ctx.db.club.findMany({
+          where: {
+            isActive: true,
+            ...(search
+              ? {
+                  OR: [
+                    { name: { contains: search, mode: "insensitive" } },
+                    { slug: { contains: search, mode: "insensitive" } },
+                  ],
+                }
+              : {}),
+          },
+          orderBy: { name: "asc" },
+          take: limit + 1,
+          cursor: cursor ? { id: cursor } : undefined,
+          include: {
+            settings: true,
+            _count: {
+              select: {
+                members: true,
+                campaigns: true,
+                subscribers: true,
+              },
+            },
+          },
+        });
+
+        let nextCursor: string | undefined = undefined;
+        if (clubs.length > limit) {
+          const nextItem = clubs.pop();
+          nextCursor = nextItem?.id;
+        }
+
+        return {
+          clubs,
+          nextCursor,
+        };
+      }
+
+      // Non-admin: get clubs the user is a member of
+      const memberships = await ctx.db.clubMember.findMany({
+        where: { userId: ctx.session.user.id },
+        include: {
+          club: {
+            include: {
+              settings: true,
+              _count: {
+                select: {
+                  members: true,
+                  campaigns: true,
+                  subscribers: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { club: { name: "asc" } },
+      });
+
+      const activeClubsWithRole = memberships
+        .filter((m) => m.club.isActive)
+        .map((m) => ({
+          ...m.club,
+          myRole: m.role,
+        }));
+
+      // Apply search filter
+      const filteredClubs = search
+        ? activeClubsWithRole.filter(
+            (club) =>
+              club.name.toLowerCase().includes(search.toLowerCase()) ||
+              club.slug.toLowerCase().includes(search.toLowerCase()),
+          )
+        : activeClubsWithRole;
+
+      // Manual pagination for non-admin (since we're filtering in memory)
+      const startIndex = cursor
+        ? filteredClubs.findIndex((c) => c.id === cursor) + 1
+        : 0;
+      const paginatedClubs = filteredClubs.slice(
+        startIndex,
+        startIndex + limit + 1,
+      );
+
+      let nextCursor: string | undefined = undefined;
+      if (paginatedClubs.length > limit) {
+        const nextItem = paginatedClubs.pop();
+        nextCursor = nextItem?.id;
+      }
+
+      return {
+        clubs: paginatedClubs,
+        nextCursor,
+      };
+    }),
 
   // Get detailed information about a specific club
   getClubDetails: clubViewerProcedure

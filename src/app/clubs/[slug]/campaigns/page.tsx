@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import CampaignsList from "@/app/clubs/[slug]/campaigns/CampaignsList";
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
@@ -25,32 +26,23 @@ export default async function CampaignsPage({
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <div className="mb-4">
-          <Link
-            href={`/clubs/${slug}`}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            ← Back to {club.name}
-          </Link>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Create and manage email campaigns for {club.name}
-            </p>
-          </div>
-          {canEdit && (
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={slug}
+        pageName="Campaigns"
+        title="Campaigns"
+        description={`Create and manage email campaigns for ${club.name}`}
+        action={
+          canEdit ? (
             <Link
               href={`/clubs/${slug}/campaigns/new`}
               className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#9fbc2f]"
             >
               New Campaign
             </Link>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
       {/* Quick Stats */}
       <div className="mb-8 grid gap-6 md:grid-cols-5">
         <div className="rounded-lg bg-white p-6 shadow">

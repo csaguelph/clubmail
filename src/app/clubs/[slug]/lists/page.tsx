@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
@@ -28,12 +29,13 @@ export default async function EmailListsPage({ params }: PageProps) {
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Email Lists</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Manage email lists for {club.name}
-        </p>
-      </div>
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={slug}
+        pageName="Email Lists"
+        title="Email Lists"
+        description={`Manage email lists for ${club.name}`}
+      />
 
       <EmailListsManager clubId={club.id} />
     </PageContainer>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
@@ -27,21 +28,13 @@ export default async function ClubSettingsPage({
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <a href={`/clubs/${slug}`} className="hover:text-gray-700">
-            {club.name}
-          </a>
-          <span>/</span>
-          <span className="text-gray-900">Settings</span>
-        </div>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">
-          Email Settings
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Configure how emails are sent from {club.name}
-        </p>
-      </div>
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={slug}
+        pageName="Settings"
+        title="Email Settings"
+        description={`Configure how emails are sent from ${club.name}`}
+      />
 
       <SettingsForm clubId={club.id} slug={slug} settings={settings} />
     </PageContainer>
