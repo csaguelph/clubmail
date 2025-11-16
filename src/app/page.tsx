@@ -1,5 +1,4 @@
 import { BarChart3, Layout, Mail, Shield, Users, Zap } from "lucide-react";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -18,7 +17,7 @@ export default async function Home() {
           <div className="container mx-auto px-4 py-20">
             <div className="flex flex-col items-center text-center">
               <h1 className="mb-6 text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
-                Clubs <span className="text-[#b1d135]">Mail</span>
+                <span className="text-[#b1d135]">Club</span>Mail
               </h1>
               <p className="mb-4 max-w-2xl text-xl text-slate-200 sm:text-2xl">
                 Professional email campaigns for student clubs
@@ -52,37 +51,14 @@ export default async function Home() {
                     </button>
                   </form>
                 ) : (
-                  <>
-                    <Link
-                      href="/clubs"
-                      className="rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
-                    >
-                      Go to My Clubs
-                    </Link>
-                    <form>
-                      <button
-                        className="rounded-lg border-2 border-white/20 bg-white/10 px-8 py-4 text-lg font-semibold transition hover:bg-white/20"
-                        formAction={async () => {
-                          "use server";
-                          await auth.api.signOut({
-                            headers: await headers(),
-                          });
-                          redirect("/");
-                        }}
-                      >
-                        Sign Out
-                      </button>
-                    </form>
-                  </>
+                  <Link
+                    href="/clubs"
+                    className="rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
+                  >
+                    Go to My Clubs
+                  </Link>
                 )}
               </div>
-
-              {session && (
-                <p className="mt-6 text-slate-300">
-                  Logged in as{" "}
-                  <span className="font-semibold">{session.user?.name}</span>
-                </p>
-              )}
             </div>
           </div>
         </div>
