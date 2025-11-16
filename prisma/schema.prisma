@@ -337,6 +337,10 @@ model PlatformSettings {
   complaintAction           String   @default("UNSUBSCRIBE") // BLOCK or UNSUBSCRIBE
   // Auto-cleanup settings
   enableAutoCleanup         Boolean  @default(true)
+  // Rate limiting settings (AWS SES throttle limits)
+  maxEmailsPerDay           Int      @default(50000) // Maximum emails per 24-hour period
+  maxEmailsPerSecond        Int      @default(14) // Maximum emails per second (SES default sending rate)
+  enableRateLimiting        Boolean  @default(true) // Enable rate limiting checks
   // Metadata
   updatedAt                 DateTime @updatedAt
   createdAt                 DateTime @default(now())

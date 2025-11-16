@@ -4,11 +4,13 @@ import {
   SendEmailCommand,
   SendRawEmailCommand,
 } from "@aws-sdk/client-ses";
+import { checkRateLimit } from "./rate-limit";
 
 /**
  * AWS SES Email Service
  *
  * This service handles all email sending operations using AWS SES.
+ * Includes rate limiting to comply with AWS SES quotas.
  */
 
 // Initialize SES client
@@ -332,6 +334,12 @@ export async function sendCampaignEmail(params: {
 /**
  * Batch send emails with rate limiting
  * AWS SES has rate limits, so we need to throttle sends
+ *
+ * IMPORTANT: This function works on Vercel but with limitations:
+ * - Serverless functions have 10s (Hobby) or 60s (Pro) timeouts
+ * - For large campaigns (>100 emails), consider using a queue system like Upstash QStash
+ * - This implementation will throw an error if rate limit is exceeded
+ * - Campaign sending will pause and can be resumed when limits reset
  */
 export async function batchSendCampaignEmails(params: {
   subscribers: Array<{
@@ -355,6 +363,7 @@ export async function batchSendCampaignEmails(params: {
 }): Promise<{
   sent: number;
   failed: number;
+  rateLimited: boolean;
   results: Array<{
     subscriberId: string;
     success: boolean;
@@ -362,6 +371,31 @@ export async function batchSendCampaignEmails(params: {
     error?: string;
   }>;
 }> {
+  // Check rate limit before starting
+  const rateLimitCheck = await checkRateLimit(params.subscribers.length);
+
+  if (!rateLimitCheck.allowed) {
+    console.error("Rate limit exceeded:", rateLimitCheck.reason);
+    console.error(
+      `Current: ${rateLimitCheck.currentCount}/${rateLimitCheck.limit}`,
+    );
+    console.error(
+      `Reset time: ${rateLimitCheck.resetTime?.toISOString() ?? "unknown"}`,
+    );
+
+    // Return early - no emails sent
+    return {
+      sent: 0,
+      failed: 0,
+      rateLimited: true,
+      results: params.subscribers.map((sub) => ({
+        subscriberId: sub.id,
+        success: false,
+        error: `${rateLimitCheck.reason}. Limit: ${rateLimitCheck.limit}, Current: ${rateLimitCheck.currentCount}, Reset: ${rateLimitCheck.resetTime?.toISOString()}`,
+      })),
+    };
+  }
+
   const maxPerSecond = params.maxPerSecond ?? 10; // Conservative default
   const delayMs = 1000 / maxPerSecond;
 
@@ -374,9 +408,33 @@ export async function batchSendCampaignEmails(params: {
 
   let sent = 0;
   let failed = 0;
+  let rateLimited = false;
 
   for (let i = 0; i < params.subscribers.length; i++) {
     const subscriber = params.subscribers[i]!;
+
+    // Check rate limit before each batch (every 10 emails or as configured)
+    if (i > 0 && i % 10 === 0) {
+      const batchCheck = await checkRateLimit(params.subscribers.length - i);
+      if (!batchCheck.allowed) {
+        console.warn(
+          `Rate limit hit mid-campaign: ${batchCheck.reason}. Sent ${sent}/${params.subscribers.length}`,
+        );
+        rateLimited = true;
+
+        // Mark remaining emails as failed due to rate limit
+        for (let j = i; j < params.subscribers.length; j++) {
+          const remainingSub = params.subscribers[j]!;
+          results.push({
+            subscriberId: remainingSub.id,
+            success: false,
+            error: `${batchCheck.reason}. Resume after ${batchCheck.resetTime?.toISOString()}`,
+          });
+          failed++;
+        }
+        break;
+      }
+    }
 
     const result = await sendCampaignEmail({
       subscriber,
@@ -407,5 +465,5 @@ export async function batchSendCampaignEmails(params: {
     }
   }
 
-  return { sent, failed, results };
+  return { sent, failed, rateLimited, results };
 }

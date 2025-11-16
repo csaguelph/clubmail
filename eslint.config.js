@@ -7,7 +7,7 @@ const compat = new FlatCompat({
 
 const config = [
   {
-    ignores: [".next/**", "node_modules/**", "generated/**"],
+    ignores: [".next/**", "node_modules/**", "generated/**", "next-env.d.ts"],
   },
   ...compat.extends("next/core-web-vitals"),
   ...tseslint.configs.recommended.map((config) => ({

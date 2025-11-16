@@ -25,6 +25,9 @@ export const platformSettingsRouter = createTRPCRouter({
         complaintThreshold: 1,
         complaintAction: "UNSUBSCRIBE",
         enableAutoCleanup: true,
+        maxEmailsPerDay: 50000,
+        maxEmailsPerSecond: 14,
+        enableRateLimiting: true,
       },
     });
 
@@ -42,6 +45,9 @@ export const platformSettingsRouter = createTRPCRouter({
         complaintThreshold: z.number().int().min(1).max(10).optional(),
         complaintAction: z.enum(["BLOCK", "UNSUBSCRIBE"]).optional(),
         enableAutoCleanup: z.boolean().optional(),
+        maxEmailsPerDay: z.number().int().min(100).max(1000000).optional(),
+        maxEmailsPerSecond: z.number().int().min(1).max(1000).optional(),
+        enableRateLimiting: z.boolean().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -60,6 +66,9 @@ export const platformSettingsRouter = createTRPCRouter({
             complaintThreshold: input.complaintThreshold ?? 1,
             complaintAction: input.complaintAction ?? "UNSUBSCRIBE",
             enableAutoCleanup: input.enableAutoCleanup ?? true,
+            maxEmailsPerDay: input.maxEmailsPerDay ?? 50000,
+            maxEmailsPerSecond: input.maxEmailsPerSecond ?? 14,
+            enableRateLimiting: input.enableRateLimiting ?? true,
           },
         });
       } else {
