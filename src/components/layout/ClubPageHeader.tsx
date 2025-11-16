@@ -15,8 +15,8 @@ interface ClubPageHeaderProps {
   pageName?: string;
   /** Array of breadcrumb items for multi-level navigation */
   breadcrumbs?: BreadcrumbItem[];
-  /** The main heading for the page */
-  title: string;
+  /** The main heading for the page (can be string or ReactNode for custom content) */
+  title: ReactNode;
   /** Optional subtitle/description text */
   description?: string;
   /** Optional action button to display on the right */
