@@ -78,7 +78,7 @@ export function Header({ user, userRole }: HeaderProps) {
                     </svg>
                   </Link>
                   {adminDropdownOpen && (
-                    <div className="absolute left-0 top-full z-50 w-56 rounded-lg border border-gray-200 bg-white shadow-lg">
+                    <div className="absolute top-full left-0 z-50 w-56 rounded-lg border border-gray-200 bg-white shadow-lg">
                       <div className="py-2">
                         <Link
                           href="/admin"

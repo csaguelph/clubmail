@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/trpc/react";
 
@@ -19,17 +19,45 @@ export default function MyClubsList() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data: clubs, isLoading } = api.clubs.listMyClubs.useQuery();
-
-  // Filter clubs based on search
-  const filteredClubs = clubs?.filter((club) => {
-    if (!debouncedSearch) return true;
-    const searchLower = debouncedSearch.toLowerCase();
-    return (
-      club.name.toLowerCase().includes(searchLower) ||
-      club.slug.toLowerCase().includes(searchLower)
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    api.clubs.listMyClubsInfinite.useInfiniteQuery(
+      {
+        limit: 20,
+        search: debouncedSearch || undefined,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
     );
-  });
+
+  const clubs = data?.pages.flatMap((page) => page.clubs) ?? [];
+
+  // Automatic infinite scroll
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <>
@@ -56,7 +84,7 @@ export default function MyClubsList() {
         <div className="rounded-lg bg-white px-6 py-12 text-center shadow">
           <p className="text-sm text-gray-500">Loading clubs...</p>
         </div>
-      ) : !filteredClubs || filteredClubs.length === 0 ? (
+      ) : !clubs || clubs.length === 0 ? (
         <div className="rounded-lg bg-white px-6 py-12 text-center shadow">
           {search ? (
             <>
@@ -94,65 +122,76 @@ export default function MyClubsList() {
           )}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredClubs.map((club) => (
-            <Link
-              key={club.id}
-              href={`/clubs/${club.slug}`}
-              className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#b1d135]">
-                    {club.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">/{club.slug}</p>
+        <>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {clubs.map((club) => (
+              <Link
+                key={club.id}
+                href={`/clubs/${club.slug}`}
+                className="group rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#b1d135]">
+                      {club.name}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500">/{club.slug}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {"myRole" in club &&
+                    club.myRole &&
+                    typeof club.myRole === "string" ? (
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                        {club.myRole.replace("CLUB_", "")}
+                      </span>
+                    ) : null}
+                    <svg
+                      className="h-5 w-5 text-gray-400 group-hover:text-[#b1d135]"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {"myRole" in club &&
-                  club.myRole &&
-                  typeof club.myRole === "string" ? (
-                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                      {club.myRole.replace("CLUB_", "")}
-                    </span>
-                  ) : null}
-                  <svg
-                    className="h-5 w-5 text-gray-400 group-hover:text-[#b1d135]"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </div>
-              </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
-                <div>
-                  <p className="text-xs text-gray-500">Members</p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
-                    {club._count.members}
-                  </p>
+                <div className="mt-4 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Members</p>
+                    <p className="mt-1 text-lg font-semibold text-gray-900">
+                      {club._count.members}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Subscribers</p>
+                    <p className="mt-1 text-lg font-semibold text-gray-900">
+                      {club._count.subscribers}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Campaigns</p>
+                    <p className="mt-1 text-lg font-semibold text-gray-900">
+                      {club._count.campaigns}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Subscribers</p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
-                    {club._count.subscribers}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Campaigns</p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
-                    {club._count.campaigns}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+          {hasNextPage && (
+            <div ref={loadMoreRef} className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                {isFetchingNextPage
+                  ? "Loading more clubs..."
+                  : "Scroll for more"}
+              </p>
+            </div>
+          )}
+        </>
       )}
     </>
   );
