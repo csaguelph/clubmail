@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
@@ -43,20 +43,20 @@ export default async function CampaignEditPage({
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <div className="mb-4">
-          <Link
-            href={`/clubs/${slug}/campaigns/${campaignId}`}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            ← Back to Campaign
-          </Link>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900">Edit Campaign</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Update your campaign content and settings
-        </p>
-      </div>
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={slug}
+        breadcrumbs={[
+          { label: "Campaigns", href: `/clubs/${slug}/campaigns` },
+          {
+            label: campaign.name,
+            href: `/clubs/${slug}/campaigns/${campaignId}`,
+          },
+          { label: "Edit" },
+        ]}
+        title="Edit Campaign"
+        description="Update your campaign content and settings"
+      />
 
       <CampaignEditForm
         clubId={club.id}

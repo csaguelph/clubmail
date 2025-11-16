@@ -2,6 +2,7 @@ import { Pencil } from "lucide-react";
 import Link from "next/link";
 
 import CancelScheduledCampaign from "@/components/campaigns/CancelScheduledCampaign";
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { env } from "@/env";
 import { generateEmailHTML, parseDesignJSON } from "@/lib/email-editor/utils";
@@ -81,32 +82,25 @@ export default async function CampaignDetailPage({
 
   return (
     <PageContainer>
-      {/* Header */}
-      <div className="mb-8">
-        <div className="mb-4">
-          <Link
-            href={`/clubs/${slug}/campaigns`}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            ← Back to Campaigns
-          </Link>
-        </div>
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center space-x-3">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {campaign.name}
-              </h1>
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getStatusBadge(campaign.status)}`}
-              >
-                {campaign.status}
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              Campaign details and performance
-            </p>
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={slug}
+        breadcrumbs={[
+          { label: "Campaigns", href: `/clubs/${slug}/campaigns` },
+          { label: campaign.name },
+        ]}
+        title={
+          <div className="flex items-center space-x-3">
+            <span>{campaign.name}</span>
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getStatusBadge(campaign.status)}`}
+            >
+              {campaign.status}
+            </span>
           </div>
+        }
+        description="Campaign details and performance"
+        action={
           <div className="flex items-center space-x-3">
             {canEditCampaign && (
               <Link
@@ -126,8 +120,8 @@ export default async function CampaignDetailPage({
               />
             )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Campaign Content Preview */}
       <div className="mb-8 grid gap-6 md:grid-cols-2">

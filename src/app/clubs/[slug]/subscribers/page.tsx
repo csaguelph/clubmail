@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
@@ -28,21 +29,13 @@ export default async function SubscribersPage({
 
   return (
     <PageContainer>
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <a href={`/clubs/${slug}`} className="hover:text-gray-700">
-            {club.name}
-          </a>
-          <span>/</span>
-          <span className="text-gray-900">Subscribers</span>
-        </div>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">
-          Manage Subscribers
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Add, import, and manage email subscribers for {club.name}
-        </p>
-      </div>
+      <ClubPageHeader
+        clubName={club.name}
+        clubSlug={slug}
+        pageName="Subscribers"
+        title="Manage Subscribers"
+        description={`Add, import, and manage email subscribers for ${club.name}`}
+      />
 
       <SubscribersList clubId={club.id} slug={slug} emailLists={emailLists} />
     </PageContainer>
