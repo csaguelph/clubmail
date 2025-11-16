@@ -1,10 +1,11 @@
 "use client";
 
+import { env } from "@/env";
 import { GitCommit } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {
-  const gitCommit = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA;
+  const gitCommit = env.NEXT_PUBLIC_GIT_COMMIT_SHA;
 
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white">
@@ -17,7 +18,7 @@ export function Footer() {
             </p>
             {gitCommit && (
               <a
-                href={`https://github.com/csaguelph/clubs-mail/commit/${gitCommit}`}
+                href={`https://github.com/csaguelph/clubmail/commit/${gitCommit}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 font-mono text-xs text-gray-400 hover:text-gray-600 hover:underline"
@@ -29,7 +30,7 @@ export function Footer() {
           </div>
           <div className="flex gap-4 text-sm">
             <a
-              href="https://github.com/csaguelph/clubs-mail"
+              href="https://github.com/csaguelph/clubmail"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-gray-900"

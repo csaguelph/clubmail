@@ -60,7 +60,7 @@ export const env = createEnv({
       (process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : `http://localhost:${process.env.PORT ?? 3000}`),
-    NEXT_PUBLIC_GIT_COMMIT_SHA: process.env.NEXT_PUBLIC_GIT_COMMIT_SHA,
+    NEXT_PUBLIC_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
