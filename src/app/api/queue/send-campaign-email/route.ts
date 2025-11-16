@@ -1,7 +1,8 @@
+import { env } from "@/env";
 import { db } from "@/server/db";
 import { sendCampaignEmail } from "@/server/services/email";
 import type { QueueEmailJob } from "@/server/services/email-queue";
-import { verifySignatureAppRouter } from "@upstash/qstash/nextjs";
+import { Receiver } from "@upstash/qstash";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
@@ -13,9 +14,54 @@ import { type NextRequest, NextResponse } from "next/server";
  * IMPORTANT: This route is protected by QStash signature verification.
  */
 
+/**
+ * Verify QStash signature and return parsed body
+ */
+async function verifyQStashSignature(
+  req: NextRequest,
+): Promise<{ valid: boolean; body?: string }> {
+  // Skip verification if QStash is not configured (e.g., in CI builds)
+  if (!env.QSTASH_CURRENT_SIGNING_KEY || !env.QSTASH_NEXT_SIGNING_KEY) {
+    console.warn("QStash signing keys not configured - skipping verification");
+    return { valid: false };
+  }
+
+  try {
+    const receiver = new Receiver({
+      currentSigningKey: env.QSTASH_CURRENT_SIGNING_KEY,
+      nextSigningKey: env.QSTASH_NEXT_SIGNING_KEY,
+    });
+
+    const signature = req.headers.get("upstash-signature");
+    if (!signature) {
+      return { valid: false };
+    }
+
+    const body = await req.text();
+    await receiver.verify({
+      signature,
+      body,
+    });
+
+    return { valid: true, body };
+  } catch (error) {
+    console.error("QStash signature verification failed:", error);
+    return { valid: false };
+  }
+}
+
 async function handler(req: NextRequest) {
   try {
-    const job = (await req.json()) as QueueEmailJob;
+    // Verify QStash signature and get body
+    const verification = await verifyQStashSignature(req);
+    if (!verification.valid || !verification.body) {
+      return NextResponse.json(
+        { error: "Unauthorized - Invalid signature" },
+        { status: 401 },
+      );
+    }
+
+    const job = JSON.parse(verification.body) as QueueEmailJob;
 
     console.log(
       `Processing email job: ${job.emailId} for campaign ${job.campaignId}`,
@@ -138,9 +184,8 @@ async function handler(req: NextRequest) {
   }
 }
 
-// Export with QStash signature verification
-// This ensures only QStash can call this endpoint
-export const POST = verifySignatureAppRouter(handler);
+// Export POST handler with signature verification built-in
+export const POST = handler;
 
 // Health check
 export async function GET() {
