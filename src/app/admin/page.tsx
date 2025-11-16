@@ -22,6 +22,12 @@ export default async function AdminPage() {
           </p>
         </div>
         <div className="flex space-x-3">
+          <Link
+            href="/admin/platform-settings"
+            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+          >
+            Platform Settings
+          </Link>
           <ClubCSVImport />
           <Link
             href="/admin/clubs/new"
