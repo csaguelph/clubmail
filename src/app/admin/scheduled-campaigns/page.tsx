@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import AllScheduledCampaignsCalendar from "@/components/admin/AllScheduledCampaignsCalendar";
+import PageContainer from "@/components/layout/PageContainer";
 import { api } from "@/trpc/react";
 
 export default function AdminScheduledCampaignsPage() {
@@ -29,20 +30,22 @@ export default function AdminScheduledCampaignsPage() {
     });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">
-          All Scheduled Campaigns
-        </h1>
-        <p className="mt-2 text-gray-600">
-          View all campaigns scheduled for delivery across the platform.
-        </p>
-      </div>
+    <PageContainer>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            All Scheduled Campaigns
+          </h1>
+          <p className="mt-2 text-gray-600">
+            View all campaigns scheduled for delivery across the platform.
+          </p>
+        </div>
 
-      <AllScheduledCampaignsCalendar
-        campaigns={campaigns ?? []}
-        isLoading={isLoading}
-      />
-    </div>
+        <AllScheduledCampaignsCalendar
+          campaigns={campaigns ?? []}
+          isLoading={isLoading}
+        />
+      </div>
+    </PageContainer>
   );
 }

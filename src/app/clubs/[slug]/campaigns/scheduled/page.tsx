@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import ScheduledCampaignsCalendar from "@/components/campaigns/ScheduledCampaignsCalendar";
+import PageContainer from "@/components/layout/PageContainer";
 import { api } from "@/trpc/react";
 
 export default function ScheduledCampaignsPage() {
@@ -50,21 +51,23 @@ export default function ScheduledCampaignsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">
-          Scheduled Campaigns
-        </h1>
-        <p className="mt-2 text-gray-600">
-          View and manage campaigns scheduled for future delivery.
-        </p>
-      </div>
+    <PageContainer>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Scheduled Campaigns
+          </h1>
+          <p className="mt-2 text-gray-600">
+            View and manage campaigns scheduled for future delivery.
+          </p>
+        </div>
 
-      <ScheduledCampaignsCalendar
-        campaigns={campaigns ?? []}
-        clubSlug={clubSlug}
-        isLoading={isLoading}
-      />
-    </div>
+        <ScheduledCampaignsCalendar
+          campaigns={campaigns ?? []}
+          clubSlug={clubSlug}
+          isLoading={isLoading}
+        />
+      </div>
+    </PageContainer>
   );
 }
