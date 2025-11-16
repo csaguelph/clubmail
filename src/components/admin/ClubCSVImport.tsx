@@ -101,13 +101,39 @@ export default function ClubCSVImport() {
       throw new Error("CSV must have at least a header row and one data row");
     }
 
-    const headerLine = lines[0];
+    // Detect if this is a GryphLife CSV (header on row 3)
+    let headerLine: string;
+    let dataStartRow: number;
+
+    // Check if row 3 exists and contains GryphLife-specific columns
+    if (lines.length >= 3) {
+      const potentialHeader = parseCSVLine(lines[2] ?? "").map((h) =>
+        h.toLowerCase().trim(),
+      );
+      const isGryphLife =
+        potentialHeader.includes("organization id") ||
+        potentialHeader.includes("website key") ||
+        potentialHeader.includes("primary contact campus email");
+
+      if (isGryphLife) {
+        headerLine = lines[2] ?? "";
+        dataStartRow = 3;
+      } else {
+        headerLine = lines[0] ?? "";
+        dataStartRow = 1;
+      }
+    } else {
+      headerLine = lines[0] ?? "";
+      dataStartRow = 1;
+    }
+
     if (!headerLine) {
       throw new Error("Invalid CSV header");
     }
 
     const header = parseCSVLine(headerLine).map((h) => h.toLowerCase().trim());
 
+    // Standard format column names
     const nameIdx = header.indexOf("name");
     const slugIdx = header.indexOf("slug");
     const gryphlifeIdIdx = header.indexOf("gryphlife_id");
@@ -120,53 +146,71 @@ export default function ClubCSVImport() {
     const isActiveIdx = header.indexOf("is_active");
     const activeIdx = header.indexOf("active");
 
-    if (nameIdx === -1 || slugIdx === -1) {
-      throw new Error('CSV must have "name" and "slug" columns');
-    }
+    // GryphLife format column names
+    const glOrgNameIdx = header.indexOf("organization name");
+    const glOrgIdIdx = header.indexOf("organization id");
+    const glWebsiteKeyIdx = header.indexOf("website key");
+    const glOrgEmailIdx = header.indexOf("organization email");
+    const glPrimaryContactIdx = header.indexOf("primary contact campus email");
 
-    // Use gryphlife_id or gryphlife column
-    const gryphlifeColumnIdx =
-      gryphlifeIdIdx !== -1 ? gryphlifeIdIdx : gryphlifeIdx;
-
-    // Use organization_email or org_email column
-    const orgEmailColumnIdx = orgEmailIdx !== -1 ? orgEmailIdx : orgEmailAltIdx;
-
-    // Use emails, contacts, or primary_contacts column (in that order of preference)
-    const emailsColumnIdx =
+    // Determine which columns to use based on format
+    const finalNameIdx = nameIdx !== -1 ? nameIdx : glOrgNameIdx;
+    const finalSlugIdx = slugIdx !== -1 ? slugIdx : glWebsiteKeyIdx;
+    const finalGryphlifeIdIdx =
+      gryphlifeIdIdx !== -1
+        ? gryphlifeIdIdx
+        : gryphlifeIdx !== -1
+          ? gryphlifeIdx
+          : glOrgIdIdx;
+    const finalOrgEmailIdx =
+      orgEmailIdx !== -1
+        ? orgEmailIdx
+        : orgEmailAltIdx !== -1
+          ? orgEmailAltIdx
+          : glOrgEmailIdx;
+    const finalEmailsIdx =
       emailsIdx !== -1
         ? emailsIdx
         : contactsIdx !== -1
           ? contactsIdx
-          : primaryContactsIdx;
+          : primaryContactsIdx !== -1
+            ? primaryContactsIdx
+            : glPrimaryContactIdx;
 
-    if (emailsColumnIdx === -1) {
+    if (finalNameIdx === -1 || finalSlugIdx === -1) {
       throw new Error(
-        'CSV must have "emails", "contacts", or "primary_contacts" column',
+        'CSV must have "name" and "slug" columns (or GryphLife equivalent)',
       );
     }
 
-    // Use is_active or active column
+    if (finalEmailsIdx === -1) {
+      throw new Error(
+        'CSV must have "emails", "contacts", or "primary_contacts" column (or GryphLife equivalent)',
+      );
+    }
+
+    // Use is_active or active column (GryphLife doesn't have this)
     const activeColumnIdx = isActiveIdx !== -1 ? isActiveIdx : activeIdx;
 
     const clubs: ParsedClub[] = [];
 
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = dataStartRow; i < lines.length; i++) {
       const line = lines[i]?.trim();
       if (!line) continue;
 
       const values = parseCSVLine(line);
 
-      const name = values[nameIdx];
-      let slug = values[slugIdx];
+      const name = values[finalNameIdx];
+      let slug = values[finalSlugIdx];
       const gryphlifeId =
-        gryphlifeColumnIdx !== -1
-          ? values[gryphlifeColumnIdx]?.trim()
+        finalGryphlifeIdIdx !== -1
+          ? (values[finalGryphlifeIdIdx]?.trim() ?? undefined)
           : undefined;
       const organizationEmail =
-        orgEmailColumnIdx !== -1
-          ? values[orgEmailColumnIdx]?.trim()
+        finalOrgEmailIdx !== -1
+          ? (values[finalOrgEmailIdx]?.trim() ?? undefined)
           : undefined;
-      const emailsRaw = values[emailsColumnIdx];
+      const emailsRaw = values[finalEmailsIdx];
 
       if (!name || !slug || !emailsRaw) {
         throw new Error(`Row ${i + 1}: Missing required fields`);
@@ -283,9 +327,14 @@ export default function ClubCSVImport() {
                     <p className="font-medium">CSV Format Instructions:</p>
                     <ul className="mt-2 list-disc space-y-1 pl-5">
                       <li>
-                        Required columns: <code>name</code>, <code>slug</code>,
-                        and one of <code>emails</code>, <code>contacts</code>,
-                        or <code>primary_contacts</code>
+                        <strong>Standard format:</strong> Required columns:{" "}
+                        <code>name</code>, <code>slug</code>, and one of{" "}
+                        <code>emails</code>, <code>contacts</code>, or{" "}
+                        <code>primary_contacts</code>
+                      </li>
+                      <li>
+                        <strong>GryphLife export format:</strong> Automatically
+                        detected (headers on row 3)
                       </li>
                       <li>
                         Optional columns: <code>gryphlife_id</code> (or{" "}

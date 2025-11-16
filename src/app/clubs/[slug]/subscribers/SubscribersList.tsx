@@ -2,7 +2,15 @@
 
 import { api } from "@/trpc/react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { Download, Edit, Trash2, Upload, UserPlus, X } from "lucide-react";
+import {
+  Download,
+  Edit,
+  Info,
+  Trash2,
+  Upload,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 
 interface SubscribersListProps {
@@ -21,6 +29,7 @@ interface SubscribersListProps {
 
 export default function SubscribersList({
   clubId,
+  slug,
   emailLists,
 }: SubscribersListProps) {
   const [selectedListId, setSelectedListId] = useState(
@@ -28,11 +37,19 @@ export default function SubscribersList({
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isGryphLifeImportModalOpen, setIsGryphLifeImportModalOpen] =
+    useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [csvContent, setCsvContent] = useState("");
+  const [gryphLifeParseError, setGryphLifeParseError] = useState<string | null>(
+    null,
+  );
+  const [gryphLifeParsedData, setGryphLifeParsedData] = useState<
+    Array<{ email: string; name: string }>
+  >([]);
   const [editingSubscriber, setEditingSubscriber] = useState<{
     id: string;
     email: string;
@@ -138,6 +155,102 @@ export default function SubscribersList({
     });
   };
 
+  const handleGryphLifeFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setGryphLifeParseError(null);
+    setGryphLifeParsedData([]);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      try {
+        const lines = text.trim().split("\n");
+
+        // Headers are on row 4 (index 3)
+        if (lines.length < 5) {
+          throw new Error("Invalid GryphLife CSV format. File too short.");
+        }
+
+        const headerLine = lines[3];
+        if (!headerLine) {
+          throw new Error("Could not find header row (row 4).");
+        }
+
+        // Parse header to find column indices
+        const headers = headerLine.split(",").map((h) => h.trim());
+        const firstNameIdx = headers.findIndex(
+          (h) => h.toLowerCase() === "first name",
+        );
+        const lastNameIdx = headers.findIndex(
+          (h) => h.toLowerCase() === "last name",
+        );
+        const emailIdx = headers.findIndex(
+          (h) => h.toLowerCase() === "campus email",
+        );
+
+        if (firstNameIdx === -1 || lastNameIdx === -1 || emailIdx === -1) {
+          throw new Error(
+            'Could not find required columns: "First Name", "Last Name", "Campus Email"',
+          );
+        }
+
+        // Parse data rows (starting from row 5, index 4)
+        const parsedData: Array<{ email: string; name: string }> = [];
+        const emailSet = new Set<string>();
+
+        for (let i = 4; i < lines.length; i++) {
+          const line = lines[i]?.trim();
+          if (!line) continue;
+
+          const values = line.split(",");
+          const firstName = values[firstNameIdx]?.trim() ?? "";
+          const lastName = values[lastNameIdx]?.trim() ?? "";
+          const email = values[emailIdx]?.trim()?.toLowerCase() ?? "";
+
+          if (email && !emailSet.has(email)) {
+            emailSet.add(email);
+            const name = [firstName, lastName].filter(Boolean).join(" ");
+            parsedData.push({ email, name: name || email });
+          }
+        }
+
+        if (parsedData.length === 0) {
+          throw new Error("No valid subscribers found in CSV.");
+        }
+
+        setGryphLifeParsedData(parsedData);
+      } catch (error) {
+        setGryphLifeParseError(
+          error instanceof Error ? error.message : "Failed to parse CSV",
+        );
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleGryphLifeImport = () => {
+    if (!selectedListId || gryphLifeParsedData.length === 0) return;
+
+    bulkImport.mutate(
+      {
+        clubId,
+        listId: selectedListId,
+        subscribers: gryphLifeParsedData,
+      },
+      {
+        onSuccess: () => {
+          setIsGryphLifeImportModalOpen(false);
+          setGryphLifeParsedData([]);
+          setGryphLifeParseError(null);
+        },
+      },
+    );
+  };
+
   const handleEditSubscriber = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingSubscriber) return;
@@ -208,6 +321,13 @@ export default function SubscribersList({
           >
             <Download className="h-4 w-4" />
             Export CSV
+          </button>
+          <button
+            onClick={() => setIsGryphLifeImportModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <Upload className="h-4 w-4" />
+            Import from GryphLife
           </button>
           <button
             onClick={() => setIsImportModalOpen(true)}
@@ -580,6 +700,151 @@ export default function SubscribersList({
                 </button>
               </div>
             </form>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* GryphLife Import Modal */}
+      <Dialog
+        open={isGryphLifeImportModalOpen}
+        onClose={() => setIsGryphLifeImportModalOpen(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-semibold text-gray-900">
+                Import Subscribers from GryphLife
+              </DialogTitle>
+              <button
+                onClick={() => setIsGryphLifeImportModalOpen(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-4 rounded-md bg-blue-50 p-4">
+              <div className="flex">
+                <Info className="h-5 w-5 text-blue-400" />
+                <div className="ml-3 text-sm text-blue-700">
+                  <p className="font-medium">How to download your roster:</p>
+                  <ol className="mt-2 list-decimal space-y-1 pl-5">
+                    <li>
+                      Go to{" "}
+                      <a
+                        href={`https://gryphlife.uoguelph.ca/actioncenter/organization/${slug}/roster`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-blue-800 underline hover:text-blue-900"
+                      >
+                        GryphLife Roster
+                      </a>
+                    </li>
+                    <li>Click &quot;Export Roster&quot;</li>
+                    <li>Upload the downloaded CSV file below</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {/* File Upload */}
+              <div>
+                <label
+                  htmlFor="gryphlife-file"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Upload GryphLife CSV
+                </label>
+                <input
+                  type="file"
+                  id="gryphlife-file"
+                  accept=".csv"
+                  onChange={handleGryphLifeFileUpload}
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-[#b1d135] file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-900 hover:file:bg-[#a0c030]"
+                />
+              </div>
+
+              {/* Parse Error */}
+              {gryphLifeParseError && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {gryphLifeParseError}
+                </div>
+              )}
+
+              {/* Parsed Data Preview */}
+              {gryphLifeParsedData.length > 0 && (
+                <div className="rounded-md border border-gray-200">
+                  <div className="border-b border-gray-200 bg-gray-50 px-4 py-2">
+                    <p className="text-sm font-medium text-gray-900">
+                      Found {gryphLifeParsedData.length} subscriber(s)
+                    </p>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="sticky top-0 bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                            Email
+                          </th>
+                          <th className="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                            Name
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {gryphLifeParsedData.slice(0, 10).map((sub, idx) => (
+                          <tr key={idx}>
+                            <td className="px-4 py-2 text-sm text-gray-900">
+                              {sub.email}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900">
+                              {sub.name}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {gryphLifeParsedData.length > 10 && (
+                      <div className="border-t border-gray-200 bg-gray-50 px-4 py-2 text-center text-xs text-gray-500">
+                        ... and {gryphLifeParsedData.length - 10} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Bulk Import Error */}
+              {bulkImport.error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {bulkImport.error.message}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsGryphLifeImportModalOpen(false)}
+                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleGryphLifeImport}
+                  disabled={
+                    bulkImport.isPending || gryphLifeParsedData.length === 0
+                  }
+                  className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {bulkImport.isPending
+                    ? "Importing..."
+                    : `Import ${gryphLifeParsedData.length} Subscriber(s)`}
+                </button>
+              </div>
+            </div>
           </DialogPanel>
         </div>
       </Dialog>
