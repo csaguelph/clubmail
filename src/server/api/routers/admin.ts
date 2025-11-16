@@ -10,13 +10,28 @@ export const adminRouter = createTRPCRouter({
       z.object({
         limit: z.number().min(1).max(100).default(50),
         cursor: z.string().optional(),
+        search: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
+      const whereClause = input.search
+        ? {
+            OR: [
+              {
+                name: { contains: input.search, mode: "insensitive" as const },
+              },
+              {
+                slug: { contains: input.search, mode: "insensitive" as const },
+              },
+            ],
+          }
+        : undefined;
+
       const clubs = await ctx.db.club.findMany({
+        where: whereClause,
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ name: "asc" }],
         include: {
           createdBy: {
             select: {
@@ -35,17 +50,40 @@ export const adminRouter = createTRPCRouter({
         },
       });
 
+      // Sort case-insensitively in JavaScript
+      const sortedClubs = clubs.sort((a, b) =>
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+      );
+
       let nextCursor: string | undefined = undefined;
-      if (clubs.length > input.limit) {
-        const nextItem = clubs.pop();
+      if (sortedClubs.length > input.limit) {
+        const nextItem = sortedClubs.pop();
         nextCursor = nextItem?.id;
       }
 
       return {
-        clubs,
+        clubs: sortedClubs,
         nextCursor,
       };
     }),
+
+  // Get club stats
+  getClubStats: adminProcedure.query(async ({ ctx }) => {
+    const [activeClubs, totalMembers, totalSubscribers, totalCampaigns] =
+      await Promise.all([
+        ctx.db.club.count({ where: { isActive: true } }),
+        ctx.db.clubMember.count(),
+        ctx.db.subscriber.count({ where: { status: "SUBSCRIBED" } }),
+        ctx.db.campaign.count(),
+      ]);
+
+    return {
+      activeClubs,
+      totalMembers,
+      totalSubscribers,
+      totalCampaigns,
+    };
+  }),
 
   // Get a specific club
   getClub: adminProcedure
@@ -103,6 +141,8 @@ export const adminRouter = createTRPCRouter({
           .min(1)
           .max(255)
           .regex(/^[a-z0-9-]+$/),
+        gryphlifeId: z.string().optional(),
+        organizationEmail: z.string().email().optional(),
         primaryContactEmails: z.array(z.string().email()).min(1).max(5),
       }),
     )
@@ -126,6 +166,8 @@ export const adminRouter = createTRPCRouter({
           data: {
             name: input.name,
             slug: input.slug,
+            gryphlifeId: input.gryphlifeId,
+            organizationEmail: input.organizationEmail,
             createdById: ctx.session.user.id,
           },
         });
@@ -135,6 +177,7 @@ export const adminRouter = createTRPCRouter({
           data: {
             clubId: newClub.id,
             fromName: input.name,
+            replyToEmail: input.organizationEmail,
           },
         });
 
@@ -193,6 +236,8 @@ export const adminRouter = createTRPCRouter({
           .max(255)
           .regex(/^[a-z0-9-]+$/)
           .optional(),
+        gryphlifeId: z.string().optional(),
+        organizationEmail: z.string().email().optional(),
         isActive: z.boolean().optional(),
       }),
     )
@@ -243,5 +288,185 @@ export const adminRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  // Import clubs from CSV
+  importClubsFromCSV: adminProcedure
+    .input(
+      z.object({
+        clubs: z.array(
+          z.object({
+            name: z.string().min(1).max(255),
+            slug: z
+              .string()
+              .min(1)
+              .max(255)
+              .regex(/^[a-z0-9-]+$/),
+            gryphlifeId: z.string().optional(),
+            organizationEmail: z.string().email().optional(),
+            primaryContactEmails: z.array(z.string().email()).min(1).max(10),
+            replaceStaff: z.boolean().default(true),
+            isActive: z.boolean().default(true),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const results = {
+        created: [] as string[],
+        updated: [] as string[],
+        errors: [] as { slug: string; error: string }[],
+      };
+
+      for (const clubData of input.clubs) {
+        try {
+          // Check if club exists
+          const existingClub = await ctx.db.club.findUnique({
+            where: { slug: clubData.slug },
+            include: {
+              members: {
+                where: {
+                  role: "CLUB_OWNER",
+                },
+              },
+            },
+          });
+
+          if (existingClub) {
+            // Update existing club
+            await ctx.db.$transaction(async (tx) => {
+              // Update club info
+              await tx.club.update({
+                where: { id: existingClub.id },
+                data: {
+                  name: clubData.name,
+                  gryphlifeId: clubData.gryphlifeId,
+                  organizationEmail: clubData.organizationEmail,
+                  isActive: clubData.isActive,
+                },
+              });
+
+              // Replace staff if requested
+              if (clubData.replaceStaff) {
+                // Remove existing club owners
+                await tx.clubMember.deleteMany({
+                  where: {
+                    clubId: existingClub.id,
+                    role: "CLUB_OWNER",
+                  },
+                });
+
+                // Add new primary contacts
+                for (const email of clubData.primaryContactEmails) {
+                  // Find or create user
+                  let user = await tx.user.findUnique({
+                    where: { email },
+                  });
+
+                  // Create stub user if none exists
+                  user ??= await tx.user.create({
+                    data: {
+                      id: `stub_${Date.now()}_${Math.random()}`,
+                      email,
+                      name: email.split("@")[0] ?? "User",
+                      emailVerified: false,
+                    },
+                  });
+
+                  // Add as club owner
+                  await tx.clubMember.upsert({
+                    where: {
+                      clubId_userId: {
+                        clubId: existingClub.id,
+                        userId: user.id,
+                      },
+                    },
+                    create: {
+                      clubId: existingClub.id,
+                      userId: user.id,
+                      role: "CLUB_OWNER",
+                    },
+                    update: {
+                      role: "CLUB_OWNER",
+                    },
+                  });
+                }
+              }
+            });
+
+            results.updated.push(clubData.slug);
+          } else {
+            // Create new club
+            await ctx.db.$transaction(async (tx) => {
+              // Create the club
+              const newClub = await tx.club.create({
+                data: {
+                  name: clubData.name,
+                  slug: clubData.slug,
+                  gryphlifeId: clubData.gryphlifeId,
+                  organizationEmail: clubData.organizationEmail,
+                  isActive: clubData.isActive,
+                  createdById: ctx.session.user.id,
+                },
+              });
+
+              // Create default club settings
+              await tx.clubSettings.create({
+                data: {
+                  clubId: newClub.id,
+                  fromName: clubData.name,
+                  replyToEmail: clubData.organizationEmail,
+                },
+              });
+
+              // Create default email list
+              await tx.emailList.create({
+                data: {
+                  clubId: newClub.id,
+                  name: "Main List",
+                  description: "Default email list for all club members",
+                  isDefault: true,
+                },
+              });
+
+              // Add primary contacts
+              for (const email of clubData.primaryContactEmails) {
+                // Find or create user
+                let user = await tx.user.findUnique({
+                  where: { email },
+                });
+
+                // Create stub user if none exists
+                user ??= await tx.user.create({
+                  data: {
+                    id: `stub_${Date.now()}_${Math.random()}`,
+                    email,
+                    name: email.split("@")[0] ?? "User",
+                    emailVerified: false,
+                  },
+                });
+
+                // Add as club owner
+                await tx.clubMember.create({
+                  data: {
+                    clubId: newClub.id,
+                    userId: user.id,
+                    role: "CLUB_OWNER",
+                  },
+                });
+              }
+            });
+
+            results.created.push(clubData.slug);
+          }
+        } catch (error) {
+          results.errors.push({
+            slug: clubData.slug,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }
+
+      return results;
     }),
 });
