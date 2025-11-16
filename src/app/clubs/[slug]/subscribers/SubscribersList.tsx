@@ -44,7 +44,6 @@ export default function SubscribersList({
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [csvContent, setCsvContent] = useState("");
-  const [gryphLifeFile, setGryphLifeFile] = useState<File | null>(null);
   const [gryphLifeParseError, setGryphLifeParseError] = useState<string | null>(
     null,
   );
@@ -162,7 +161,6 @@ export default function SubscribersList({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setGryphLifeFile(file);
     setGryphLifeParseError(null);
     setGryphLifeParsedData([]);
 
@@ -246,7 +244,6 @@ export default function SubscribersList({
       {
         onSuccess: () => {
           setIsGryphLifeImportModalOpen(false);
-          setGryphLifeFile(null);
           setGryphLifeParsedData([]);
           setGryphLifeParseError(null);
         },

@@ -204,11 +204,11 @@ export default function ClubCSVImport() {
       let slug = values[finalSlugIdx];
       const gryphlifeId =
         finalGryphlifeIdIdx !== -1
-          ? values[finalGryphlifeIdIdx]?.trim() || undefined
+          ? (values[finalGryphlifeIdIdx]?.trim() ?? undefined)
           : undefined;
       const organizationEmail =
         finalOrgEmailIdx !== -1
-          ? values[finalOrgEmailIdx]?.trim() || undefined
+          ? (values[finalOrgEmailIdx]?.trim() ?? undefined)
           : undefined;
       const emailsRaw = values[finalEmailsIdx];
 
