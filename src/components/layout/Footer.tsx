@@ -1,12 +1,9 @@
-"use client";
-
 import { env } from "@/env";
 import { GitCommit } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {
   const gitCommit = env.NEXT_PUBLIC_GIT_COMMIT_SHA;
-
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
