@@ -705,4 +705,48 @@ export const campaignsRouter = createTRPCRouter({
         });
       }
     }),
+
+  // Duplicate a campaign
+  duplicateCampaign: clubEditorProcedure
+    .input(
+      z.object({
+        clubId: z.string(),
+        campaignId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get the original campaign
+      const originalCampaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!originalCampaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Create a duplicate with DRAFT status
+      const duplicatedCampaign = await ctx.db.campaign.create({
+        data: {
+          name: `${originalCampaign.name} (Copy)`,
+          subject: originalCampaign.subject,
+          preheaderText: originalCampaign.preheaderText,
+          designJson: originalCampaign.designJson,
+          html: originalCampaign.html,
+          fromName: originalCampaign.fromName,
+          fromEmail: originalCampaign.fromEmail,
+          clubId: originalCampaign.clubId,
+          emailListId: originalCampaign.emailListId,
+          createdById: ctx.session.user.id,
+          status: "DRAFT",
+        },
+      });
+
+      return duplicatedCampaign;
+    }),
 });
