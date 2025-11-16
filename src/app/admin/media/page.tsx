@@ -288,6 +288,7 @@ function MediaRow({
       </div>
       <div className="col-span-1 flex items-center">
         {isImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.url}
             alt={item.filename}
@@ -308,7 +309,7 @@ function MediaRow({
         </div>
       </div>
       <div className="col-span-2 flex items-center">
-        <p className="text-sm text-gray-900">{item.club?.name || "Global"}</p>
+        <p className="text-sm text-gray-900">{item.club?.name ?? "Global"}</p>
       </div>
       <div className="col-span-2 flex items-center">
         <div className="min-w-0">

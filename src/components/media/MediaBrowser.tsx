@@ -105,7 +105,7 @@ export function MediaBrowser({
       onSelect({
         id: selected.id,
         url: selected.url,
-        alt: selected.altText || selected.filename,
+        alt: selected.altText ?? selected.filename,
       });
       onClose?.();
     }
@@ -278,9 +278,10 @@ function MediaItem({ item, isSelected, onSelect, onDelete }: MediaItemProps) {
       {/* Preview */}
       <div className="aspect-square bg-gray-100">
         {isImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.url}
-            alt={item.altText || item.filename}
+            alt={item.altText ?? item.filename}
             className="h-full w-full object-cover"
           />
         ) : (

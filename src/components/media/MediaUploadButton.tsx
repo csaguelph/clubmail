@@ -26,7 +26,7 @@ export function MediaUploadButton({
       onUpload({
         id: data.id,
         url: data.url,
-        alt: data.altText || data.filename,
+        alt: data.altText ?? data.filename,
       });
       setUploading(false);
     },
@@ -87,7 +87,7 @@ export function MediaUploadButton({
       ) : (
         <Upload className="h-4 w-4" />
       )}
-      {children || (uploading ? "Uploading..." : "Upload")}
+      {children ?? (uploading ? "Uploading..." : "Upload")}
     </label>
   );
 }

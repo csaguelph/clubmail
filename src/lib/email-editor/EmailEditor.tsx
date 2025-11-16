@@ -625,6 +625,7 @@ function BlockEditor({
               </div>
               {block.url && (
                 <div className="rounded-lg border border-gray-200 p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={block.url}
                     alt={block.alt}

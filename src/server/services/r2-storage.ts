@@ -59,7 +59,7 @@ export async function uploadToR2(
   const client = getR2Client();
 
   // Generate a unique key with optional club prefix
-  const ext = filename.split(".").pop() || "";
+  const ext = filename.split(".").pop() ?? "";
   const hash = crypto.randomBytes(16).toString("hex");
   const timestamp = Date.now();
   const key = clubId
@@ -175,8 +175,8 @@ export function validateMediaFile(
  * Get image dimensions from buffer
  */
 export async function getImageDimensions(
-  buffer: Buffer,
-  mimeType: string,
+  _buffer: Buffer,
+  _mimeType: string,
 ): Promise<{ width: number; height: number } | null> {
   // This is a simple implementation - you may want to use a library like 'sharp' or 'image-size'
   // For now, we'll return null and handle dimensions on the client side if needed
