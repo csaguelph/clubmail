@@ -19,8 +19,6 @@ interface CampaignSchedulingUIProps {
 }
 
 export default function CampaignSchedulingUI({
-  campaignId,
-  clubId,
   currentStatus,
   scheduledFor,
   onSchedule,
@@ -37,13 +35,6 @@ export default function CampaignSchedulingUI({
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split("T")[0];
-  };
-
-  // Get minimum time for today
-  const getMinTime = () => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 30); // At least 30 minutes from now
-    return now.toTimeString().slice(0, 5);
   };
 
   const handleSchedule = async () => {

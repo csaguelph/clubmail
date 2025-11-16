@@ -49,7 +49,7 @@ export default function ScheduledCampaignsCalendar({
           No scheduled campaigns
         </h3>
         <p className="text-gray-600">
-          You don't have any campaigns scheduled for delivery.
+          You don&apos;t have any campaigns scheduled for delivery.
         </p>
       </div>
     );
@@ -69,10 +69,8 @@ export default function ScheduledCampaignsCalendar({
         },
       );
 
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey]!.push(campaign);
+      acc[dateKey] ??= [];
+      acc[dateKey].push(campaign);
       return acc;
     },
     {} as Record<string, ScheduledCampaign[]>,

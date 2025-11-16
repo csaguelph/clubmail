@@ -250,12 +250,12 @@ export default function CampaignActions({
             )}
 
             {/* Errors */}
-            {(sendCampaign.error ||
-              scheduleCampaign.error ||
+            {(sendCampaign.error ??
+              scheduleCampaign.error ??
               scheduleError) && (
               <p className="mt-3 text-sm text-red-600">
-                {scheduleError ||
-                  sendCampaign.error?.message ||
+                {scheduleError ??
+                  sendCampaign.error?.message ??
                   scheduleCampaign.error?.message}
               </p>
             )}

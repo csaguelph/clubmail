@@ -72,10 +72,8 @@ export default function AllScheduledCampaignsCalendar({
         },
       );
 
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey]!.push(campaign);
+      acc[dateKey] ??= [];
+      acc[dateKey].push(campaign);
       return acc;
     },
     {} as Record<string, ScheduledCampaign[]>,
