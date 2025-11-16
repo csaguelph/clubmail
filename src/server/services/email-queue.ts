@@ -22,11 +22,9 @@ function getQStashClient(): Client {
     );
   }
 
-  if (!qstashClient) {
-    qstashClient = new Client({
-      token: env.QSTASH_TOKEN,
-    });
-  }
+  qstashClient ??= new Client({
+    token: env.QSTASH_TOKEN,
+  });
 
   return qstashClient;
 }
@@ -65,7 +63,7 @@ export interface QueueEmailJob {
  */
 export async function queueEmail(
   job: QueueEmailJob,
-  delaySeconds: number = 0,
+  delaySeconds = 0,
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const client = getQStashClient();

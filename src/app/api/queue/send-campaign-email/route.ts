@@ -2,7 +2,7 @@ import { db } from "@/server/db";
 import { sendCampaignEmail } from "@/server/services/email";
 import type { QueueEmailJob } from "@/server/services/email-queue";
 import { verifySignatureAppRouter } from "@upstash/qstash/nextjs";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * QStash Webhook: Send Campaign Email
@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 async function handler(req: NextRequest) {
   try {
-    const job: QueueEmailJob = await req.json();
+    const job = (await req.json()) as QueueEmailJob;
 
     console.log(
       `Processing email job: ${job.emailId} for campaign ${job.campaignId}`,
@@ -114,8 +114,8 @@ async function handler(req: NextRequest) {
 
     // Update email record as failed if we have the job data
     try {
-      const body = await req.clone().json();
-      const job = body as QueueEmailJob;
+      const body = (await req.clone().json()) as QueueEmailJob;
+      const job = body;
 
       await db.email.update({
         where: { id: job.emailId },

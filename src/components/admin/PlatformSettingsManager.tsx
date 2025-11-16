@@ -321,19 +321,20 @@ export function PlatformSettingsManager() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Maximum Emails Per Minute
+                    Maximum Emails Per Second
                   </label>
                   <input
                     type="number"
                     min="1"
                     max="1000"
-                    value={formData.maxEmailsPerMinute}
-                    onChange={(e) =>
+                    value={formData.maxEmailsPerSecond}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
                       setFormData({
                         ...formData,
-                        maxEmailsPerMinute: parseInt(e.target.value),
-                      })
-                    }
+                        maxEmailsPerSecond: Number.isNaN(value) ? 1 : value,
+                      });
+                    }}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
                   />
                   <p className="mt-1 text-sm text-gray-500">

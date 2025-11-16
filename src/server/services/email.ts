@@ -379,7 +379,9 @@ export async function batchSendCampaignEmails(params: {
     console.error(
       `Current: ${rateLimitCheck.currentCount}/${rateLimitCheck.limit}`,
     );
-    console.error(`Reset time: ${rateLimitCheck.resetTime}`);
+    console.error(
+      `Reset time: ${rateLimitCheck.resetTime?.toISOString() ?? "unknown"}`,
+    );
 
     // Return early - no emails sent
     return {

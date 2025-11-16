@@ -61,7 +61,7 @@ async function getRateLimitSettings() {
  * @returns RateLimitStatus indicating if send is allowed
  */
 export async function checkRateLimit(
-  emailsToSend: number = 1,
+  emailsToSend = 1,
 ): Promise<RateLimitStatus> {
   const settings = await getRateLimitSettings();
 
@@ -171,7 +171,7 @@ export async function getRateLimitUsage() {
  * @returns Delay in milliseconds between batches
  */
 export async function calculateSendDelay(
-  emailsToSend: number,
+  _emailsToSend: number,
 ): Promise<number> {
   const settings = await getRateLimitSettings();
 
