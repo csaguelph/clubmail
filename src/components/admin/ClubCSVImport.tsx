@@ -216,8 +216,8 @@ export default function ClubCSVImport() {
       clubs.push({
         name,
         slug,
-        gryphlifeId: gryphlifeId || undefined,
-        organizationEmail: organizationEmail || undefined,
+        gryphlifeId: gryphlifeId ?? undefined,
+        organizationEmail: organizationEmail ?? undefined,
         primaryContactEmails: emails,
         isActive,
       });
@@ -298,7 +298,7 @@ export default function ClubCSVImport() {
                       </li>
                       <li>
                         Fields containing commas should be wrapped in double
-                        quotes (e.g., "Club Name, Inc.")
+                        quotes (e.g., &quot;Club Name, Inc.&quot;)
                       </li>
                       <li>
                         Multiple emails can be separated by semicolons (;) or
@@ -314,8 +314,8 @@ export default function ClubCSVImport() {
                       <code className="text-xs">
                         name,slug,gryphlife_id,organization_email,emails,is_active
                         <br />
-                        "Chess Club,
-                        Official",chess-club,12345,chess@uoguelph.ca,president@example.com;vp@example.com,true
+                        &quot;Chess Club,
+                        Official&quot;,chess-club,12345,chess@uoguelph.ca,president@example.com;vp@example.com,true
                       </code>
                     </p>
                   </div>
@@ -396,10 +396,10 @@ export default function ClubCSVImport() {
                               {club.slug}
                             </td>
                             <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                              {club.gryphlifeId || "-"}
+                              {club.gryphlifeId ?? "-"}
                             </td>
                             <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                              {club.organizationEmail || "-"}
+                              {club.organizationEmail ?? "-"}
                             </td>
                             <td className="px-3 py-2 text-sm text-gray-500">
                               {club.primaryContactEmails.join(", ")}
