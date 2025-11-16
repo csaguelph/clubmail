@@ -27,6 +27,12 @@ export const env = createEnv({
     QSTASH_TOKEN: z.string().optional(), // QStash API token
     QSTASH_CURRENT_SIGNING_KEY: z.string().optional(), // For verifying webhook signatures
     QSTASH_NEXT_SIGNING_KEY: z.string().optional(), // For key rotation
+    // Cloudflare R2 configuration for media uploads
+    R2_ACCOUNT_ID: z.string().optional(), // Cloudflare account ID
+    R2_ACCESS_KEY_ID: z.string().optional(), // R2 access key
+    R2_SECRET_ACCESS_KEY: z.string().optional(), // R2 secret key
+    R2_BUCKET_NAME: z.string().optional(), // R2 bucket name
+    R2_PUBLIC_URL: z.string().url().optional(), // Public URL for R2 bucket (e.g., https://media.example.com)
   },
 
   /**
@@ -62,6 +68,11 @@ export const env = createEnv({
     QSTASH_TOKEN: process.env.QSTASH_TOKEN,
     QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
     QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
+    R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
 
     // Client:
     NEXT_PUBLIC_BASE_URL:

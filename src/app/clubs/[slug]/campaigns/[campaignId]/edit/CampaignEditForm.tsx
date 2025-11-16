@@ -188,6 +188,7 @@ export default function CampaignEditForm({
           onChange={setBlocks}
           clubName={clubName}
           brandColor={brandColor}
+          clubId={clubId}
         />
       </div>
 

@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
+    "@aws-sdk/client-s3": "^3.932.0",
     "@aws-sdk/client-ses": "^3.932.0",
+    "@aws-sdk/lib-storage": "^3.932.0",
     "@headlessui/react": "^2.2.9",
     "@prisma/client": "^6.6.0",
     "@react-email/components": "^1.0.1",

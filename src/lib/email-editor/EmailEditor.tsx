@@ -8,6 +8,8 @@
 */
 /* eslint-disable jsx-a11y/alt-text */
 
+import { MediaBrowser } from "@/components/media/MediaBrowser";
+import { MediaUploadButton } from "@/components/media/MediaUploadButton";
 import {
   ChevronDown,
   ChevronUp,
@@ -31,6 +33,7 @@ interface EmailEditorProps {
   onChange: (blocks: EmailBlock[]) => void;
   clubName?: string;
   brandColor?: string;
+  clubId?: string;
 }
 
 export function EmailEditor({
@@ -38,6 +41,7 @@ export function EmailEditor({
   onChange,
   clubName = "Your Club",
   brandColor = "#b1d135",
+  clubId,
 }: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
@@ -165,7 +169,11 @@ export function EmailEditor({
             <h3 className="mb-4 text-sm font-medium text-gray-900">
               Edit {selectedBlock.type}
             </h3>
-            <BlockEditor block={selectedBlock} onChange={updateBlock} />
+            <BlockEditor
+              block={selectedBlock}
+              onChange={updateBlock}
+              clubId={clubId}
+            />
           </div>
         )}
 
@@ -462,10 +470,14 @@ function BlockItem({
 function BlockEditor({
   block,
   onChange,
+  clubId,
 }: {
   block: EmailBlock;
   onChange: (id: string, updates: Partial<EmailBlock>) => void;
+  clubId?: string;
 }) {
+  const [showMediaBrowser, setShowMediaBrowser] = useState(false);
+
   switch (block.type) {
     case "heading":
       return (
@@ -564,45 +576,94 @@ function BlockEditor({
     case "image":
       return (
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Image URL
-            </label>
-            <input
-              type="url"
-              value={block.url}
-              onChange={(e) => onChange(block.id, { url: e.target.value })}
-              placeholder="https://"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Alt Text
-            </label>
-            <input
-              type="text"
-              value={block.alt}
-              onChange={(e) => onChange(block.id, { alt: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Width (optional)
-            </label>
-            <input
-              type="number"
-              value={block.width ?? ""}
-              onChange={(e) =>
-                onChange(block.id, {
-                  width: e.target.value ? parseInt(e.target.value) : undefined,
-                })
-              }
-              placeholder="Auto"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
-            />
-          </div>
+          {showMediaBrowser ? (
+            <div className="h-[400px] overflow-hidden rounded-lg border border-gray-200">
+              <MediaBrowser
+                clubId={clubId}
+                onSelect={(media) => {
+                  onChange(block.id, { url: media.url, alt: media.alt });
+                  setShowMediaBrowser(false);
+                }}
+                onClose={() => setShowMediaBrowser(false)}
+                allowUpload={true}
+                mimeTypeFilter="image"
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Image URL
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="url"
+                    value={block.url}
+                    onChange={(e) =>
+                      onChange(block.id, { url: e.target.value })
+                    }
+                    placeholder="https://"
+                    className="block flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowMediaBrowser(true)}
+                    className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Browse
+                  </button>
+                </div>
+                <div className="mt-2">
+                  <MediaUploadButton
+                    clubId={clubId}
+                    onUpload={(media) => {
+                      onChange(block.id, { url: media.url, alt: media.alt });
+                    }}
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+              {block.url && (
+                <div className="rounded-lg border border-gray-200 p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={block.url}
+                    alt={block.alt}
+                    className="max-h-40 w-full rounded object-contain"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Alt Text
+                </label>
+                <input
+                  type="text"
+                  value={block.alt}
+                  onChange={(e) => onChange(block.id, { alt: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Width (optional)
+                </label>
+                <input
+                  type="number"
+                  value={block.width ?? ""}
+                  onChange={(e) =>
+                    onChange(block.id, {
+                      width: e.target.value
+                        ? parseInt(e.target.value)
+                        : undefined,
+                    })
+                  }
+                  placeholder="Auto"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                />
+              </div>
+            </>
+          )}
         </div>
       );
 
