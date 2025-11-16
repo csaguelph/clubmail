@@ -10,6 +10,10 @@ import {
   batchSendCampaignEmails,
   sendTestEmail,
 } from "@/server/services/email";
+import {
+  isQStashEnabled,
+  queueCampaignEmails,
+} from "@/server/services/email-queue";
 
 export const campaignsRouter = createTRPCRouter({
   // List campaigns for a club
@@ -549,15 +553,6 @@ export const campaignsRouter = createTRPCRouter({
         });
       }
 
-      // Update campaign status to SENDING
-      await ctx.db.campaign.update({
-        where: { id: input.campaignId },
-        data: {
-          status: "SENDING",
-          startedAt: new Date(),
-        },
-      });
-
       // Get club settings
       const settings = await ctx.db.clubSettings.findUnique({
         where: { clubId: input.clubId },
@@ -607,6 +602,49 @@ export const campaignsRouter = createTRPCRouter({
         };
       }
 
+      // ========================================
+      // USE QSTASH QUEUE IF AVAILABLE
+      // ========================================
+      if (isQStashEnabled()) {
+        const queueResult = await queueCampaignEmails(input.campaignId);
+
+        if (!queueResult.success) {
+          // Revert campaign status on failure
+          await ctx.db.campaign.update({
+            where: { id: input.campaignId },
+            data: {
+              status: "DRAFT",
+              startedAt: null,
+            },
+          });
+
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: queueResult.message,
+          });
+        }
+
+        return {
+          success: true,
+          message: queueResult.message,
+          sent: queueResult.queued,
+          failed: queueResult.failed,
+          queued: true, // Indicate this was queued
+        };
+      }
+
+      // ========================================
+      // FALLBACK: DIRECT SEND (LEGACY/SMALL CAMPAIGNS)
+      // ========================================
+      // Update campaign status to SENDING
+      await ctx.db.campaign.update({
+        where: { id: input.campaignId },
+        data: {
+          status: "SENDING",
+          startedAt: new Date(),
+        },
+      });
+
       try {
         // Create Email records BEFORE sending so we have tracking tokens
         const emailRecords = await Promise.all(
@@ -635,24 +673,25 @@ export const campaignsRouter = createTRPCRouter({
         );
 
         // Send emails in batch with rate limiting
-        const { sent, failed, results } = await batchSendCampaignEmails({
-          subscribers: subscribers.map((sub) => ({
-            ...sub,
-            trackingToken: settings.enableTracking
-              ? trackingTokenMap.get(sub.id)!
-              : undefined,
-          })),
-          campaign: {
-            subject: campaign.subject,
-            fromName: campaign.fromName,
-            fromEmail: campaign.fromEmail,
-            html: campaign.html,
-          },
-          clubSettings: {
-            replyToEmail: settings.replyToEmail,
-          },
-          maxPerSecond: 10, // Conservative rate limit
-        });
+        const { sent, failed, rateLimited, results } =
+          await batchSendCampaignEmails({
+            subscribers: subscribers.map((sub) => ({
+              ...sub,
+              trackingToken: settings.enableTracking
+                ? trackingTokenMap.get(sub.id)!
+                : undefined,
+            })),
+            campaign: {
+              subject: campaign.subject,
+              fromName: campaign.fromName,
+              fromEmail: campaign.fromEmail,
+              html: campaign.html,
+            },
+            clubSettings: {
+              replyToEmail: settings.replyToEmail,
+            },
+            maxPerSecond: 10, // Conservative rate limit
+          });
 
         // Update Email records with send results
         await Promise.all(
@@ -678,10 +717,23 @@ export const campaignsRouter = createTRPCRouter({
         await ctx.db.campaign.update({
           where: { id: input.campaignId },
           data: {
-            status: failed > 0 && sent === 0 ? "FAILED" : "SENT",
-            finishedAt: new Date(),
+            status: rateLimited
+              ? "SENDING" // Keep as SENDING if rate limited (can be resumed)
+              : failed > 0 && sent === 0
+                ? "FAILED"
+                : "SENT",
+            finishedAt: rateLimited ? null : new Date(),
           },
         });
+
+        if (rateLimited) {
+          return {
+            success: false,
+            message: `Rate limit exceeded: ${sent} sent, ${failed} failed. Campaign paused. Please try again later or contact admin to adjust rate limits.`,
+            sent,
+            failed,
+          };
+        }
 
         return {
           success: true,

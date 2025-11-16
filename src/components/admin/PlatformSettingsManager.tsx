@@ -42,6 +42,9 @@ export function PlatformSettingsManager() {
     complaintThreshold: 1,
     complaintAction: "UNSUBSCRIBE" as "BLOCK" | "UNSUBSCRIBE",
     enableAutoCleanup: true,
+    maxEmailsPerDay: 50000,
+    maxEmailsPerSecond: 14,
+    enableRateLimiting: true,
   });
 
   // Update form data when settings load
@@ -55,6 +58,9 @@ export function PlatformSettingsManager() {
       complaintThreshold: settings.complaintThreshold,
       complaintAction: settings.complaintAction as "BLOCK" | "UNSUBSCRIBE",
       enableAutoCleanup: settings.enableAutoCleanup,
+      maxEmailsPerDay: settings.maxEmailsPerDay,
+      maxEmailsPerSecond: settings.maxEmailsPerSecond,
+      enableRateLimiting: settings.enableRateLimiting,
     });
   }
 
@@ -245,6 +251,94 @@ export function PlatformSettingsManager() {
                   <p className="mt-1 text-sm text-gray-500">
                     Action to take when complaint threshold is reached
                     (recommended: Unsubscribe)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Rate Limiting Configuration */}
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h3 className="text-lg font-semibold">Rate Limiting (AWS SES)</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Configure email throughput limits to comply with AWS SES quotas
+              </p>
+              <div className="mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      Enable Rate Limiting
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Enforce throughput limits to prevent SES rejections
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        enableRateLimiting: !formData.enableRateLimiting,
+                      })
+                    }
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-[#b1d135] focus:ring-offset-2 focus:outline-none ${
+                      formData.enableRateLimiting
+                        ? "bg-[#b1d135]"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        formData.enableRateLimiting
+                          ? "translate-x-5"
+                          : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Maximum Emails Per Day
+                  </label>
+                  <input
+                    type="number"
+                    min="100"
+                    max="1000000"
+                    value={formData.maxEmailsPerDay}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxEmailsPerDay: parseInt(e.target.value),
+                      })
+                    }
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    AWS SES sandbox: 200/day, Production: 50,000+/day (check
+                    your SES quota)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Maximum Emails Per Minute
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="1000"
+                    value={formData.maxEmailsPerMinute}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        maxEmailsPerMinute: parseInt(e.target.value),
+                      })
+                    }
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    AWS SES sandbox: 1/second, Production: 14/second (default) -
+                    check your SES sending rate
                   </p>
                 </div>
               </div>

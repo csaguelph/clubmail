@@ -22,6 +22,11 @@ export const env = createEnv({
     AWS_SES_ACCESS_KEY_ID: z.string().optional(), // AWS access key
     AWS_SES_SECRET_ACCESS_KEY: z.string().optional(), // AWS secret key
     AWS_SES_FROM_EMAIL: z.string().email().optional(), // Verified sender email address
+    // Upstash QStash configuration for async email queue
+    QSTASH_URL: z.string().url().optional(), // QStash API URL (usually https://qstash.upstash.io)
+    QSTASH_TOKEN: z.string().optional(), // QStash API token
+    QSTASH_CURRENT_SIGNING_KEY: z.string().optional(), // For verifying webhook signatures
+    QSTASH_NEXT_SIGNING_KEY: z.string().optional(), // For key rotation
   },
 
   /**
@@ -53,6 +58,10 @@ export const env = createEnv({
     AWS_SES_ACCESS_KEY_ID: process.env.AWS_SES_ACCESS_KEY_ID,
     AWS_SES_SECRET_ACCESS_KEY: process.env.AWS_SES_SECRET_ACCESS_KEY,
     AWS_SES_FROM_EMAIL: process.env.AWS_SES_FROM_EMAIL,
+    QSTASH_URL: process.env.QSTASH_URL,
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
 
     // Client:
     NEXT_PUBLIC_BASE_URL:
