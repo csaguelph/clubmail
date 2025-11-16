@@ -108,7 +108,7 @@ export default function ClubsList() {
               {clubs.map((club) => (
                 <Link
                   key={club.id}
-                  href={`/admin/clubs/${club.id}`}
+                  href={`/clubs/${club.slug}`}
                   className="block px-6 py-4 transition hover:bg-gray-50"
                 >
                   <div className="flex items-center justify-between">

@@ -84,6 +84,7 @@ export const clubsRouter = createTRPCRouter({
                   id: true,
                   name: true,
                   email: true,
+                  role: true,
                 },
               },
             },
@@ -113,6 +114,19 @@ export const clubsRouter = createTRPCRouter({
       }
 
       // Get user's role in this club
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { role: true },
+      });
+
+      // Admins get CLUB_OWNER permissions
+      if (user?.role === "ADMIN") {
+        return {
+          ...club,
+          myRole: "CLUB_OWNER" as const,
+        };
+      }
+
       const membership = await ctx.db.clubMember.findUnique({
         where: {
           clubId_userId: {

@@ -271,30 +271,32 @@ export const clubViewerProcedure = protectedProcedure.use(
       return next({ ctx });
     }
 
-    // Extract clubId from input
-    const typedInput = input as { clubId?: string };
-    if (!typedInput.clubId) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "clubId is required",
-      });
+    // Extract clubId from input (optional for some queries like getClubBySlug)
+    const typedInput = input as { clubId?: string; slug?: string };
+
+    // If neither clubId nor slug is provided, we can't check permissions
+    if (!typedInput.clubId && !typedInput.slug) {
+      // This is for queries that will check permissions themselves
+      return next({ ctx });
     }
 
-    // Check club membership
-    const membership = await ctx.db.clubMember.findUnique({
-      where: {
-        clubId_userId: {
-          clubId: typedInput.clubId,
-          userId: ctx.session.user.id,
+    // If we have a clubId, check membership directly
+    if (typedInput.clubId) {
+      const membership = await ctx.db.clubMember.findUnique({
+        where: {
+          clubId_userId: {
+            clubId: typedInput.clubId,
+            userId: ctx.session.user.id,
+          },
         },
-      },
-    });
-
-    if (!membership || !allowedRoles.includes(membership.role)) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Insufficient permissions for this club",
       });
+
+      if (!membership || !allowedRoles.includes(membership.role)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions for this club",
+        });
+      }
     }
 
     return next({ ctx });

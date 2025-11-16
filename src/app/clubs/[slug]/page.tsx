@@ -40,7 +40,7 @@ export default async function ClubPage({
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Staff</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">
-            {club.members.length}
+            {club.members.filter((m) => m.user.role !== "ADMIN").length}
           </p>
         </div>
         <div className="rounded-lg bg-white p-6 shadow">
