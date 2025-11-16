@@ -9,6 +9,8 @@ export default function NewClubPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [gryphlifeId, setGryphlifeId] = useState("");
+  const [organizationEmail, setOrganizationEmail] = useState("");
   const [primaryContactEmails, setPrimaryContactEmails] = useState("");
 
   const createClub = api.admin.createClub.useMutation({
@@ -28,6 +30,8 @@ export default function NewClubPage() {
     createClub.mutate({
       name,
       slug,
+      gryphlifeId: gryphlifeId || undefined,
+      organizationEmail: organizationEmail || undefined,
       primaryContactEmails: emails,
     });
   };
@@ -109,6 +113,47 @@ export default function NewClubPage() {
             </div>
             <p className="mt-1 text-xs text-gray-500">
               Lowercase letters, numbers, and hyphens only
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="gryphlifeId"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Gryphlife ID
+            </label>
+            <input
+              type="text"
+              id="gryphlifeId"
+              value={gryphlifeId}
+              onChange={(e) => setGryphlifeId(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+              placeholder="e.g., 12345"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Optional Gryphlife organization ID
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="organizationEmail"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Organization Email
+            </label>
+            <input
+              type="email"
+              id="organizationEmail"
+              value={organizationEmail}
+              onChange={(e) => setOrganizationEmail(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+              placeholder="club@uoguelph.ca"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Optional organization email (will be used as default reply-to
+              email)
             </p>
           </div>
 
