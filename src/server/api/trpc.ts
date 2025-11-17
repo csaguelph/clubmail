@@ -272,7 +272,7 @@ export const clubViewerProcedure = protectedProcedure.use(
     }
 
     // Extract clubId from input (optional for some queries like getClubBySlug)
-    const typedInput = input as { clubId?: string; slug?: string };
+    const typedInput = (input as { clubId?: string; slug?: string }) ?? {};
 
     // If neither clubId nor slug is provided, we can't check permissions
     if (!typedInput.clubId && !typedInput.slug) {
