@@ -33,7 +33,7 @@ export const auth = betterAuth({
   plugins: [nextCookies()],
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
-      // Restrict Microsoft OAuth to @uoguelph.ca emails only
+      // OAuth callback handler
       if (ctx.path === "/callback/:id") {
         const newUser = ctx.context?.newSession?.user;
         const email = newUser?.email;
@@ -60,6 +60,26 @@ export const auth = betterAuth({
           throw ctx.redirect(
             `${env.NEXT_PUBLIC_BASE_URL}/login?error=domain_restricted`,
           );
+        }
+
+        // Update user name and image on OAuth login (for stub users or profile updates)
+        if (newUser?.id && newUser.name && !ctx.context?.isNewUser) {
+          const updatedData: { name?: string; image?: string | null } = {};
+
+          if (newUser.name) {
+            updatedData.name = newUser.name;
+          }
+
+          if (newUser.image !== undefined) {
+            updatedData.image = newUser.image;
+          }
+
+          if (Object.keys(updatedData).length > 0) {
+            await db.user.update({
+              where: { id: newUser.id },
+              data: updatedData,
+            });
+          }
         }
       }
     }),
