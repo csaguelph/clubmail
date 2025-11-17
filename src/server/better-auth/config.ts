@@ -13,6 +13,10 @@ export const auth = betterAuth({
     enabled: true,
   },
   socialProviders: {
+    microsoft: {
+      clientId: env.MICROSOFT_CLIENT_ID,
+      clientSecret: env.MICROSOFT_CLIENT_SECRET,
+    },
     github: {
       clientId: env.BETTER_AUTH_GITHUB_CLIENT_ID,
       clientSecret: env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
