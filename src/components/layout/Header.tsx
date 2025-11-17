@@ -136,7 +136,7 @@ export function Header({ user, userRole }: HeaderProps) {
                   <p className="font-medium text-gray-900">{user.name}</p>
                   <p className="text-gray-500">{user.email}</p>
                 </div>
-                <form action="/api/auth/sign-out" method="POST">
+                <form action="/api/auth/logout" method="POST">
                   <button
                     type="submit"
                     className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
@@ -147,7 +147,7 @@ export function Header({ user, userRole }: HeaderProps) {
               </div>
             ) : (
               <Link
-                href="/api/auth/sign-in"
+                href="/login"
                 className="rounded-md bg-[#b1d135] px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#9fbc2f]"
               >
                 Sign in

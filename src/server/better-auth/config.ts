@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 
 import { env } from "@/env";
@@ -7,19 +8,62 @@ import { db } from "@/server/db";
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
-    provider: "postgresql", // or "sqlite" or "mysql"
+    provider: "postgresql",
   }),
   emailAndPassword: {
     enabled: true,
   },
   socialProviders: {
-    github: {
-      clientId: env.BETTER_AUTH_GITHUB_CLIENT_ID,
-      clientSecret: env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
-      redirectURI: `${env.NEXT_PUBLIC_BASE_URL}/api/auth/callback/github`,
+    microsoft: {
+      clientId: env.MICROSOFT_CLIENT_ID,
+      clientSecret: env.MICROSOFT_CLIENT_SECRET,
+      redirectURI: `${env.NEXT_PUBLIC_BASE_URL}/api/auth/callback/microsoft`,
     },
+    // Only enable GitHub in dev when credentials are available
+    ...(env.BETTER_AUTH_GITHUB_CLIENT_ID && env.BETTER_AUTH_GITHUB_CLIENT_SECRET
+      ? {
+          github: {
+            clientId: env.BETTER_AUTH_GITHUB_CLIENT_ID,
+            clientSecret: env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
+            redirectURI: `${env.NEXT_PUBLIC_BASE_URL}/api/auth/callback/github`,
+          },
+        }
+      : {}),
   },
   plugins: [nextCookies()],
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      // Restrict Microsoft OAuth to @uoguelph.ca emails only
+      if (ctx.path === "/callback/:id") {
+        const newUser = ctx.context?.newSession?.user;
+        const email = newUser?.email;
+
+        // Check if this is a Microsoft login
+        const url = ctx.request?.url ?? "";
+        const isMicrosoft = url.includes("microsoft");
+
+        // Only restrict Microsoft logins
+        if (isMicrosoft && email && !email.endsWith("@uoguelph.ca")) {
+          console.error("Blocking non-UofG Microsoft email:", email);
+
+          // Delete the user and account that were just created
+          if (newUser?.id) {
+            await db.account.deleteMany({
+              where: { userId: newUser.id },
+            });
+            await db.user.delete({
+              where: { id: newUser.id },
+            });
+          }
+
+          // Redirect to login page with error message
+          throw ctx.redirect(
+            `${env.NEXT_PUBLIC_BASE_URL}/login?error=domain_restricted`,
+          );
+        }
+      }
+    }),
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;
