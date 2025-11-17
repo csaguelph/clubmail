@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { APIError, createAuthMiddleware } from "better-auth/api";
+import { createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 
 import { env } from "@/env";
@@ -32,16 +32,34 @@ export const auth = betterAuth({
   },
   plugins: [nextCookies()],
   hooks: {
-    before: createAuthMiddleware(async (ctx) => {
+    after: createAuthMiddleware(async (ctx) => {
       // Restrict Microsoft OAuth to @uoguelph.ca emails only
-      if (ctx.path === "/callback/microsoft") {
-        const email = ctx.body?.email || ctx.context?.user?.email;
+      if (ctx.path === "/callback/:id") {
+        const newUser = ctx.context?.newSession?.user;
+        const email = newUser?.email;
 
-        if (email && !email.endsWith("@uoguelph.ca")) {
-          throw new APIError("FORBIDDEN", {
-            message:
-              "Access restricted to @uoguelph.ca email addresses only. Please sign in with your University of Guelph email.",
-          });
+        // Check if this is a Microsoft login
+        const url = ctx.request?.url || "";
+        const isMicrosoft = url.includes("microsoft");
+
+        // Only restrict Microsoft logins
+        if (isMicrosoft && email && !email.endsWith("@uoguelph.ca")) {
+          console.error("Blocking non-UofG Microsoft email:", email);
+
+          // Delete the user and account that were just created
+          if (newUser?.id) {
+            await db.account.deleteMany({
+              where: { userId: newUser.id },
+            });
+            await db.user.delete({
+              where: { id: newUser.id },
+            });
+          }
+
+          // Redirect to login page with error message
+          throw ctx.redirect(
+            `${env.NEXT_PUBLIC_BASE_URL}/login?error=domain_restricted`,
+          );
         }
       }
     }),

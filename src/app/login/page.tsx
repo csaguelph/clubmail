@@ -4,7 +4,11 @@ import { env } from "@/env";
 import { auth } from "@/server/better-auth";
 import { getSession } from "@/server/better-auth/server";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await getSession();
 
   // If already logged in, redirect to clubs
@@ -16,6 +20,10 @@ export default async function LoginPage() {
   const isGitHubEnabled =
     !!env.BETTER_AUTH_GITHUB_CLIENT_ID &&
     !!env.BETTER_AUTH_GITHUB_CLIENT_SECRET;
+
+  // Get error from URL params
+  const params = await searchParams;
+  const error = params.error;
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4 py-12">
@@ -29,6 +37,37 @@ export default async function LoginPage() {
             </h1>
             <p className="text-gray-600">Sign in to your account</p>
           </div>
+
+          {/* Error Message */}
+          {error === "domain_restricted" && (
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start">
+                <svg
+                  className="mt-0.5 h-5 w-5 shrink-0 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    Access Restricted
+                  </h3>
+                  <p className="mt-1 text-sm text-red-700">
+                    Microsoft sign-in is restricted to @uoguelph.ca email
+                    addresses only. Please sign in with your University of
+                    Guelph email.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Sign-in Options */}
           <div className="space-y-4">
@@ -101,23 +140,11 @@ export default async function LoginPage() {
             )}
           </div>
 
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-gray-500">
-                University of Guelph only
-              </span>
-            </div>
-          </div>
-
           {/* Info text */}
-          <p className="text-center text-sm text-gray-500">
-            Microsoft sign-in is restricted to{" "}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Sign-in is restricted to{" "}
             <span className="font-medium text-gray-700">@uoguelph.ca</span>{" "}
-            email addresses
+            accounts.
           </p>
         </div>
 
