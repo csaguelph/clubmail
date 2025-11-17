@@ -132,6 +132,17 @@ export function Header({ user, userRole }: HeaderProps) {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-3">
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt={user.name}
+                    className="h-10 w-10 rounded-full ring-2 ring-white"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#b1d135] text-sm font-semibold text-gray-900 ring-2 ring-white">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="text-sm">
                   <p className="font-medium text-gray-900">{user.name}</p>
                   <p className="text-gray-500">{user.email}</p>
