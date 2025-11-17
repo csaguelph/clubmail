@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { env } from "@/env";
@@ -150,12 +151,12 @@ export default async function LoginPage({
 
         {/* Back to home */}
         <div className="mt-6 text-center">
-          <a
+          <Link
             href="/"
             className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
           >
             ← Back to home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

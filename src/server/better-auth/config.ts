@@ -39,7 +39,7 @@ export const auth = betterAuth({
         const email = newUser?.email;
 
         // Check if this is a Microsoft login
-        const url = ctx.request?.url || "";
+        const url = ctx.request?.url ?? "";
         const isMicrosoft = url.includes("microsoft");
 
         // Only restrict Microsoft logins
