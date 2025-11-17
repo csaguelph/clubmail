@@ -1,8 +1,6 @@
 import { BarChart3, Layout, Mail, Shield, Users, Zap } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-import { auth } from "@/server/better-auth";
 import { getSession } from "@/server/better-auth/server";
 import { HydrateClient } from "@/trpc/server";
 
@@ -30,26 +28,12 @@ export default async function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col gap-4 sm:flex-row">
                 {!session ? (
-                  <form>
-                    <button
-                      className="rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
-                      formAction={async () => {
-                        "use server";
-                        const res = await auth.api.signInSocial({
-                          body: {
-                            provider: "microsoft",
-                            callbackURL: "/clubs",
-                          },
-                        });
-                        if (!res.url) {
-                          throw new Error("No URL returned from signInSocial");
-                        }
-                        redirect(res.url);
-                      }}
-                    >
-                      Get Started
-                    </button>
-                  </form>
+                  <Link
+                    href="/login"
+                    className="rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
+                  >
+                    Get Started
+                  </Link>
                 ) : (
                   <Link
                     href="/clubs"
@@ -239,26 +223,12 @@ export default async function Home() {
                 : "Sign in to get started"}
             </p>
             {!session ? (
-              <form className="inline-block">
-                <button
-                  className="rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
-                  formAction={async () => {
-                    "use server";
-                    const res = await auth.api.signInSocial({
-                      body: {
-                        provider: "microsoft",
-                        callbackURL: "/clubs",
-                      },
-                    });
-                    if (!res.url) {
-                      throw new Error("No URL returned from signInSocial");
-                    }
-                    redirect(res.url);
-                  }}
-                >
-                  Sign in with Microsoft
-                </button>
-              </form>
+              <Link
+                href="/login"
+                className="inline-block rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
+              >
+                Sign in with Microsoft
+              </Link>
             ) : (
               <Link
                 href="/clubs"
