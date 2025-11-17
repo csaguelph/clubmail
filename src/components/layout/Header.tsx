@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -133,9 +134,11 @@ export function Header({ user, userRole }: HeaderProps) {
             {user ? (
               <div className="flex items-center space-x-3">
                 {user.image ? (
-                  <img
+                  <Image
                     src={user.image}
                     alt={user.name}
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full ring-2 ring-white"
                   />
                 ) : (

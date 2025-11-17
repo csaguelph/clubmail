@@ -31,22 +31,23 @@ export const auth = betterAuth({
       : {}),
   },
   plugins: [nextCookies()],
+  account: {
+    accountLinking: {
+      enabled: true,
+    },
+  },
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
-      // OAuth callback handler
       if (ctx.path === "/callback/:id") {
         const newUser = ctx.context?.newSession?.user;
         const email = newUser?.email;
-
-        // Check if this is a Microsoft login
         const url = ctx.request?.url ?? "";
         const isMicrosoft = url.includes("microsoft");
 
-        // Only restrict Microsoft logins
+        // Restrict Microsoft OAuth to @uoguelph.ca emails only
         if (isMicrosoft && email && !email.endsWith("@uoguelph.ca")) {
           console.error("Blocking non-UofG Microsoft email:", email);
 
-          // Delete the user and account that were just created
           if (newUser?.id) {
             await db.account.deleteMany({
               where: { userId: newUser.id },
@@ -56,29 +57,39 @@ export const auth = betterAuth({
             });
           }
 
-          // Redirect to login page with error message
           throw ctx.redirect(
             `${env.NEXT_PUBLIC_BASE_URL}/login?error=domain_restricted`,
           );
         }
 
-        // Update user name and image on OAuth login (for stub users or profile updates)
-        if (newUser?.id && newUser.name && !ctx.context?.isNewUser) {
-          const updatedData: { name?: string; image?: string | null } = {};
+        // Update user name from Microsoft OAuth token
+        if (newUser?.id && isMicrosoft) {
+          const account = await db.account.findFirst({
+            where: {
+              userId: newUser.id,
+              providerId: "microsoft",
+            },
+          });
 
-          if (newUser.name) {
-            updatedData.name = newUser.name;
-          }
+          if (account?.idToken) {
+            try {
+              // Decode JWT payload to get user's name from Microsoft
+              const payload = JSON.parse(
+                Buffer.from(
+                  account.idToken.split(".")[1]!,
+                  "base64",
+                ).toString(),
+              ) as { name?: string };
 
-          if (newUser.image !== undefined) {
-            updatedData.image = newUser.image;
-          }
-
-          if (Object.keys(updatedData).length > 0) {
-            await db.user.update({
-              where: { id: newUser.id },
-              data: updatedData,
-            });
+              if (payload.name) {
+                await db.user.update({
+                  where: { id: newUser.id },
+                  data: { name: payload.name },
+                });
+              }
+            } catch (error) {
+              console.error("Failed to decode ID token:", error);
+            }
           }
         }
       }
