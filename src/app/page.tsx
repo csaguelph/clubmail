@@ -227,7 +227,7 @@ export default async function Home() {
                 href="/login"
                 className="inline-block rounded-lg bg-[#b1d135] px-8 py-4 text-lg font-semibold text-slate-900 transition hover:bg-[#a0c030]"
               >
-                Sign in with Microsoft
+                Get Started
               </Link>
             ) : (
               <Link
