@@ -2,16 +2,22 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  clubOwnerProcedure,
-  clubViewerProcedure,
+  checkClubPermission,
   createTRPCRouter,
+  protectedProcedure,
 } from "@/server/api/trpc";
 
 export const clubSettingsRouter = createTRPCRouter({
   // Get club settings
-  getSettings: clubViewerProcedure
+  getSettings: protectedProcedure
     .input(z.object({ clubId: z.string() }))
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const settings = await ctx.db.clubSettings.findUnique({
         where: { clubId: input.clubId },
       });
@@ -27,7 +33,7 @@ export const clubSettingsRouter = createTRPCRouter({
     }),
 
   // Update club settings
-  updateSettings: clubOwnerProcedure
+  updateSettings: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -42,6 +48,8 @@ export const clubSettingsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, ["CLUB_OWNER"]);
+
       const { clubId, ...updateData } = input;
 
       const settings = await ctx.db.clubSettings.update({

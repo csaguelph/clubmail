@@ -2,15 +2,15 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  clubEditorProcedure,
-  clubViewerProcedure,
+  checkClubPermission,
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 
 export const subscribersRouter = createTRPCRouter({
   // List subscribers for a club
-  listSubscribers: clubViewerProcedure
+  listSubscribers: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -21,6 +21,11 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
       const where: {
         clubId: string;
         status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";
@@ -73,7 +78,7 @@ export const subscribersRouter = createTRPCRouter({
     }),
 
   // Get subscriber count
-  getSubscriberCount: clubViewerProcedure
+  getSubscriberCount: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -82,6 +87,11 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
       const where: {
         clubId: string;
         status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";
@@ -108,7 +118,7 @@ export const subscribersRouter = createTRPCRouter({
     }),
 
   // Create a single subscriber
-  createSubscriber: clubEditorProcedure
+  createSubscriber: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -118,6 +128,12 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Check permissions after input validation
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Check if subscriber already exists
       const existing = await ctx.db.subscriber.findUnique({
         where: {
@@ -190,7 +206,7 @@ export const subscribersRouter = createTRPCRouter({
     }),
 
   // Bulk import subscribers from CSV data
-  bulkImport: clubEditorProcedure
+  bulkImport: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -204,6 +220,10 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
       // Verify list belongs to club
       const list = await ctx.db.emailList.findFirst({
         where: {
@@ -302,7 +322,7 @@ export const subscribersRouter = createTRPCRouter({
     }),
 
   // Update a subscriber
-  updateSubscriber: clubEditorProcedure
+  updateSubscriber: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -312,6 +332,10 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
       const { clubId, subscriberId, ...updateData } = input;
 
       // Verify subscriber belongs to club
@@ -338,7 +362,7 @@ export const subscribersRouter = createTRPCRouter({
     }),
 
   // Delete a subscriber
-  deleteSubscriber: clubEditorProcedure
+  deleteSubscriber: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -346,6 +370,10 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
       // Verify subscriber belongs to club
       const subscriber = await ctx.db.subscriber.findFirst({
         where: {
@@ -369,7 +397,7 @@ export const subscribersRouter = createTRPCRouter({
     }),
 
   // Export subscribers as CSV data
-  exportSubscribers: clubViewerProcedure
+  exportSubscribers: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -378,6 +406,11 @@ export const subscribersRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
       const where: {
         clubId: string;
         status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";

@@ -2,16 +2,22 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  clubOwnerProcedure,
-  clubViewerProcedure,
+  checkClubPermission,
   createTRPCRouter,
+  protectedProcedure,
 } from "@/server/api/trpc";
 
 export const clubMembersRouter = createTRPCRouter({
   // List members of a club
-  listMembers: clubViewerProcedure
+  listMembers: protectedProcedure
     .input(z.object({ clubId: z.string() }))
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const members = await ctx.db.clubMember.findMany({
         where: { clubId: input.clubId },
         include: {
@@ -34,7 +40,7 @@ export const clubMembersRouter = createTRPCRouter({
     }),
 
   // Add a member to a club
-  addMember: clubOwnerProcedure
+  addMember: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -43,6 +49,8 @@ export const clubMembersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, ["CLUB_OWNER"]);
+
       // Find user by email
       let user = await ctx.db.user.findUnique({
         where: { email: input.userEmail },
@@ -98,7 +106,7 @@ export const clubMembersRouter = createTRPCRouter({
     }),
 
   // Update a member's role
-  updateMemberRole: clubOwnerProcedure
+  updateMemberRole: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -107,6 +115,8 @@ export const clubMembersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, ["CLUB_OWNER"]);
+
       // Check if member exists
       const member = await ctx.db.clubMember.findUnique({
         where: {
@@ -168,7 +178,7 @@ export const clubMembersRouter = createTRPCRouter({
     }),
 
   // Remove a member from a club
-  removeMember: clubOwnerProcedure
+  removeMember: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -176,6 +186,8 @@ export const clubMembersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, ["CLUB_OWNER"]);
+
       // Check if member exists
       const member = await ctx.db.clubMember.findUnique({
         where: {

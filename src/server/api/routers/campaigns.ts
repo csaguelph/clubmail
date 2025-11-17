@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  clubEditorProcedure,
-  clubViewerProcedure,
+  checkClubPermission,
   createTRPCRouter,
+  protectedProcedure,
 } from "@/server/api/trpc";
 import {
   batchSendCampaignEmails,
@@ -19,7 +19,7 @@ import {
 
 export const campaignsRouter = createTRPCRouter({
   // List campaigns for a club
-  listCampaigns: clubViewerProcedure
+  listCampaigns: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -38,6 +38,12 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const where: {
         clubId: string;
         status?:
@@ -95,7 +101,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Get a specific campaign
-  getCampaign: clubViewerProcedure
+  getCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -103,6 +109,12 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const campaign = await ctx.db.campaign.findFirst({
         where: {
           id: input.campaignId,
@@ -141,7 +153,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Get campaign statistics
-  getCampaignStats: clubViewerProcedure
+  getCampaignStats: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -149,6 +161,12 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -213,7 +231,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Get campaign engagement statistics (opens and clicks)
-  getCampaignEngagement: clubViewerProcedure
+  getCampaignEngagement: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -221,6 +239,12 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -294,7 +318,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Create a new campaign
-  createCampaign: clubEditorProcedure
+  createCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -307,6 +331,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify email list belongs to club
       const emailList = await ctx.db.emailList.findFirst({
         where: {
@@ -356,7 +385,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Update a campaign
-  updateCampaign: clubEditorProcedure
+  updateCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -370,6 +399,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       const { clubId, campaignId, ...updateData } = input;
 
       // Verify campaign belongs to club and is editable
@@ -404,7 +438,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Delete a campaign
-  deleteCampaign: clubEditorProcedure
+  deleteCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -412,6 +446,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -443,7 +482,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Send test email
-  sendTest: clubEditorProcedure
+  sendTest: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -452,6 +491,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -513,7 +557,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Send campaign
-  sendCampaign: clubEditorProcedure
+  sendCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -521,6 +565,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -761,7 +810,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Duplicate a campaign
-  duplicateCampaign: clubEditorProcedure
+  duplicateCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -769,6 +818,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Get the original campaign
       const originalCampaign = await ctx.db.campaign.findFirst({
         where: {
@@ -805,7 +859,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Schedule a campaign for future delivery
-  scheduleCampaign: clubEditorProcedure
+  scheduleCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -814,6 +868,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -876,7 +935,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Cancel a scheduled campaign
-  cancelCampaign: clubEditorProcedure
+  cancelCampaign: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -884,6 +943,11 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify campaign belongs to club
       const campaign = await ctx.db.campaign.findFirst({
         where: {
@@ -925,7 +989,7 @@ export const campaignsRouter = createTRPCRouter({
     }),
 
   // Get scheduled campaigns for a club (for calendar view)
-  getScheduledCampaigns: clubViewerProcedure
+  getScheduledCampaigns: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -934,6 +998,12 @@ export const campaignsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const where: {
         clubId: string;
         status: "SCHEDULED";

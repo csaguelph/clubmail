@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  clubViewerProcedure,
+  checkClubPermission,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
@@ -179,9 +179,15 @@ export const clubsRouter = createTRPCRouter({
     }),
 
   // Get detailed information about a specific club
-  getClubDetails: clubViewerProcedure
+  getClubDetails: protectedProcedure
     .input(z.object({ clubId: z.string() }))
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const club = await ctx.db.club.findUnique({
         where: { id: input.clubId },
         include: {

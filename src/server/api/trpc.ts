@@ -155,150 +155,59 @@ export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 });
 
 /**
- * Club owner procedure
- *
- * Requires the user to be a CLUB_OWNER of the specified club (or an admin).
+ * Helper function to check if user has required club role
+ * Call this INSIDE your procedure after input validation, not in middleware
  */
-export const clubOwnerProcedure = protectedProcedure.use(
-  async ({ ctx, next, input }) => {
-    const allowedRoles = ["CLUB_OWNER"];
+export async function checkClubPermission(
+  ctx: { db: typeof db; session: { user: { id: string } } },
+  clubId: string,
+  allowedRoles: string[],
+): Promise<void> {
+  // Check if user is admin (admins bypass club role checks)
+  const user = await ctx.db.user.findUnique({
+    where: { id: ctx.session.user.id },
+    select: { role: true },
+  });
 
-    // Check if user is admin (admins bypass club role checks)
-    const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
-      select: { role: true },
-    });
+  if (user?.role === "ADMIN") {
+    return; // Admin has access
+  }
 
-    if (user?.role === "ADMIN") {
-      return next({ ctx });
-    }
-
-    // Extract clubId from input
-    const typedInput = input as { clubId?: string };
-    if (!typedInput.clubId) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "clubId is required",
-      });
-    }
-
-    // Check club membership
-    const membership = await ctx.db.clubMember.findUnique({
-      where: {
-        clubId_userId: {
-          clubId: typedInput.clubId,
-          userId: ctx.session.user.id,
-        },
+  // Check club membership
+  const membership = await ctx.db.clubMember.findUnique({
+    where: {
+      clubId_userId: {
+        clubId,
+        userId: ctx.session.user.id,
       },
+    },
+  });
+
+  if (!membership || !allowedRoles.includes(membership.role)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Insufficient permissions for this club",
     });
-
-    if (!membership || !allowedRoles.includes(membership.role)) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Insufficient permissions for this club",
-      });
-    }
-
-    return next({ ctx });
-  },
-);
+  }
+}
 
 /**
- * Club editor procedure
- *
- * Requires the user to be a CLUB_OWNER or CLUB_EDITOR of the specified club (or an admin).
+ * Club owner procedure - DEPRECATED
+ * Use protectedProcedure and call checkClubPermission() inside instead
+ * @deprecated
  */
-export const clubEditorProcedure = protectedProcedure.use(
-  async ({ ctx, next, input }) => {
-    const allowedRoles = ["CLUB_OWNER", "CLUB_EDITOR"];
-
-    // Check if user is admin (admins bypass club role checks)
-    const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
-      select: { role: true },
-    });
-
-    if (user?.role === "ADMIN") {
-      return next({ ctx });
-    }
-
-    // Extract clubId from input
-    const typedInput = input as { clubId?: string };
-    if (!typedInput.clubId) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "clubId is required",
-      });
-    }
-
-    // Check club membership
-    const membership = await ctx.db.clubMember.findUnique({
-      where: {
-        clubId_userId: {
-          clubId: typedInput.clubId,
-          userId: ctx.session.user.id,
-        },
-      },
-    });
-
-    if (!membership || !allowedRoles.includes(membership.role)) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Insufficient permissions for this club",
-      });
-    }
-
-    return next({ ctx });
-  },
-);
+export const clubOwnerProcedure = protectedProcedure;
 
 /**
- * Club viewer procedure
- *
- * Requires the user to be a member of the specified club in any role (or an admin).
+ * Club editor procedure - DEPRECATED
+ * Use protectedProcedure and call checkClubPermission() inside instead
+ * @deprecated
  */
-export const clubViewerProcedure = protectedProcedure.use(
-  async ({ ctx, next, input }) => {
-    const allowedRoles = ["CLUB_OWNER", "CLUB_EDITOR", "CLUB_VIEWER"];
+export const clubEditorProcedure = protectedProcedure;
 
-    // Check if user is admin (admins bypass club role checks)
-    const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
-      select: { role: true },
-    });
-
-    if (user?.role === "ADMIN") {
-      return next({ ctx });
-    }
-
-    // Extract clubId from input (optional for some queries like getClubBySlug)
-    const typedInput = (input as { clubId?: string; slug?: string }) ?? {};
-
-    // If neither clubId nor slug is provided, we can't check permissions
-    if (!typedInput.clubId && !typedInput.slug) {
-      // This is for queries that will check permissions themselves
-      return next({ ctx });
-    }
-
-    // If we have a clubId, check membership directly
-    if (typedInput.clubId) {
-      const membership = await ctx.db.clubMember.findUnique({
-        where: {
-          clubId_userId: {
-            clubId: typedInput.clubId,
-            userId: ctx.session.user.id,
-          },
-        },
-      });
-
-      if (!membership || !allowedRoles.includes(membership.role)) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Insufficient permissions for this club",
-        });
-      }
-    }
-
-    return next({ ctx });
-  },
-);
+/**
+ * Club viewer procedure - DEPRECATED
+ * Use protectedProcedure and call checkClubPermission() inside instead
+ * @deprecated
+ */
+export const clubViewerProcedure = protectedProcedure;

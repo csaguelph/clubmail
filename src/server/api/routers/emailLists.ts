@@ -2,16 +2,22 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  clubEditorProcedure,
-  clubViewerProcedure,
+  checkClubPermission,
   createTRPCRouter,
+  protectedProcedure,
 } from "@/server/api/trpc";
 
 export const emailListsRouter = createTRPCRouter({
   // List email lists for a club
-  listLists: clubViewerProcedure
+  listLists: protectedProcedure
     .input(z.object({ clubId: z.string() }))
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const lists = await ctx.db.emailList.findMany({
         where: { clubId: input.clubId },
         orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
@@ -29,9 +35,15 @@ export const emailListsRouter = createTRPCRouter({
     }),
 
   // Get default list for a club
-  getDefaultList: clubViewerProcedure
+  getDefaultList: protectedProcedure
     .input(z.object({ clubId: z.string() }))
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const list = await ctx.db.emailList.findFirst({
         where: {
           clubId: input.clubId,
@@ -58,7 +70,7 @@ export const emailListsRouter = createTRPCRouter({
     }),
 
   // Get a specific list
-  getList: clubViewerProcedure
+  getList: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -66,6 +78,12 @@ export const emailListsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
       const list = await ctx.db.emailList.findFirst({
         where: {
           id: input.listId,
@@ -92,7 +110,7 @@ export const emailListsRouter = createTRPCRouter({
     }),
 
   // Create a new email list
-  createList: clubEditorProcedure
+  createList: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -101,6 +119,11 @@ export const emailListsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       const list = await ctx.db.emailList.create({
         data: {
           clubId: input.clubId,
@@ -114,7 +137,7 @@ export const emailListsRouter = createTRPCRouter({
     }),
 
   // Update an email list
-  updateList: clubEditorProcedure
+  updateList: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -124,6 +147,11 @@ export const emailListsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       const { clubId, listId, ...updateData } = input;
 
       // Verify list belongs to club
@@ -150,7 +178,7 @@ export const emailListsRouter = createTRPCRouter({
     }),
 
   // Delete an email list
-  deleteList: clubEditorProcedure
+  deleteList: protectedProcedure
     .input(
       z.object({
         clubId: z.string(),
@@ -158,6 +186,11 @@ export const emailListsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
       // Verify list belongs to club
       const list = await ctx.db.emailList.findFirst({
         where: {
