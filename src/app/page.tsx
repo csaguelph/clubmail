@@ -37,7 +37,7 @@ export default async function Home() {
                         "use server";
                         const res = await auth.api.signInSocial({
                           body: {
-                            provider: "github",
+                            provider: "microsoft",
                             callbackURL: "/clubs",
                           },
                         });
@@ -246,7 +246,7 @@ export default async function Home() {
                     "use server";
                     const res = await auth.api.signInSocial({
                       body: {
-                        provider: "github",
+                        provider: "microsoft",
                         callbackURL: "/clubs",
                       },
                     });
@@ -256,7 +256,7 @@ export default async function Home() {
                     redirect(res.url);
                   }}
                 >
-                  Sign in with GitHub
+                  Sign in with Microsoft
                 </button>
               </form>
             ) : (
