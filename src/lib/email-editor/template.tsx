@@ -234,12 +234,34 @@ const socialIconsContainer = {
 const socialIcons: Record<string, string> = socialIconSvgs;
 
 function renderSocialIcons(links: Record<string, string>): string {
-  const iconSize = 24;
   const iconSpacing = 12;
   const iconColor = "#8898aa";
 
-  const icons = Object.entries(links)
+  // Preferred order for university students (most popular first)
+  const preferredOrder = [
+    "instagram",
+    "tiktok",
+    "discord",
+    "twitter",
+    "youtube",
+    "facebook",
+    "linkedin",
+    "github",
+  ];
+
+  // Sort entries by preferred order, then filter and map
+  const sortedEntries = Object.entries(links)
     .filter(([_, url]) => url && url.trim() !== "")
+    .sort(([platformA], [platformB]) => {
+      const indexA = preferredOrder.indexOf(platformA.toLowerCase());
+      const indexB = preferredOrder.indexOf(platformB.toLowerCase());
+      // If platform not in preferred order, put it at the end
+      const orderA = indexA === -1 ? Infinity : indexA;
+      const orderB = indexB === -1 ? Infinity : indexB;
+      return orderA - orderB;
+    });
+
+  const icons = sortedEntries
     .map(([platform, url]) => {
       const iconSvg = socialIcons[platform.toLowerCase()];
       if (!iconSvg) return "";
