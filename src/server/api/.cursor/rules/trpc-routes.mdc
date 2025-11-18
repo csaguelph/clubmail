@@ -1,0 +1,22 @@
+---
+description: tRPC router and procedure conventions
+globs:
+  - "src/server/api/**/*"
+alwaysApply: true
+---
+
+# Routers
+
+- Define all routers here, grouped by domain (e.g. `clubRouter`, `campaignRouter`).
+- Use shared helpers (`createTRPCRouter`, `publicProcedure`, `protectedProcedure`).
+
+# Procedures
+
+- Every procedure uses **Zod** for input validation.
+- No `any` on inputs/outputs; keep context typed.
+- Return JSON-serializable data or Prisma payloads shaped via `select`/`include`.
+
+# Types & DB
+
+- Use `RouterInputs/RouterOutputs` for types at call sites.
+- Use `@/server/db` for Prisma access, never `new PrismaClient()`.

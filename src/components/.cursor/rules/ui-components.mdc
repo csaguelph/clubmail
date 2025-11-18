@@ -1,0 +1,40 @@
+---
+description: UI component and Tailwind rules for src/components
+globs:
+  - "src/components/**/*"
+alwaysApply: true
+---
+
+# Component Structure
+
+- Components in `src/components` should be framework-agnostic where reasonable and focused on **presentation** plus light logic.
+- Prefer smaller, reusable primitives (buttons, inputs, layout wrappers) composed into more complex components.
+
+---
+description: UI component, Tailwind, and Headless UI rules
+globs:
+  - "src/components/**/*"
+alwaysApply: true
+---
+
+# Components
+
+- Make components small, reusable, and mostly presentational.
+- Build primitives (buttons, inputs, layout pieces) and compose them.
+
+# Styling
+
+- Use Tailwind utilities for styling.
+- Use `clsx()`/`cn` for dynamic classes.
+- Avoid repeating long Tailwind strings; extract variants or smaller components.
+
+# Accessibility
+
+- Use semantic interactive elements (`button`, `input`, `a`) with appropriate `aria-*`.
+- Preserve visible focus states.
+- For dialogs/menus/etc., ensure keyboard navigation and roles/labels.
+
+# Headless UI
+
+- Prefer **Headless UI** (`Dialog`, `Menu`, `Listbox`, `Disclosure`, `Switch`, etc.) for common interactive patterns.
+- Rely on Headless UI for behavior/accessibility; style with Tailwind.

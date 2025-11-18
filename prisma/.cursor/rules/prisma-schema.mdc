@@ -1,0 +1,23 @@
+---
+description: Prisma schema and migration rules
+globs:
+  - "prisma/**/*"
+alwaysApply: true
+---
+
+# Schema & Migrations
+
+- Define DB schema in `prisma/schema.prisma`.
+- Use Prisma Migrate for changes; keep migrations small and focused.
+
+# Types & Queries
+
+- Prefer generated Prisma types (e.g. payload helpers) over custom interfaces.
+- Use explicit `select`/`include` in queries for predictable types and minimal overfetching.
+
+# Coordination
+
+- When changing schema, also update:
+  - tRPC routers in `src/server/api`.
+  - UI/forms that depend on those models.
+- After schema changes, re-generate Prisma client and re-run type checks.

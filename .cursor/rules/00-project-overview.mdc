@@ -1,0 +1,38 @@
+---
+description: Project-wide T3 stack and coding guidelines
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Stack
+
+- Use **Next.js + tRPC + Prisma + BetterAuth + TailwindCSS + TypeScript**.
+- Prefer type-safe, end-to-end flows (no loose `any`).
+
+# Coding
+
+- Use **TypeScript only** (`.ts`, `.tsx`), no `.js`/`.jsx`.
+- Use **functional React components with hooks**, never class components.
+- In `src/app`, prefer **server components**; add `"use client"` only for interactivity or browser APIs.
+- Keep route files thin; move reusable logic to `src/components` or `src/lib`.
+
+# Data & Types
+
+- Derive types from **tRPC routers**, **Zod schemas**, or **Prisma** instead of hand-written interfaces.
+- Use shared/domain types in `src/types` only when not inferrable.
+- Prefer `Awaited<ReturnType<typeof fn>>`, `RouterInputs/RouterOutputs`, and Prisma payload helpers.
+
+# Tooling
+
+- Write code to pass `pnpm lint` and `pnpm typecheck`.
+- Before commits/PRs, assume both commands should succeed.
+
+# Layout
+
+- Components: `src/components/**`
+- Utilities: `src/lib/**`
+- tRPC / backend: `src/server/api/**`
+- Prisma: `prisma/schema.prisma`, `prisma/migrations/**`
+- BetterAuth: `src/server/better-auth/config.ts`
+- Env: `src/env.js` (+ typed access)

@@ -1,0 +1,31 @@
+---
+description: Frontend React, Tailwind, and component style rules
+globs:
+  - "src/app/**/*"
+  - "src/components/**/*"
+  - "src/lib/**/*"
+alwaysApply: false
+---
+
+# React
+
+- Use **functional components** with hooks; no class components.
+- `src/app`: default to **server components**; add `"use client"` only when needed.
+- Keep pages thin; delegate complex UI/logic to `src/components` and `src/lib`.
+
+# Styling
+
+- Use **TailwindCSS** utilities for styling.
+- For conditional classes, use `clsx()`/`cn` instead of string concatenation.
+- Extract complex or repeated UI into reusable components.
+
+# Accessibility & Composition
+
+- Prefer semantic elements (`button`, `a`, `nav`, etc.) with basic `aria-*` where needed.
+- Ensure form inputs have labels and interactive elements are keyboard-focusable.
+- Favor small, composable components over deeply nested ones.
+
+# Headless UI
+
+- For dialogs, menus, listboxes, disclosures, switches, prefer **Headless UI** primitives.
+- Let Headless UI handle behavior/accessibility; style with Tailwind.
