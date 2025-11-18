@@ -2,7 +2,7 @@
 
 import { api } from "@/trpc/react";
 import { Loader2, Upload } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ export function MediaUploadButton({
   children,
 }: MediaUploadButtonProps) {
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadMutation = api.media.upload.useMutation({
     onSuccess: (data) => {
@@ -71,9 +72,14 @@ export function MediaUploadButton({
     [uploadMutation, clubId],
   );
 
+  const handleButtonClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
   return (
-    <label className={cn("cursor-pointer", className)}>
+    <>
       <input
+        ref={fileInputRef}
         type="file"
         className="hidden"
         accept={accept}
@@ -85,7 +91,8 @@ export function MediaUploadButton({
         variant="secondary"
         size="sm"
         disabled={uploading}
-        className="flex items-center gap-2"
+        onClick={handleButtonClick}
+        className={cn("flex items-center gap-2", className)}
       >
         {uploading ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -94,6 +101,6 @@ export function MediaUploadButton({
         )}
         {children ?? (uploading ? "Uploading..." : "Upload")}
       </Button>
-    </label>
+    </>
   );
 }
