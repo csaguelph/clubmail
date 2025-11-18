@@ -54,6 +54,7 @@ export default function SubscribersList({
     id: string;
     email: string;
     name: string | null;
+    status: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED" | "BLOCKED";
   } | null>(null);
   const [deletingSubscriber, setDeletingSubscriber] = useState<{
     id: string;
@@ -274,6 +275,7 @@ export default function SubscribersList({
       clubId,
       subscriberId: editingSubscriber.id,
       name: editingSubscriber.name,
+      status: editingSubscriber.status,
     });
   };
 
@@ -433,7 +435,11 @@ export default function SubscribersList({
                               email: subscriber.email,
                               currentStatus: subscriber.status,
                             });
-                            setNewStatus(subscriber.status);
+                            setNewStatus(
+                              subscriber.status === "BOUNCED"
+                                ? "SUBSCRIBED"
+                                : subscriber.status,
+                            );
                           }
                         }}
                         disabled={subscriber.status === "BLOCKED"}
@@ -472,6 +478,7 @@ export default function SubscribersList({
                               id: subscriber.id,
                               email: subscriber.email,
                               name: subscriber.name,
+                              status: subscriber.status,
                             });
                             setIsEditModalOpen(true);
                           }}
@@ -722,6 +729,46 @@ export default function SubscribersList({
                 />
               </div>
 
+              <div>
+                <label
+                  htmlFor="edit-status"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Status
+                </label>
+                <select
+                  id="edit-status"
+                  value={editingSubscriber?.status ?? "SUBSCRIBED"}
+                  onChange={(e) =>
+                    setEditingSubscriber(
+                      editingSubscriber
+                        ? {
+                            ...editingSubscriber,
+                            status: e.target.value as
+                              | "SUBSCRIBED"
+                              | "UNSUBSCRIBED"
+                              | "BOUNCED"
+                              | "BLOCKED",
+                          }
+                        : null,
+                    )
+                  }
+                  disabled={editingSubscriber?.status === "BLOCKED"}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
+                >
+                  <option value="SUBSCRIBED">Active</option>
+                  <option value="UNSUBSCRIBED">Unsubscribed</option>
+                  {editingSubscriber?.status === "BLOCKED" && (
+                    <option value="BLOCKED">Blocked</option>
+                  )}
+                </select>
+                {editingSubscriber?.status === "BLOCKED" && (
+                  <p className="mt-1 text-xs text-red-600">
+                    Blocked subscribers cannot have their status changed
+                  </p>
+                )}
+              </div>
+
               {updateSubscriber.error && (
                 <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
                   {updateSubscriber.error.message}
@@ -945,13 +992,7 @@ export default function SubscribersList({
                 >
                   <option value="SUBSCRIBED">Active</option>
                   <option value="UNSUBSCRIBED">Unsubscribed</option>
-                  <option value="BOUNCED">Bounced</option>
-                  <option value="BLOCKED">Blocked</option>
                 </select>
-                <p className="mt-2 text-xs text-gray-500">
-                  Note: Changing to &quot;Blocked&quot; will permanently prevent
-                  this subscriber from being changed to any other status.
-                </p>
               </div>
 
               {changeStatus.error && (
