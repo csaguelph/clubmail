@@ -1,14 +1,23 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import DeleteClubDialog from "@/components/admin/DeleteClubDialog";
 import { api } from "@/trpc/react";
 
 export default function ClubsList() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clubToDelete, setClubToDelete] = useState<{
+    id: string;
+    name: string;
+    stats: { members: number; campaigns: number; subscribers: number };
+  } | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -31,6 +40,50 @@ export default function ClubsList() {
     );
 
   const clubs = data?.pages.flatMap((page) => page.clubs) ?? [];
+
+  const utils = api.useUtils();
+  const deleteClubMutation = api.admin.deleteClub.useMutation({
+    onSuccess: () => {
+      // Invalidate and refetch clubs list
+      void utils.admin.listClubs.invalidate();
+      void utils.admin.getClubStats.invalidate();
+      // Close dialog and reset state
+      setDeleteDialogOpen(false);
+      setClubToDelete(null);
+      router.refresh();
+    },
+    onError: (error) => {
+      alert(`Failed to delete club: ${error.message}`);
+    },
+  });
+
+  const handleDeleteClick = (
+    e: React.MouseEvent,
+    club: {
+      id: string;
+      name: string;
+      _count: { members: number; campaigns: number; subscribers: number };
+    },
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setClubToDelete({
+      id: club.id,
+      name: club.name,
+      stats: {
+        members: club._count.members,
+        campaigns: club._count.campaigns,
+        subscribers: club._count.subscribers,
+      },
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (clubToDelete) {
+      deleteClubMutation.mutate({ clubId: clubToDelete.id });
+    }
+  };
 
   // Automatic infinite scroll
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -106,51 +159,61 @@ export default function ClubsList() {
           ) : (
             <>
               {clubs.map((club) => (
-                <Link
+                <div
                   key={club.id}
-                  href={`/clubs/${club.slug}`}
-                  className="block px-6 py-4 transition hover:bg-gray-50"
+                  className="group relative px-6 py-4 transition hover:bg-gray-50"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-sm font-medium text-gray-900">
-                          {club.name}
-                        </h3>
-                        {!club.isActive && (
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
-                            Inactive
-                          </span>
-                        )}
+                  <Link href={`/clubs/${club.slug}`} className="block">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-sm font-medium text-gray-900">
+                            {club.name}
+                          </h3>
+                          {!club.isActive && (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                          <span>/{club.slug}</span>
+                          <span>•</span>
+                          <span>{club._count.members} members</span>
+                          <span>•</span>
+                          <span>{club._count.campaigns} campaigns</span>
+                          <span>•</span>
+                          <span>{club._count.subscribers} subscribers</span>
+                        </div>
                       </div>
-                      <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                        <span>/{club.slug}</span>
-                        <span>•</span>
-                        <span>{club._count.members} members</span>
-                        <span>•</span>
-                        <span>{club._count.campaigns} campaigns</span>
-                        <span>•</span>
-                        <span>{club._count.subscribers} subscribers</span>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm text-gray-400">
+                          Created{" "}
+                          {new Date(club.createdAt).toLocaleDateString()}
+                        </span>
+                        <button
+                          onClick={(e) => handleDeleteClick(e, club)}
+                          className="rounded-md p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                          title="Delete club"
+                          aria-label={`Delete ${club.name}`}
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                        <svg
+                          className="h-5 w-5 text-gray-400"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path d="M9 5l7 7-7 7"></path>
+                        </svg>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-400">
-                        Created {new Date(club.createdAt).toLocaleDateString()}
-                      </span>
-                      <svg
-                        className="h-5 w-5 text-gray-400"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               ))}
               {hasNextPage && (
                 <div ref={loadMoreRef} className="px-6 py-4 text-center">
@@ -165,6 +228,21 @@ export default function ClubsList() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {clubToDelete && (
+        <DeleteClubDialog
+          isOpen={deleteDialogOpen}
+          onClose={() => {
+            setDeleteDialogOpen(false);
+            setClubToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          clubName={clubToDelete.name}
+          clubStats={clubToDelete.stats}
+          isDeleting={deleteClubMutation.isPending}
+        />
+      )}
     </>
   );
 }
