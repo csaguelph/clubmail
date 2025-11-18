@@ -1,3 +1,5 @@
+import type { inferRouterOutputs } from "@trpc/server";
+
 import { adminRouter } from "@/server/api/routers/admin";
 import { campaignsRouter } from "@/server/api/routers/campaigns";
 import { clubMembersRouter } from "@/server/api/routers/clubMembers";
@@ -28,6 +30,14 @@ export const appRouter = createTRPCRouter({
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
+
+/**
+ * Composite RouterOutputs types for frontend consumption
+ * These types are inferred from the router and can be used in components
+ * @example
+ * type ClubDetails = RouterOutputs['clubs']['getClubDetails']
+ */
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 /**
  * Create a server-side caller for the tRPC API.

@@ -6,11 +6,16 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import {
+  clubRoleSchema,
+  cuidSchema,
+  emailSchema,
+} from "@/server/api/validators";
 
 export const clubMembersRouter = createTRPCRouter({
   // List members of a club
   listMembers: protectedProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .query(async ({ ctx, input }) => {
       await checkClubPermission(ctx, input.clubId, [
         "CLUB_OWNER",
@@ -43,9 +48,9 @@ export const clubMembersRouter = createTRPCRouter({
   addMember: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        userEmail: z.string().email(),
-        role: z.enum(["CLUB_OWNER", "CLUB_EDITOR", "CLUB_VIEWER"]),
+        clubId: cuidSchema,
+        userEmail: emailSchema,
+        role: clubRoleSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -109,9 +114,9 @@ export const clubMembersRouter = createTRPCRouter({
   updateMemberRole: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
+        clubId: cuidSchema,
         userId: z.string(),
-        role: z.enum(["CLUB_OWNER", "CLUB_EDITOR", "CLUB_VIEWER"]),
+        role: clubRoleSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -181,7 +186,7 @@ export const clubMembersRouter = createTRPCRouter({
   removeMember: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
+        clubId: cuidSchema,
         userId: z.string(),
       }),
     )

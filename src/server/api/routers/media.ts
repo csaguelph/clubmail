@@ -3,6 +3,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import { cuidSchema } from "@/server/api/validators";
 import { db } from "@/server/db";
 import {
   deleteFromR2,
@@ -42,7 +43,7 @@ export const mediaRouter = createTRPCRouter({
         filename: z.string(),
         mimeType: z.string(),
         base64Data: z.string(), // Base64 encoded file data
-        clubId: z.string().optional(),
+        clubId: cuidSchema.optional(),
         altText: z.string().optional(),
       }),
     )
@@ -123,9 +124,9 @@ export const mediaRouter = createTRPCRouter({
   list: protectedProcedure
     .input(
       z.object({
-        clubId: z.string().optional(),
-        limit: z.number().min(1).max(100).default(50),
-        cursor: z.string().optional(),
+        clubId: cuidSchema.optional(),
+        limit: z.number().int().min(1).max(100).default(50),
+        cursor: cuidSchema.optional(),
         mimeTypeFilter: z
           .enum(["image", "document", "all"])
           .default("all")
@@ -271,7 +272,7 @@ export const mediaRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: cuidSchema,
         altText: z.string().optional(),
       }),
     )
@@ -388,7 +389,7 @@ export const mediaRouter = createTRPCRouter({
    * Bulk delete media (admin only)
    */
   bulkDelete: adminProcedure
-    .input(z.object({ ids: z.array(z.string()) }))
+    .input(z.object({ ids: z.array(cuidSchema) }))
     .mutation(async ({ input }) => {
       const mediaItems = await db.media.findMany({
         where: { id: { in: input.ids } },

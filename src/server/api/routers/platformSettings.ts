@@ -1,4 +1,5 @@
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
+import { cuidSchema } from "@/server/api/validators";
 import { db } from "@/server/db";
 import { z } from "zod";
 
@@ -264,7 +265,7 @@ export const platformSettingsRouter = createTRPCRouter({
   getSubscriberHistory: adminProcedure
     .input(
       z.object({
-        subscriberId: z.string(),
+        subscriberId: cuidSchema,
       }),
     )
     .query(async ({ input }) => {
