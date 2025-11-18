@@ -29,6 +29,9 @@ export const campaignsRouter = createTRPCRouter({
       z.object({
         clubId: cuidSchema,
         status: campaignStatusSchema.optional(),
+        search: z.string().optional(),
+        includeArchived: z.boolean().default(false),
+        tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(100).default(50),
         cursor: cuidSchema.optional(),
       }),
@@ -49,12 +52,46 @@ export const campaignsRouter = createTRPCRouter({
           | "SENT"
           | "FAILED"
           | "CANCELLED";
+        archivedAt?: { equals: null } | { not: null };
+        OR?: Array<{
+          name?: { contains: string; mode?: "insensitive" };
+          subject?: { contains: string; mode?: "insensitive" };
+        }>;
+        tags?: { hasSome: string[] };
       } = {
         clubId: input.clubId,
       };
 
       if (input.status) {
         where.status = input.status;
+      }
+
+      // Filter by archived status
+      if (!input.includeArchived) {
+        where.archivedAt = { equals: null };
+      }
+
+      // Search in name and subject
+      if (input.search && input.search.trim().length > 0) {
+        where.OR = [
+          {
+            name: {
+              contains: input.search.trim(),
+              mode: "insensitive",
+            },
+          },
+          {
+            subject: {
+              contains: input.search.trim(),
+              mode: "insensitive",
+            },
+          },
+        ];
+      }
+
+      // Filter by tags (campaigns that have at least one of the selected tags)
+      if (input.tags && input.tags.length > 0) {
+        where.tags = { hasSome: input.tags };
       }
 
       const campaigns = await ctx.db.campaign.findMany({
@@ -891,6 +928,130 @@ export const campaignsRouter = createTRPCRouter({
       });
 
       return duplicatedCampaign;
+    }),
+
+  // Archive a campaign
+  archiveCampaign: protectedProcedure
+    .input(
+      z.object({
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
+      // Verify campaign belongs to club
+      const campaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Archive the campaign
+      const archivedCampaign = await ctx.db.campaign.update({
+        where: { id: input.campaignId },
+        data: { archivedAt: new Date() },
+      });
+
+      return archivedCampaign;
+    }),
+
+  // Unarchive a campaign
+  unarchiveCampaign: protectedProcedure
+    .input(
+      z.object({
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
+      // Verify campaign belongs to club
+      const campaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Unarchive the campaign
+      const unarchivedCampaign = await ctx.db.campaign.update({
+        where: { id: input.campaignId },
+        data: { archivedAt: null },
+      });
+
+      return unarchivedCampaign;
+    }),
+
+  // Update campaign tags
+  updateCampaignTags: protectedProcedure
+    .input(
+      z.object({
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
+        tags: z.array(z.string().min(1).max(50)).max(20),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+      ]);
+
+      // Verify campaign belongs to club
+      const campaign = await ctx.db.campaign.findFirst({
+        where: {
+          id: input.campaignId,
+          clubId: input.clubId,
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      // Normalize tags: trim, lowercase, remove duplicates
+      const normalizedTags = Array.from(
+        new Set(
+          input.tags
+            .map((tag) => tag.trim().toLowerCase())
+            .filter((tag) => tag.length > 0),
+        ),
+      );
+
+      // Update tags
+      const updatedCampaign = await ctx.db.campaign.update({
+        where: { id: input.campaignId },
+        data: { tags: normalizedTags },
+      });
+
+      return updatedCampaign;
     }),
 
   // Schedule a campaign for future delivery

@@ -1,3 +1,5 @@
+"use client";
+
 import { Eye } from "lucide-react";
 
 import { Button } from "@/components/ui";
