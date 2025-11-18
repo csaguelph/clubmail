@@ -220,20 +220,9 @@ export default function ClubStaffManager({
                     <tr key={member.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          {member.user.image ? (
-                            // Using raw <img> here for simple avatar display. Next.js recommends using <Image />
-                            // but that adds layout/loader complexity. Disable the specific rule for this line.
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={member.user.image}
-                              alt={member.user.name}
-                              className="h-8 w-8 rounded-full"
-                            />
-                          ) : (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b1d135] text-sm font-semibold text-gray-900">
-                              {member.user.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b1d135] text-sm font-semibold text-gray-900">
+                            {member.user.name.charAt(0).toUpperCase()}
+                          </div>
                           <div className="ml-3">
                             <div className="text-sm font-medium text-gray-900">
                               {member.user.name}

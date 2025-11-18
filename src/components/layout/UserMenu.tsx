@@ -1,5 +1,4 @@
 import { LogOut } from "lucide-react";
-import Image from "next/image";
 
 import { Button } from "@/components/ui";
 
@@ -7,29 +6,18 @@ interface UserMenuProps {
   user: {
     name: string;
     email: string;
-    image?: string | null;
   };
 }
 
 export function UserMenu({ user }: UserMenuProps) {
   return (
     <div className="flex items-center gap-3">
-      {user.image ? (
-        <Image
-          src={user.image}
-          alt={user.name}
-          width={40}
-          height={40}
-          className="h-10 w-10 rounded-full border border-white object-cover shadow-sm"
-        />
-      ) : (
-        <div
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-[#b1d135] to-[#83a124] text-sm font-semibold text-gray-900 shadow-sm"
-          aria-hidden="true"
-        >
-          {user.name.charAt(0).toUpperCase()}
-        </div>
-      )}
+      <div
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-[#b1d135] to-[#83a124] text-sm font-semibold text-gray-900 shadow-sm"
+        aria-hidden="true"
+      >
+        {user.name.charAt(0).toUpperCase()}
+      </div>
 
       <div className="hidden min-w-0 text-right text-sm leading-tight sm:block">
         <p className="font-semibold text-gray-900">{user.name}</p>

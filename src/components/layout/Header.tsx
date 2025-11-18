@@ -13,7 +13,6 @@ interface HeaderProps {
   user?: {
     name: string;
     email: string;
-    image?: string | null;
   } | null;
   userRole?: "ADMIN" | "USER";
 }
