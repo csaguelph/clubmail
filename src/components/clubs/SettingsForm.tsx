@@ -7,7 +7,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui";
 import { Input } from "@/components/ui";
-import { cn } from "@/lib/utils";
 
 interface SettingsFormProps {
   clubId: string;

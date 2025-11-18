@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui";
 import { Input } from "@/components/ui";
 import type { RouterOutputs } from "@/trpc/react";
-import { cn } from "@/lib/utils";
 
 type CampaignStatus = RouterOutputs["campaigns"]["getCampaign"]["status"];
 

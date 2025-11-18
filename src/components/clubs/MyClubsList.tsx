@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { ClubCard } from "@/components/clubs/ClubCard";
 import { SearchInput } from "@/components/ui";
 import { api } from "@/trpc/react";
-import { cn } from "@/lib/utils";
 
 export default function MyClubsList() {
   const [search, setSearch] = useState("");

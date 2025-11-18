@@ -2,7 +2,7 @@ import { Copy, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import type { RouterOutputs } from "@/trpc/react";
-import { Button } from "@/components/ui";
+
 import { cn } from "@/lib/utils";
 
 type Campaign =

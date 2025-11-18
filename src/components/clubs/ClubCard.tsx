@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import type { RouterOutputs } from "@/trpc/react";
-import { cn } from "@/lib/utils";
 
 type ClubCardData =
   RouterOutputs["clubs"]["listMyClubsInfinite"]["clubs"][number];

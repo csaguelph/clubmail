@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { type InputHTMLAttributes, forwardRef } from "react";
+import { forwardRef } from "react";
 
 import { cn } from "@/lib/utils";
 import { Input, type InputProps } from "./Input";

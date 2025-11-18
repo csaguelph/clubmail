@@ -9,7 +9,6 @@ import { Edit, ListPlus, Mail, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
-import type { RouterOutputs } from "@/trpc/react";
 
 interface EmailListsManagerProps {
   clubId: string;

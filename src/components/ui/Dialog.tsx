@@ -55,7 +55,7 @@ export function Dialog({
           )}
         >
           {/* Header */}
-          {(title || showCloseButton) && (
+          {(title != null || showCloseButton) && (
             <div className="mb-4 flex items-center justify-between">
               {title && (
                 <DialogTitle className="text-lg font-semibold text-gray-900">

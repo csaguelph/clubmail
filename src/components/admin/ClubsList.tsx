@@ -9,7 +9,6 @@ import { ClubListItem } from "@/components/admin/ClubListItem";
 import { SearchInput } from "@/components/ui";
 import { api } from "@/trpc/react";
 import type { RouterOutputs } from "@/trpc/react";
-import { cn } from "@/lib/utils";
 
 type Club = RouterOutputs["admin"]["listClubs"]["clubs"][number];
 

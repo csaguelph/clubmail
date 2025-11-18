@@ -1,12 +1,11 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { FileIcon, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui";
 import { MediaItem } from "@/components/media/MediaItem";
-import { cn } from "@/lib/utils";
 
 interface MediaBrowserProps {
   clubId?: string;
