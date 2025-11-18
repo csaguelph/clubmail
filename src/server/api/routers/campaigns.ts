@@ -364,6 +364,16 @@ export const campaignsRouter = createTRPCRouter({
         });
       }
 
+      const fromEmailSlug =
+        settings.fromEmailSlug && settings.fromEmailSlug.trim().length > 0
+          ? settings.fromEmailSlug
+          : ((
+              await ctx.db.club.findUnique({
+                where: { id: input.clubId },
+                select: { slug: true },
+              })
+            )?.slug ?? "noreply");
+
       // Create campaign
       const campaign = await ctx.db.campaign.create({
         data: {
@@ -373,7 +383,7 @@ export const campaignsRouter = createTRPCRouter({
           subject: input.subject ?? "",
           preheaderText: input.preheaderText,
           fromName: settings.fromName,
-          fromEmail: "noreply@csaonline.ca",
+          fromEmail: `${fromEmailSlug}@clubmail.csaonline.ca`,
           designJson: input.designJson ?? JSON.stringify({ blocks: [] }),
           html: input.html ?? "",
           status: "DRAFT",
@@ -427,6 +437,35 @@ export const campaignsRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "Cannot edit a campaign that has been sent or is being sent",
         });
+      }
+
+      // If the client is not explicitly changing fromName/fromEmail, keep them
+      // in sync with current club settings for drafts/scheduled campaigns.
+      // This lets old campaigns pick up the new sender slug until they are sent.
+      const needsSenderSync =
+        typeof updateData.fromName === "undefined" &&
+        typeof (updateData as { fromEmail?: string }).fromEmail === "undefined";
+
+      if (needsSenderSync) {
+        const settings = await ctx.db.clubSettings.findUnique({
+          where: { clubId },
+        });
+
+        if (settings) {
+          const fromEmailSlug =
+            settings.fromEmailSlug && settings.fromEmailSlug.trim().length > 0
+              ? settings.fromEmailSlug
+              : ((
+                  await ctx.db.club.findUnique({
+                    where: { id: clubId },
+                    select: { slug: true },
+                  })
+                )?.slug ?? "noreply");
+
+          updateData.fromName = settings.fromName;
+          (updateData as { fromEmail: string }).fromEmail =
+            `${fromEmailSlug}@clubmail.csaonline.ca`;
+        }
       }
 
       const updated = await ctx.db.campaign.update({

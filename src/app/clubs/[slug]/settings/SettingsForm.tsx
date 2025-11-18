@@ -24,6 +24,9 @@ export default function SettingsForm({
 }: SettingsFormProps) {
   const router = useRouter();
   const [fromName, setFromName] = useState(initialSettings.fromName);
+  const [fromEmailSlug, setFromEmailSlug] = useState(
+    initialSettings.fromEmailSlug ?? slug,
+  );
   const [replyToEmail, setReplyToEmail] = useState(
     initialSettings.replyToEmail ?? "",
   );
@@ -47,6 +50,7 @@ export default function SettingsForm({
     updateSettings.mutate({
       clubId,
       fromName,
+      fromEmailSlug,
       replyToEmail: replyToEmail || undefined,
       defaultSubjectPrefix: defaultSubjectPrefix || undefined,
       brandColor,
@@ -85,20 +89,32 @@ export default function SettingsForm({
 
           <div>
             <label
-              htmlFor="fromEmail"
+              htmlFor="fromEmailSlug"
               className="block text-sm font-medium text-gray-700"
             >
               From Email
             </label>
-            <input
-              type="email"
-              id="fromEmail"
-              value="noreply@csaonline.ca"
-              disabled
-              className="mt-1 block w-full cursor-not-allowed rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 shadow-sm"
-            />
+            <div className="mt-1 flex items-center gap-2">
+              <input
+                type="text"
+                id="fromEmailSlug"
+                value={fromEmailSlug}
+                onChange={(e) => setFromEmailSlug(e.target.value.toLowerCase())}
+                pattern="^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
+                required
+                className="block w-48 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+              />
+              <span className="text-sm text-gray-700">
+                @clubmail.csaonline.ca
+              </span>
+            </div>
             <p className="mt-1 text-xs text-gray-500">
-              All emails are sent from noreply@csaonline.ca
+              This controls the sender address: {fromEmailSlug}
+              @clubmail.csaonline.ca. Only the part before the @ can be changed.
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Allowed: lowercase letters, numbers, hyphens, must start and end
+              with a letter or number.
             </p>
           </div>
 
@@ -119,7 +135,7 @@ export default function SettingsForm({
             />
             <p className="mt-1 text-xs text-gray-500">
               Where should replies be sent? If not set, replies will go to
-              noreply@csaonline.ca
+              {fromEmailSlug}@clubmail.csaonline.ca
             </p>
           </div>
         </div>
