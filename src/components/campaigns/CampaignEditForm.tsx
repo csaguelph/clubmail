@@ -12,6 +12,10 @@ import {
 } from "@/lib/email-editor/utils";
 import { api } from "@/trpc/react";
 
+import { Button } from "@/components/ui";
+import { Input } from "@/components/ui";
+import { Select } from "@/components/ui";
+
 interface CampaignEditFormProps {
   clubId: string;
   clubSlug: string;
@@ -101,13 +105,13 @@ export default function CampaignEditForm({
             >
               Campaign Name
             </label>
-            <input
+            <Input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+              className="mt-1"
             />
             <p className="mt-1 text-sm text-gray-500">
               Internal name for this campaign (not visible to subscribers)
@@ -121,18 +125,18 @@ export default function CampaignEditForm({
             >
               Email List (cannot be changed)
             </label>
-            <select
+            <Select
               id="emailList"
               value={emailListId}
               disabled
-              className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm"
+              className="mt-1 bg-gray-50"
             >
               {emailLists.map((list) => (
                 <option key={list.id} value={list.id}>
                   {list.name}
                 </option>
               ))}
-            </select>
+            </Select>
             <p className="mt-1 text-sm text-gray-500">
               The email list cannot be changed after campaign creation
             </p>
@@ -145,14 +149,14 @@ export default function CampaignEditForm({
             >
               Subject Line
             </label>
-            <input
+            <Input
               type="text"
               id="subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               required
               placeholder="Your email subject..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+              className="mt-1"
             />
           </div>
 
@@ -163,13 +167,13 @@ export default function CampaignEditForm({
             >
               Preheader Text (Optional)
             </label>
-            <input
+            <Input
               type="text"
               id="preheader"
               value={preheaderText}
               onChange={(e) => setPreheaderText(e.target.value)}
               placeholder="Preview text that appears after the subject..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+              className="mt-1"
             />
             <p className="mt-1 text-sm text-gray-500">
               This text appears next to the subject line in email clients
@@ -194,26 +198,26 @@ export default function CampaignEditForm({
 
       {/* Actions */}
       <div className="flex items-center justify-end space-x-4">
-        <button
+        <Button
           type="button"
           onClick={() =>
             router.push(`/clubs/${clubSlug}/campaigns/${campaign.id}`)
           }
-          className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+          variant="secondary"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={updateCampaign.isPending}
-          className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:opacity-50"
+          variant="primary"
         >
           {updateCampaign.isPending ? "Saving..." : "Save Changes"}
-        </button>
+        </Button>
       </div>
 
       {updateCampaign.error && (
-        <div className="rounded-md bg-red-50 p-4">
+        <div className="rounded-md bg-red-50 p-4" role="alert">
           <p className="text-sm text-red-800">
             Error: {updateCampaign.error.message}
           </p>

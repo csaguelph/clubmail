@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import CampaignsList from "@/app/clubs/[slug]/campaigns/CampaignsList";
+import { CampaignsList } from "@/components/campaigns/CampaignsList";
 import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";

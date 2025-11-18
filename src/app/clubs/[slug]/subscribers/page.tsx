@@ -4,7 +4,7 @@ import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
-import SubscribersList from "./SubscribersList";
+import SubscribersList from "@/components/subscribers/SubscribersList";
 
 export default async function SubscribersPage({
   params,

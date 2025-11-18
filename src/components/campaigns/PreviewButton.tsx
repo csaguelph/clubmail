@@ -1,12 +1,12 @@
-"use client";
-
 import { Eye } from "lucide-react";
+
+import { Button } from "@/components/ui";
 
 interface PreviewButtonProps {
   html: string;
 }
 
-export default function PreviewButton({ html }: PreviewButtonProps) {
+export function PreviewButton({ html }: PreviewButtonProps) {
   const handleClick = () => {
     const win = window.open("", "_blank");
     if (win) {
@@ -16,12 +16,14 @@ export default function PreviewButton({ html }: PreviewButtonProps) {
   };
 
   return (
-    <button
+    <Button
       onClick={handleClick}
-      className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+      variant="secondary"
+      size="sm"
+      className="inline-flex items-center gap-2"
     >
-      <Eye className="h-4 w-4" />
+      <Eye className="h-4 w-4" aria-hidden="true" />
       Open in New Tab
-    </button>
+    </Button>
   );
 }
