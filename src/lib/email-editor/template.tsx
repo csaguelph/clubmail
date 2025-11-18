@@ -246,7 +246,8 @@ function getEnv(): EnvType {
   // This will only execute server-side when useInlineSvgs is false
   // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
   _env ??= require("@/env").env;
-  return _env;
+  // After ??=, _env is guaranteed to be non-null
+  return _env as EnvType;
 }
 
 // Social media icon PNG URLs (for email compatibility)
