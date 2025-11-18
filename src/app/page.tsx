@@ -15,14 +15,14 @@ export default async function Home() {
           <div className="container mx-auto px-4 py-20">
             <div className="flex flex-col items-center text-center">
               <h1 className="mb-6 text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
-                <span className="text-[#b1d135]">Club</span>Mail
+                CSA <span className="text-[#b1d135]">Club</span>Mail
               </h1>
-              <p className="mb-4 max-w-2xl text-xl text-slate-200 sm:text-2xl">
-                Professional email campaigns for student clubs
+              <p className="mb-4 max-w-3xl text-xl text-slate-200 sm:text-2xl">
+                Purpose-built email campaigns for CSA clubs and student leaders
               </p>
-              <p className="mb-10 max-w-3xl text-lg text-slate-300">
-                Create beautiful emails, manage subscribers, and send campaigns
-                with our powerful drag-and-drop editor
+              <p className="mb-10 max-w-2xl text-lg text-slate-300">
+                Launch beautiful newsletters, keep member lists tidy, and stay
+                on top of engagement—no marketing degree required!
               </p>
 
               {/* CTA Buttons */}
@@ -49,9 +49,19 @@ export default async function Home() {
 
         {/* Features Section */}
         <div className="container mx-auto px-4 py-20">
-          <h2 className="mb-12 text-center text-4xl font-bold text-slate-900">
-            Everything you need to engage your members
-          </h2>
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <p className="text-sm font-semibold tracking-[0.3em] text-slate-400 uppercase">
+              Platform Highlights
+            </p>
+            <h2 className="mt-4 text-4xl font-bold text-slate-900">
+              Everything you need to engage your members
+            </h2>
+            <p className="mt-4 text-lg text-slate-600">
+              CSA ClubMail brings the editor, subscriber tools, and delivery
+              infrastructure together so your club can focus on storytelling
+              instead of stitching different services.
+            </p>
+          </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 */}
@@ -60,11 +70,11 @@ export default async function Home() {
                 <Layout className="h-6 w-6 text-[#b1d135]" />
               </div>
               <h3 className="mb-3 text-xl font-bold text-slate-900">
-                Drag-and-Drop Editor
+                Rich Email Builder
               </h3>
               <p className="text-slate-600">
-                Build beautiful emails with our intuitive visual editor. Add
-                headings, text, buttons, images, and more—no coding required.
+                Compose polished newsletters with our drag-and-drop editor -
+                brand colors and reusable blocks included.
               </p>
             </div>
 
@@ -77,8 +87,8 @@ export default async function Home() {
                 Subscriber Management
               </h3>
               <p className="text-slate-600">
-                Easily manage your members with CSV import/export, custom email
-                lists, and full subscriber editing capabilities.
+                Import via CSV, sync GryphLife data, and organize subscribers
+                into curated lists with custom fields.
               </p>
             </div>
 
@@ -88,11 +98,12 @@ export default async function Home() {
                 <Mail className="h-6 w-6 text-[#b1d135]" />
               </div>
               <h3 className="mb-3 text-xl font-bold text-slate-900">
-                Professional Delivery
+                Reliable Delivery
               </h3>
               <p className="text-slate-600">
-                Powered by AWS SES for reliable email delivery. Test sends,
-                personalization, and automatic unsubscribe handling included.
+                Keep campaigns on schedule with our reliable email delivery
+                infrastructure, including automatic unsubscribe links, bounce
+                management, and complaint handling.
               </p>
             </div>
 
@@ -102,11 +113,11 @@ export default async function Home() {
                 <Shield className="h-6 w-6 text-[#b1d135]" />
               </div>
               <h3 className="mb-3 text-xl font-bold text-slate-900">
-                Role-Based Access
+                Roles & Permissions
               </h3>
               <p className="text-slate-600">
-                Manage your team with Owner, Editor, and Viewer roles. Control
-                who can create campaigns and manage club settings.
+                Assign Owner, Editor, and Viewer roles so club exec teams can
+                collaborate confidently.
               </p>
             </div>
 
@@ -116,11 +127,11 @@ export default async function Home() {
                 <BarChart3 className="h-6 w-6 text-[#b1d135]" />
               </div>
               <h3 className="mb-3 text-xl font-bold text-slate-900">
-                Campaign Tracking
+                Actionable Insights
               </h3>
               <p className="text-slate-600">
-                Monitor delivery status with real-time stats for sent,
-                delivered, bounced, and failed emails.
+                Monitor opens, clicks, bounces, and complaints in real time so
+                you can celebrate wins or clean lists before the next send.
               </p>
             </div>
 
@@ -130,15 +141,53 @@ export default async function Home() {
                 <Zap className="h-6 w-6 text-[#b1d135]" />
               </div>
               <h3 className="mb-3 text-xl font-bold text-slate-900">
-                Quick & Easy
+                Launch in Minutes
               </h3>
               <p className="text-slate-600">
-                From draft to inbox in minutes. Create campaigns, send test
-                emails, and launch to your entire list with just a few clicks.
+                Draft, test, and launch in a single workflow that keeps
+                approvals, scheduling, and delivery all in one place.
               </p>
             </div>
           </div>
         </div>
+
+        {/* Metrics Section */}
+        {/* <div className="bg-linear-to-r from-white via-slate-50 to-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  metric: "30+",
+                  label: "CSA clubs onboarded",
+                  detail: "Centralized into one shared platform",
+                },
+                {
+                  metric: "50K+",
+                  label: "Emails delivered",
+                  detail: "Powered by AWS SES infrastructure",
+                },
+                {
+                  metric: "3 min",
+                  label: "Average launch time",
+                  detail: "From draft to scheduled send",
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-slate-200 bg-white/60 p-8 shadow-sm backdrop-blur"
+                >
+                  <p className="text-4xl font-extrabold text-[#0667a0]">
+                    {stat.metric}
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">
+                    {stat.label}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">{stat.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div> */}
 
         {/* How It Works Section */}
         <div className="bg-white py-20">
@@ -172,8 +221,8 @@ export default async function Home() {
                     Add subscribers
                   </h3>
                   <p className="text-slate-600">
-                    Import your members via CSV or add them individually. Create
-                    custom email lists to organize your audience.
+                    Import your members via CSV, GryphLife, or add them
+                    individually. Create email lists to organize your audience.
                   </p>
                 </div>
               </div>
