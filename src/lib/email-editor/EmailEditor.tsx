@@ -221,6 +221,7 @@ function EmailPreview({
       clubName,
       brandColor,
       testUnsubscribeUrl,
+      undefined, // archiveUrl not available in preview (no campaign ID)
       socialLinks ?? null,
       true, // useInlineSvgs = true for preview (client-side)
     )
