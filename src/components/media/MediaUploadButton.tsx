@@ -4,6 +4,9 @@ import { api } from "@/trpc/react";
 import { Loader2, Upload } from "lucide-react";
 import { useCallback, useState } from "react";
 
+import { Button } from "@/components/ui";
+import { cn } from "@/lib/utils";
+
 interface MediaUploadButtonProps {
   clubId?: string;
   onUpload: (media: { id: string; url: string; alt: string }) => void;
@@ -16,7 +19,7 @@ export function MediaUploadButton({
   clubId,
   onUpload,
   accept = "image/*",
-  className = "",
+  className,
   children,
 }: MediaUploadButtonProps) {
   const [uploading, setUploading] = useState(false);
@@ -69,25 +72,28 @@ export function MediaUploadButton({
   );
 
   return (
-    <label
-      className={
-        className ||
-        "inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-      }
-    >
+    <label className={cn("cursor-pointer", className)}>
       <input
         type="file"
         className="hidden"
         accept={accept}
         onChange={handleFileSelect}
         disabled={uploading}
+        aria-label="Upload media file"
       />
-      {uploading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Upload className="h-4 w-4" />
-      )}
-      {children ?? (uploading ? "Uploading..." : "Upload")}
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={uploading}
+        className="flex items-center gap-2"
+      >
+        {uploading ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <Upload className="h-4 w-4" aria-hidden="true" />
+        )}
+        {children ?? (uploading ? "Uploading..." : "Upload")}
+      </Button>
     </label>
   );
 }

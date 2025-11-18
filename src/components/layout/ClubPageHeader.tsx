@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { cn } from "@/lib/utils";
+
 interface BreadcrumbItem {
   label: string;
   href?: string;
@@ -51,31 +53,40 @@ export function ClubPageHeader({
   return (
     <div className="mb-8">
       {shouldShowBreadcrumbs && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          {crumbs.map((crumb, index) => (
-            <>
-              {index > 0 && <span>/</span>}
-              {crumb.href ? (
-                <Link
-                  key={index}
-                  href={crumb.href}
-                  className="hover:text-gray-700"
-                >
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span key={index} className="text-gray-900">
-                  {crumb.label}
-                </span>
-              )}
-            </>
-          ))}
-        </div>
+        <nav aria-label="Breadcrumb">
+          <ol className="flex items-center gap-2 text-sm text-gray-500">
+            {crumbs.map((crumb, index) => (
+              <li key={index} className="flex items-center">
+                {index > 0 && (
+                  <span className="mx-2" aria-hidden="true">
+                    /
+                  </span>
+                )}
+                {crumb.href ? (
+                  <Link
+                    href={crumb.href}
+                    className="hover:text-gray-700"
+                    aria-current={
+                      index === crumbs.length - 1 ? "page" : undefined
+                    }
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="text-gray-900" aria-current="page">
+                    {crumb.label}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
       )}
       <div
-        className={`flex items-center justify-between ${
-          shouldShowBreadcrumbs ? "mt-2" : ""
-        }`}
+        className={cn(
+          "flex items-center justify-between",
+          shouldShowBreadcrumbs && "mt-2",
+        )}
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
