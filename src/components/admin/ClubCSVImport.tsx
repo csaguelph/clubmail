@@ -19,6 +19,7 @@ interface ParsedClub {
 interface CSVImportResult {
   created: string[];
   updated: string[];
+  deactivated: string[];
   errors: { slug: string; error: string }[];
 }
 
@@ -26,6 +27,8 @@ export default function ClubCSVImport() {
   const [isOpen, setIsOpen] = useState(false);
   const [csvData, setCsvData] = useState<ParsedClub[]>([]);
   const [replaceStaff, setReplaceStaff] = useState(true);
+  const [deactivateClubsNotListed, setDeactivateClubsNotListed] =
+    useState(false);
   const [importResult, setImportResult] = useState<CSVImportResult | null>(
     null,
   );
@@ -281,6 +284,7 @@ export default function ClubCSVImport() {
         ...club,
         replaceStaff,
       })),
+      deactivateClubsNotListed,
     });
 
     // Refresh the clubs list
@@ -292,6 +296,7 @@ export default function ClubCSVImport() {
     setCsvData([]);
     setParseError(null);
     setImportResult(null);
+    setDeactivateClubsNotListed(false);
   };
 
   return (
@@ -453,24 +458,48 @@ export default function ClubCSVImport() {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={replaceStaff}
-                    onChange={(e) => setReplaceStaff(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">
-                    Replace existing staff/primary contacts for clubs being
-                    updated
-                  </span>
-                </label>
-                <p className="mt-1 ml-6 text-xs text-gray-500">
-                  When checked, all existing CLUB_OWNER members will be removed
-                  and replaced with the contacts from the CSV. When unchecked,
-                  existing staff will be preserved.
-                </p>
+              <div className="mb-6 space-y-4">
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={replaceStaff}
+                      onChange={(e) => setReplaceStaff(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      Replace existing staff/primary contacts for clubs being
+                      updated
+                    </span>
+                  </label>
+                  <p className="mt-1 ml-6 text-xs text-gray-500">
+                    When checked, all existing CLUB_OWNER members will be
+                    removed and replaced with the contacts from the CSV. When
+                    unchecked, existing staff will be preserved.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={deactivateClubsNotListed}
+                      onChange={(e) =>
+                        setDeactivateClubsNotListed(e.target.checked)
+                      }
+                      className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">
+                      Deactivate clubs not listed
+                    </span>
+                  </label>
+                  <p className="mt-1 ml-6 text-xs text-gray-500">
+                    When checked, all clubs not present in this CSV will be
+                    deactivated. Deactivated clubs will have all staff removed
+                    and ownership transferred to csaclubs@uoguelph.ca. They will
+                    be hidden from the frontend but can be reactivated later.
+                  </p>
+                </div>
               </div>
 
               <DialogFooter>
@@ -534,6 +563,32 @@ export default function ClubCSVImport() {
                   </div>
                 </div>
               )}
+
+              {importResult.deactivated &&
+                importResult.deactivated.length > 0 && (
+                  <div className="rounded-md bg-amber-50 p-4">
+                    <div className="flex">
+                      <Info className="h-5 w-5 text-amber-400" />
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-amber-800">
+                          Deactivated {importResult.deactivated.length} club
+                          {importResult.deactivated.length !== 1 ? "s" : ""}
+                        </h3>
+                        <div className="mt-2 text-sm text-amber-700">
+                          <p className="mb-2">
+                            These clubs were not in the CSV and have been
+                            deactivated:
+                          </p>
+                          <ul className="list-disc space-y-1 pl-5">
+                            {importResult.deactivated.map((slug) => (
+                              <li key={slug}>{slug}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
               {importResult.errors.length > 0 && (
                 <div className="rounded-md bg-red-50 p-4">

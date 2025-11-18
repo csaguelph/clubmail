@@ -12,21 +12,40 @@ export const adminRouter = createTRPCRouter({
         limit: z.number().int().min(1).max(100).default(50),
         cursor: cuidSchema.optional(),
         search: z.string().optional(),
+        isActive: z.enum(["active", "inactive", "all"]).default("all"),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const whereClause = input.search
-        ? {
-            OR: [
-              {
-                name: { contains: input.search, mode: "insensitive" as const },
-              },
-              {
-                slug: { contains: input.search, mode: "insensitive" as const },
-              },
-            ],
-          }
-        : undefined;
+      const whereConditions: {
+        OR?: Array<{
+          name?: { contains: string; mode: "insensitive" };
+          slug?: { contains: string; mode: "insensitive" };
+        }>;
+        isActive?: boolean;
+      } = {};
+
+      // Add search condition
+      if (input.search) {
+        whereConditions.OR = [
+          {
+            name: { contains: input.search, mode: "insensitive" as const },
+          },
+          {
+            slug: { contains: input.search, mode: "insensitive" as const },
+          },
+        ];
+      }
+
+      // Add isActive filter
+      if (input.isActive === "active") {
+        whereConditions.isActive = true;
+      } else if (input.isActive === "inactive") {
+        whereConditions.isActive = false;
+      }
+      // "all" means no filter on isActive
+
+      const whereClause =
+        Object.keys(whereConditions).length > 0 ? whereConditions : undefined;
 
       const clubs = await ctx.db.club.findMany({
         where: whereClause,
@@ -287,6 +306,104 @@ export const adminRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // Deactivate a club
+  deactivateClub: adminProcedure
+    .input(z.object({ clubId: cuidSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const club = await ctx.db.club.findUnique({
+        where: { id: input.clubId },
+      });
+
+      if (!club) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Club not found",
+        });
+      }
+
+      if (!club.isActive) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Club is already inactive",
+        });
+      }
+
+      // Get or create the CSA clubs admin user
+      const csaEmail = "csaclubs@uoguelph.ca";
+      let csaUser = await ctx.db.user.findUnique({
+        where: { email: csaEmail },
+      });
+
+      if (!csaUser) {
+        // Use a deterministic ID based on email to avoid conflicts
+        const csaUserId = `csa_admin_${csaEmail.replace(/[@.]/g, "_")}`;
+        csaUser = await ctx.db.user.create({
+          data: {
+            id: csaUserId,
+            email: csaEmail,
+            name: "CSA Clubs Admin",
+            emailVerified: false,
+          },
+        });
+      }
+
+      // Deactivate the club and reset staff
+      await ctx.db.$transaction(async (tx) => {
+        // Deactivate the club
+        await tx.club.update({
+          where: { id: input.clubId },
+          data: { isActive: false },
+        });
+
+        // Remove all staff members
+        await tx.clubMember.deleteMany({
+          where: { clubId: input.clubId },
+        });
+
+        // Set CSA admin as the only owner
+        await tx.clubMember.create({
+          data: {
+            clubId: input.clubId,
+            userId: csaUser.id,
+            role: "CLUB_OWNER",
+          },
+        });
+      });
+
+      return { success: true };
+    }),
+
+  // Reactivate a deactivated club
+  reactivateClub: adminProcedure
+    .input(z.object({ clubId: cuidSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const club = await ctx.db.club.findUnique({
+        where: { id: input.clubId },
+      });
+
+      if (!club) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Club not found",
+        });
+      }
+
+      if (club.isActive) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Club is already active",
+        });
+      }
+
+      // Reactivate the club
+      await ctx.db.club.update({
+        where: { id: input.clubId },
+        data: { isActive: true },
+      });
+
+      return { success: true };
+    }),
+
   // Import clubs from CSV
   importClubsFromCSV: adminProcedure
     .input(
@@ -306,6 +423,7 @@ export const adminRouter = createTRPCRouter({
             isActive: z.boolean().default(true),
           }),
         ),
+        deactivateClubsNotListed: z.boolean().default(false),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -313,6 +431,7 @@ export const adminRouter = createTRPCRouter({
         created: [] as string[],
         updated: [] as string[],
         errors: [] as { slug: string; error: string }[],
+        deactivated: [] as string[],
       };
 
       for (const clubData of input.clubs) {
@@ -461,6 +580,76 @@ export const adminRouter = createTRPCRouter({
             slug: clubData.slug,
             error: error instanceof Error ? error.message : "Unknown error",
           });
+        }
+      }
+
+      // If deactivateClubsNotListed is enabled, deactivate all clubs not in the import
+      if (input.deactivateClubsNotListed) {
+        const importedSlugs = new Set(input.clubs.map((c) => c.slug));
+
+        // Find all active clubs not in the imported list
+        const clubsToDeactivate = await ctx.db.club.findMany({
+          where: {
+            isActive: true,
+            slug: {
+              notIn: Array.from(importedSlugs),
+            },
+          },
+        });
+
+        // Get or create the CSA clubs admin user
+        const csaEmail = "csaclubs@uoguelph.ca";
+        let csaUser = await ctx.db.user.findUnique({
+          where: { email: csaEmail },
+        });
+
+        if (!csaUser) {
+          // Use a deterministic ID based on email to avoid conflicts
+          const csaUserId = `csa_admin_${csaEmail.replace(/[@.]/g, "_")}`;
+          csaUser = await ctx.db.user.create({
+            data: {
+              id: csaUserId,
+              email: csaEmail,
+              name: "CSA Clubs Admin",
+              emailVerified: false,
+            },
+          });
+        }
+
+        // Deactivate each club and reset staff
+        for (const club of clubsToDeactivate) {
+          try {
+            await ctx.db.$transaction(async (tx) => {
+              // Deactivate the club
+              await tx.club.update({
+                where: { id: club.id },
+                data: { isActive: false },
+              });
+
+              // Remove all staff members
+              await tx.clubMember.deleteMany({
+                where: { clubId: club.id },
+              });
+
+              // Set CSA admin as the only owner
+              await tx.clubMember.create({
+                data: {
+                  clubId: club.id,
+                  userId: csaUser.id,
+                  role: "CLUB_OWNER",
+                },
+              });
+            });
+
+            results.deactivated.push(club.slug);
+          } catch (error) {
+            results.errors.push({
+              slug: club.slug,
+              error: `Failed to deactivate: ${
+                error instanceof Error ? error.message : "Unknown error"
+              }`,
+            });
+          }
         }
       }
 

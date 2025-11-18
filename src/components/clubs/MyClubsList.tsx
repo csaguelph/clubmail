@@ -61,15 +61,13 @@ export default function MyClubsList() {
 
   return (
     <>
-      {clubs.length > 0 && (
-        <SearchInput
-          placeholder="Search your clubs by name or slug..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mb-6"
-          aria-label="Search your clubs"
-        />
-      )}
+      <SearchInput
+        placeholder="Search your clubs by name or slug..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="mb-6"
+        aria-label="Search your clubs"
+      />
 
       {isLoading ? (
         <ClubsListEmptyState>
