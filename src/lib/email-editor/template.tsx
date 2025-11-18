@@ -1,4 +1,5 @@
 import { getTextColorForBackground } from "@/lib/color-utils";
+import { socialIconSvgs } from "@/lib/social-icons";
 import {
   Body,
   Button,
@@ -18,6 +19,7 @@ interface EmailTemplateProps {
   clubName: string;
   brandColor?: string;
   unsubscribeUrl?: string;
+  socialLinks?: Record<string, string> | null;
 }
 
 export function EmailTemplate({
@@ -25,6 +27,7 @@ export function EmailTemplate({
   clubName,
   brandColor = "#b1d135",
   unsubscribeUrl,
+  socialLinks,
 }: EmailTemplateProps) {
   return (
     <Html>
@@ -41,6 +44,14 @@ export function EmailTemplate({
           {/* Footer */}
           <Section style={footer}>
             <Hr style={hr} />
+            {socialLinks && Object.keys(socialLinks).length > 0 && (
+              <Text
+                style={socialIconsContainer}
+                dangerouslySetInnerHTML={{
+                  __html: renderSocialIcons(socialLinks),
+                }}
+              />
+            )}
             <Text style={footerTextStyle}>
               This content is created by {clubName} and is not reviewed or
               endorsed by the Central Student Association or the University of
@@ -210,3 +221,33 @@ const link = {
   color: "#3b82f6", // Match rich text link color
   textDecoration: "underline",
 };
+
+const socialIconsContainer = {
+  fontSize: "12px",
+  lineHeight: "1.5",
+  color: "#8898aa",
+  marginTop: "16px",
+  textAlign: "center" as const,
+};
+
+// Social media icon SVGs (same as used in settings form)
+const socialIcons: Record<string, string> = socialIconSvgs;
+
+function renderSocialIcons(links: Record<string, string>): string {
+  const iconSize = 24;
+  const iconSpacing = 12;
+  const iconColor = "#8898aa";
+
+  const icons = Object.entries(links)
+    .filter(([_, url]) => url && url.trim() !== "")
+    .map(([platform, url]) => {
+      const iconSvg = socialIcons[platform.toLowerCase()];
+      if (!iconSvg) return "";
+
+      return `<a href="${url}" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; text-decoration: none; color: ${iconColor};" target="_blank" rel="noopener noreferrer">${iconSvg}</a>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  return icons || "";
+}

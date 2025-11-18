@@ -34,6 +34,7 @@ interface CampaignEditFormProps {
   }>;
   clubName: string;
   brandColor: string;
+  socialLinks?: Record<string, string> | null;
 }
 
 export default function CampaignEditForm({
@@ -43,6 +44,7 @@ export default function CampaignEditForm({
   emailLists,
   clubName,
   brandColor,
+  socialLinks,
 }: CampaignEditFormProps) {
   const router = useRouter();
   const [name, setName] = useState(campaign.name);
@@ -74,6 +76,7 @@ export default function CampaignEditForm({
       clubName,
       brandColor,
       undefined, // No unsubscribe token for draft
+      socialLinks ?? null,
     );
 
     // Generate design JSON from blocks
@@ -193,6 +196,7 @@ export default function CampaignEditForm({
           clubName={clubName}
           brandColor={brandColor}
           clubId={clubId}
+          socialLinks={socialLinks}
         />
       </div>
 

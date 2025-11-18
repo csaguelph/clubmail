@@ -34,6 +34,7 @@ interface EmailEditorProps {
   clubName?: string;
   brandColor?: string;
   clubId?: string;
+  socialLinks?: Record<string, string> | null;
 }
 
 export function EmailEditor({
@@ -42,6 +43,7 @@ export function EmailEditor({
   clubName = "Your Club",
   brandColor = "#b1d135",
   clubId,
+  socialLinks,
 }: EmailEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
@@ -192,6 +194,7 @@ export function EmailEditor({
                     blocks={blocks}
                     clubName={clubName}
                     brandColor={brandColor}
+                    socialLinks={socialLinks}
                   />
                 </div>
               </div>
@@ -207,10 +210,12 @@ function EmailPreview({
   blocks,
   clubName,
   brandColor,
+  socialLinks,
 }: {
   blocks: EmailBlock[];
   clubName: string;
   brandColor: string;
+  socialLinks?: Record<string, string> | null;
 }) {
   const [html, setHtml] = useState<string>("");
 
@@ -222,10 +227,16 @@ function EmailPreview({
         : "http://localhost:3000";
     const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
 
-    generateEmailHTML(blocks, clubName, brandColor, testUnsubscribeUrl)
+    generateEmailHTML(
+      blocks,
+      clubName,
+      brandColor,
+      testUnsubscribeUrl,
+      socialLinks ?? null,
+    )
       .then(setHtml)
       .catch((err) => console.error("Failed to generate email preview:", err));
-  }, [blocks, clubName, brandColor]);
+  }, [blocks, clubName, brandColor, socialLinks]);
 
   if (!html) {
     return (
