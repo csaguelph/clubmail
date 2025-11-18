@@ -6,7 +6,7 @@ export function Footer() {
   const gitCommit = env.NEXT_PUBLIC_GIT_COMMIT_SHA;
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-center text-sm text-gray-600 sm:text-left">
             <p>© {new Date().getFullYear()} Central Student Association</p>

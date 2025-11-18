@@ -88,7 +88,7 @@ export default function NewCampaignPage() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Campaign Details */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             Campaign Details
           </h2>
@@ -141,7 +141,7 @@ export default function NewCampaignPage() {
         </div>
 
         {/* Email Content - Coming Soon */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             Email Content
           </h2>
@@ -199,18 +199,18 @@ export default function NewCampaignPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:w-auto"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={createCampaign.isPending}
-            className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {createCampaign.isPending ? "Creating..." : "Create Campaign"}
           </button>

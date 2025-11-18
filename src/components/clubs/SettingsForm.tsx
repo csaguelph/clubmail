@@ -72,7 +72,7 @@ export default function SettingsForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Sender Information */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Sender Information
         </h2>
@@ -153,7 +153,7 @@ export default function SettingsForm({
       </div>
 
       {/* Email Content */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Email Content
         </h2>
@@ -266,7 +266,7 @@ export default function SettingsForm({
       </div>
 
       {/* Social Media Links */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Social Media Links
         </h2>
@@ -349,14 +349,20 @@ export default function SettingsForm({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-3">
-        <Button type="button" onClick={() => router.back()} variant="secondary">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <Button
+          type="button"
+          onClick={() => router.back()}
+          variant="secondary"
+          className="w-full sm:w-auto"
+        >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={updateSettings.isPending}
           variant="primary"
+          className="w-full sm:w-auto"
         >
           {updateSettings.isPending ? "Saving..." : "Save Settings"}
         </Button>

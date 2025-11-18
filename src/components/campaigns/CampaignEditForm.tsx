@@ -96,7 +96,7 @@ export default function CampaignEditForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Basic Details */}
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-4 shadow sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Campaign Details
         </h2>
@@ -186,7 +186,7 @@ export default function CampaignEditForm({
       </div>
 
       {/* Email Editor */}
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-4 shadow sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Email Content
         </h2>
@@ -201,13 +201,14 @@ export default function CampaignEditForm({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end space-x-4">
+      <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end sm:space-x-4">
         <Button
           type="button"
           onClick={() =>
             router.push(`/clubs/${clubSlug}/campaigns/${campaign.id}`)
           }
           variant="secondary"
+          className="w-full sm:w-auto"
         >
           Cancel
         </Button>
@@ -215,6 +216,7 @@ export default function CampaignEditForm({
           type="submit"
           disabled={updateCampaign.isPending}
           variant="primary"
+          className="w-full sm:w-auto"
         >
           {updateCampaign.isPending ? "Saving..." : "Save Changes"}
         </Button>
