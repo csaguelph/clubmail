@@ -125,10 +125,10 @@ export function EmailEditor({
         </button>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
         {/* Block List */}
         <div
-          className={`space-y-2 ${showPreview ? "flex-1" : selectedBlock ? "flex-1" : "w-full"}`}
+          className={`space-y-2 ${showPreview ? "lg:flex-1" : selectedBlock ? "lg:flex-1" : "w-full"}`}
         >
           <div className="mb-4 flex items-center justify-between">
             <BlockMenu onAddBlock={addBlock} />
@@ -166,7 +166,7 @@ export function EmailEditor({
         {/* Block Editor */}
         {selectedBlock && (
           <div
-            className={`sticky top-4 max-h-[600px] self-start overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 ${showPreview ? "w-80" : "flex-1"}`}
+            className={`overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 lg:sticky lg:top-4 lg:max-h-[600px] lg:self-start ${showPreview ? "w-full lg:w-80" : "w-full lg:flex-1"}`}
           >
             <h3 className="mb-4 text-sm font-medium text-gray-900">
               Edit {selectedBlock.type}
@@ -181,15 +181,15 @@ export function EmailEditor({
 
         {/* Live Preview */}
         {showPreview && (
-          <div className="flex-1">
-            <div className="sticky top-4">
+          <div className="w-full lg:flex-1">
+            <div className="lg:sticky lg:top-4">
               <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
                 <div className="border-b border-gray-200 bg-gray-50 px-4 py-2">
                   <p className="text-xs font-medium text-gray-600">
                     Live Preview
                   </p>
                 </div>
-                <div className="h-[600px]">
+                <div className="h-[400px] lg:h-[600px]">
                   <EmailPreview
                     blocks={blocks}
                     clubName={clubName}

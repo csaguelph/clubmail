@@ -54,7 +54,7 @@ export function ClubPageHeader({
     <div className="mb-8">
       {shouldShowBreadcrumbs && (
         <nav aria-label="Breadcrumb">
-          <ol className="flex items-center gap-2 text-sm text-gray-500">
+          <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
             {crumbs.map((crumb, index) => (
               <li key={index} className="flex items-center">
                 {index > 0 && (
@@ -84,17 +84,19 @@ export function ClubPageHeader({
       )}
       <div
         className={cn(
-          "flex items-center justify-between",
+          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
           shouldShowBreadcrumbs && "mt-2",
         )}
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+            {title}
+          </h1>
           {description && (
             <p className="mt-2 text-sm text-gray-600">{description}</p>
           )}
         </div>
-        {action && <div>{action}</div>}
+        {action && <div className="flex-shrink-0">{action}</div>}
       </div>
     </div>
   );
