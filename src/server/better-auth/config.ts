@@ -38,6 +38,14 @@ export const auth = betterAuth({
   },
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
+      // Update lastLoginAt whenever a session is created
+      if (ctx.context?.newSession?.user?.id) {
+        await db.user.update({
+          where: { id: ctx.context.newSession.user.id },
+          data: { lastLoginAt: new Date() },
+        });
+      }
+
       if (ctx.path === "/callback/:id") {
         const newUser = ctx.context?.newSession?.user;
         const email = newUser?.email;
