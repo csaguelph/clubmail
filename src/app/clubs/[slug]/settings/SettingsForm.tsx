@@ -273,7 +273,7 @@ export default function SettingsForm({
 
       {updateSettings.error && (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
-          {(updateSettings.error as Error).message}
+          {(updateSettings.error as unknown as Error).message}
         </div>
       )}
     </form>
