@@ -43,7 +43,7 @@ export default async function RootLayout({
       <body className="flex min-h-screen flex-col bg-gray-50">
         <TRPCReactProvider>
           <Header user={session?.user} userRole={userRole} />
-          <main className="flex-1">{children}</main>
+          <main className="flex flex-1 flex-col">{children}</main>
           <Footer />
         </TRPCReactProvider>
       </body>
