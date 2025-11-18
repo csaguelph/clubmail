@@ -45,12 +45,15 @@ export default function NewCampaignPage() {
     if (!club?.id || !settings) return;
 
     // Generate HTML from blocks
+    // Use inline SVGs for client-side generation (avoids server env access)
+    // Server will use PNGs when actually sending emails
     const html = await generateEmailHTML(
       blocks,
       club.name,
       settings.brandColor,
       undefined, // unsubscribe URL will be injected when sending
       (settings.socialLinks as Record<string, string> | null) ?? null,
+      true, // useInlineSvgs = true for client-side generation
     );
 
     const designJson = generateDesignJSON(blocks);

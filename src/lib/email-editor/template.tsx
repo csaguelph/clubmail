@@ -1,5 +1,4 @@
 import { getTextColorForBackground } from "@/lib/color-utils";
-import { env } from "@/env";
 import {
   Body,
   Button,
@@ -14,12 +13,15 @@ import {
 } from "@react-email/components";
 import type { EmailBlock } from "./types";
 import { processRichTextForEmail } from "./utils";
+import { socialIconSvgs } from "@/lib/social-icons";
+
 interface EmailTemplateProps {
   blocks: EmailBlock[];
   clubName: string;
   brandColor?: string;
   unsubscribeUrl?: string;
   socialLinks?: Record<string, string> | null;
+  useInlineSvgs?: boolean; // Use inline SVGs for preview (client-side), PNGs for actual emails (server-side)
 }
 
 export function EmailTemplate({
@@ -28,6 +30,7 @@ export function EmailTemplate({
   brandColor = "#b1d135",
   unsubscribeUrl,
   socialLinks,
+  useInlineSvgs = false,
 }: EmailTemplateProps) {
   return (
     <Html>
@@ -45,11 +48,9 @@ export function EmailTemplate({
           <Section style={footer}>
             <Hr style={hr} />
             {socialLinks && Object.keys(socialLinks).length > 0 && (
-              <Text
-                style={socialIconsContainer}
-                dangerouslySetInnerHTML={{
-                  __html: renderSocialIcons(socialLinks),
-                }}
+              <SocialIconsRenderer
+                socialLinks={socialLinks}
+                useInlineSvgs={useInlineSvgs}
               />
             )}
             <Text style={footerTextStyle}>
@@ -230,9 +231,30 @@ const socialIconsContainer = {
   textAlign: "center" as const,
 };
 
+// Lazy getter for env (only accessed server-side)
+// This avoids importing env on the client, which would cause errors
+let _env: (typeof import("@/env"))["env"] | null = null;
+function getEnv() {
+  // Safety check: this should never be called on the client
+  if (typeof window !== "undefined") {
+    throw new Error(
+      "getSocialIconUrl should only be called server-side. Use useInlineSvgs=true for client-side preview.",
+    );
+  }
+  if (_env === null) {
+    // This will only execute server-side when useInlineSvgs is false
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    _env = require("@/env").env;
+  }
+  return _env;
+}
+
 // Social media icon PNG URLs (for email compatibility)
 // Icons can be served from public folder (Vercel) or R2 (recommended for email)
+// This function is only used server-side for actual email sending
 function getSocialIconUrl(platform: string): string {
+  const env = getEnv();
+
   // Check if R2 is configured and has a public URL
   // If so, use R2 URLs (better for email delivery with CDN)
   if (env.R2_PUBLIC_URL) {
@@ -244,7 +266,10 @@ function getSocialIconUrl(platform: string): string {
   return `${baseUrl}/social-icons/${platform.toLowerCase()}.png`;
 }
 
-function renderSocialIcons(links: Record<string, string>): string {
+function renderSocialIcons(
+  links: Record<string, string>,
+  useInlineSvgs = false,
+): string {
   const iconSize = 20;
   const iconSpacing = 12;
 
@@ -272,25 +297,51 @@ function renderSocialIcons(links: Record<string, string>): string {
       return orderA - orderB;
     });
 
-  // Use table-based layout with PNG images for better email client compatibility
-  // This works much better in Outlook than SVGs
-  // Wrap in a centered table to ensure proper alignment
+  // Use inline SVGs for preview (client-side) or PNG images for actual emails (server-side)
+  // PNGs work better in email clients like Outlook, but SVGs are fine for browser preview
   const icons = sortedEntries
     .map(([platform, url]) => {
-      const iconUrl = getSocialIconUrl(platform);
       const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
+      const platformKey = platform.toLowerCase();
 
-      return `
-        <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; vertical-align: middle;">
-          <tr>
-            <td style="padding: 0;">
-              <a href="${url}" style="display: block; text-decoration: none;" target="_blank" rel="noopener noreferrer">
-                <img src="${iconUrl}" alt="${platformName}" width="${iconSize}" height="${iconSize}" style="display: block; border: 0; outline: none; text-decoration: none; width: ${iconSize}px; height: ${iconSize}px;" />
-              </a>
-            </td>
-          </tr>
-        </table>
-      `;
+      if (useInlineSvgs) {
+        // Use inline SVG for preview (client-side, no server env access needed)
+        const iconSvg = socialIconSvgs[platformKey];
+        if (!iconSvg) return "";
+
+        // Replace fill="currentColor" with the actual color for email compatibility
+        const coloredSvg = iconSvg.replace(
+          'fill="currentColor"',
+          'fill="#8898aa"',
+        );
+
+        return `
+          <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; vertical-align: middle;">
+            <tr>
+              <td style="padding: 0;">
+                <a href="${url}" style="display: block; text-decoration: none;" target="_blank" rel="noopener noreferrer">
+                  ${coloredSvg}
+                </a>
+              </td>
+            </tr>
+          </table>
+        `;
+      } else {
+        // Use PNG URL for actual emails (server-side)
+        // This branch is only executed server-side, so we can safely access env
+        const iconUrl = getSocialIconUrl(platform);
+        return `
+          <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; vertical-align: middle;">
+            <tr>
+              <td style="padding: 0;">
+                <a href="${url}" style="display: block; text-decoration: none;" target="_blank" rel="noopener noreferrer">
+                  <img src="${iconUrl}" alt="${platformName}" width="${iconSize}" height="${iconSize}" style="display: block; border: 0; outline: none; text-decoration: none; width: ${iconSize}px; height: ${iconSize}px;" />
+                </a>
+              </td>
+            </tr>
+          </table>
+        `;
+      }
     })
     .filter(Boolean)
     .join("");
@@ -305,4 +356,21 @@ function renderSocialIcons(links: Record<string, string>): string {
       </tr>
     </table>
   `;
+}
+
+// Component to render social icons (handles async if needed, but currently synchronous)
+function SocialIconsRenderer({
+  socialLinks,
+  useInlineSvgs,
+}: {
+  socialLinks: Record<string, string>;
+  useInlineSvgs: boolean;
+}) {
+  const html = renderSocialIcons(socialLinks, useInlineSvgs);
+  return (
+    <Text
+      style={socialIconsContainer}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
