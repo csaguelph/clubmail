@@ -38,6 +38,12 @@ export const clubSettingsRouter = createTRPCRouter({
       z.object({
         clubId: z.string(),
         fromName: z.string().min(1).optional(),
+        fromEmailSlug: z
+          .string()
+          .min(1)
+          .max(64)
+          .regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/)
+          .optional(),
         replyToEmail: z.string().email().optional().nullable(),
         defaultSubjectPrefix: z.string().optional().nullable(),
         brandColor: z

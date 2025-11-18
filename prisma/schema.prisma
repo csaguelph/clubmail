@@ -98,6 +98,7 @@ model ClubMember {
 model ClubSettings {
   id                    String  @id @default(cuid())
   fromName              String
+  fromEmailSlug         String  @default("")
   replyToEmail          String?
   defaultSubjectPrefix  String?
   brandColor            String  @default("#b1d135")
