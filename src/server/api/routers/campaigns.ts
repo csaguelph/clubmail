@@ -5,6 +5,7 @@ import {
   checkClubPermission,
   createTRPCRouter,
   protectedProcedure,
+  publicProcedure,
 } from "@/server/api/trpc";
 import {
   campaignStatusSchema,
@@ -424,6 +425,37 @@ export const campaignsRouter = createTRPCRouter({
         },
       });
 
+      // Regenerate HTML with archive URL if we have designJson
+      if (input.designJson && input.html) {
+        const { generateEmailHTML, parseDesignJSON } = await import(
+          "@/lib/email-editor/utils"
+        );
+        const { env } = await import("@/env");
+        const blocks = parseDesignJSON(input.designJson);
+        const club = await ctx.db.club.findUnique({
+          where: { id: input.clubId },
+          select: { name: true },
+        });
+        const archiveUrl = `${env.NEXT_PUBLIC_BASE_URL}/archive/${campaign.id}`;
+        const htmlWithArchive = await generateEmailHTML(
+          blocks,
+          club?.name ?? "Club",
+          settings.brandColor,
+          undefined, // No unsubscribe URL for draft
+          archiveUrl,
+          (settings.socialLinks as Record<string, string> | null) ?? null,
+          false, // useInlineSvgs = false for server-side
+        );
+
+        // Update campaign with HTML that includes archive URL
+        await ctx.db.campaign.update({
+          where: { id: campaign.id },
+          data: { html: htmlWithArchive },
+        });
+
+        return { ...campaign, html: htmlWithArchive };
+      }
+
       return campaign;
     }),
 
@@ -499,6 +531,33 @@ export const campaignsRouter = createTRPCRouter({
           (updateData as { fromEmail: string }).fromEmail =
             `${fromEmailSlug}@clubmail.csaonline.ca`;
         }
+      }
+
+      // If HTML is being updated, regenerate it with archive URL
+      if (updateData.html && updateData.designJson) {
+        const { generateEmailHTML, parseDesignJSON } = await import(
+          "@/lib/email-editor/utils"
+        );
+        const { env } = await import("@/env");
+        const blocks = parseDesignJSON(updateData.designJson);
+        const club = await ctx.db.club.findUnique({
+          where: { id: clubId },
+          select: { name: true },
+        });
+        const settings = await ctx.db.clubSettings.findUnique({
+          where: { clubId },
+        });
+        const archiveUrl = `${env.NEXT_PUBLIC_BASE_URL}/archive/${campaignId}`;
+        const htmlWithArchive = await generateEmailHTML(
+          blocks,
+          club?.name ?? "Club",
+          settings?.brandColor,
+          undefined, // No unsubscribe URL for draft
+          archiveUrl,
+          (settings?.socialLinks as Record<string, string> | null) ?? null,
+          false, // useInlineSvgs = false for server-side
+        );
+        updateData.html = htmlWithArchive;
       }
 
       const updated = await ctx.db.campaign.update({
@@ -625,11 +684,13 @@ export const campaignsRouter = createTRPCRouter({
       const { env } = await import("@/env");
       const blocks = parseDesignJSON(campaign.designJson);
       const testUnsubscribeUrl = `${env.NEXT_PUBLIC_BASE_URL}/unsubscribe?token=test`;
+      const archiveUrl = `${env.NEXT_PUBLIC_BASE_URL}/archive/${campaign.id}`;
       const htmlWithSocialLinks = await generateEmailHTML(
         blocks,
         club.name,
         settings.brandColor,
         testUnsubscribeUrl,
+        archiveUrl,
         (settings.socialLinks as Record<string, string> | null) ?? null,
         false, // useInlineSvgs = false for server-side (use PNGs for better email client compatibility)
       );
@@ -1279,5 +1340,42 @@ export const campaignsRouter = createTRPCRouter({
       });
 
       return campaigns;
+    }),
+
+  // Get campaign for public archive view (unlisted)
+  getCampaignArchive: publicProcedure
+    .input(
+      z.object({
+        campaignId: cuidSchema,
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const campaign = await ctx.db.campaign.findUnique({
+        where: {
+          id: input.campaignId,
+        },
+        select: {
+          id: true,
+          name: true,
+          subject: true,
+          html: true,
+          createdAt: true,
+          club: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (!campaign) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Campaign not found",
+        });
+      }
+
+      return campaign;
     }),
 });

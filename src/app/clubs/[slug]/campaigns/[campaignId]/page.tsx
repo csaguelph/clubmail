@@ -38,11 +38,13 @@ export default async function CampaignDetailPage({
   const blocks = parseDesignJSON(campaign.designJson);
   const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   const testUnsubscribeUrl = `${baseUrl}/unsubscribe?token=test`;
+  const archiveUrl = `${baseUrl}/archive/${campaign.id}`;
   const previewHtml = await generateEmailHTML(
     blocks,
     club.name,
     settings.brandColor,
     testUnsubscribeUrl,
+    archiveUrl,
     (settings.socialLinks as Record<string, string> | null) ?? null,
     false, // useInlineSvgs = false for server-side (use PNGs for better email client compatibility)
   );
