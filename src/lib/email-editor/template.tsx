@@ -1,5 +1,5 @@
 import { getTextColorForBackground } from "@/lib/color-utils";
-import { socialIconSvgs } from "@/lib/social-icons";
+import { env } from "@/env";
 import {
   Body,
   Button,
@@ -230,12 +230,16 @@ const socialIconsContainer = {
   textAlign: "center" as const,
 };
 
-// Social media icon SVGs (same as used in settings form)
-const socialIcons: Record<string, string> = socialIconSvgs;
+// Social media icon PNG URLs (for email compatibility)
+// These should be stored in public/social-icons/ directory
+function getSocialIconUrl(platform: string): string {
+  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
+  return `${baseUrl}/social-icons/${platform.toLowerCase()}.png`;
+}
 
 function renderSocialIcons(links: Record<string, string>): string {
+  const iconSize = 20;
   const iconSpacing = 12;
-  const iconColor = "#8898aa";
 
   // Preferred order for university students (most popular first)
   const preferredOrder = [
@@ -261,15 +265,37 @@ function renderSocialIcons(links: Record<string, string>): string {
       return orderA - orderB;
     });
 
+  // Use table-based layout with PNG images for better email client compatibility
+  // This works much better in Outlook than SVGs
+  // Wrap in a centered table to ensure proper alignment
   const icons = sortedEntries
     .map(([platform, url]) => {
-      const iconSvg = socialIcons[platform.toLowerCase()];
-      if (!iconSvg) return "";
+      const iconUrl = getSocialIconUrl(platform);
+      const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
 
-      return `<a href="${url}" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; text-decoration: none; color: ${iconColor};" target="_blank" rel="noopener noreferrer">${iconSvg}</a>`;
+      return `
+        <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; vertical-align: middle;">
+          <tr>
+            <td style="padding: 0;">
+              <a href="${url}" style="display: block; text-decoration: none;" target="_blank" rel="noopener noreferrer">
+                <img src="${iconUrl}" alt="${platformName}" width="${iconSize}" height="${iconSize}" style="display: block; border: 0; outline: none; text-decoration: none; width: ${iconSize}px; height: ${iconSize}px;" />
+              </a>
+            </td>
+          </tr>
+        </table>
+      `;
     })
     .filter(Boolean)
     .join("");
 
-  return icons || "";
+  // Wrap all icons in a centered container table for proper alignment
+  return `
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 auto;">
+      <tr>
+        <td align="center" style="padding: 0;">
+          ${icons}
+        </td>
+      </tr>
+    </table>
+  `;
 }

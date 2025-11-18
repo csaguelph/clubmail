@@ -604,6 +604,35 @@ export const campaignsRouter = createTRPCRouter({
         });
       }
 
+      // Get club name
+      const club = await ctx.db.club.findUnique({
+        where: { id: input.clubId },
+        select: { name: true },
+      });
+
+      if (!club) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Club not found",
+        });
+      }
+
+      // Regenerate HTML with current social links for test email
+      // This ensures test emails always show the latest social links
+      const { generateEmailHTML, parseDesignJSON } = await import(
+        "@/lib/email-editor/utils"
+      );
+      const { env } = await import("@/env");
+      const blocks = parseDesignJSON(campaign.designJson);
+      const testUnsubscribeUrl = `${env.NEXT_PUBLIC_BASE_URL}/unsubscribe?token=test`;
+      const htmlWithSocialLinks = await generateEmailHTML(
+        blocks,
+        club.name,
+        settings.brandColor,
+        testUnsubscribeUrl,
+        (settings.socialLinks as Record<string, string> | null) ?? null,
+      );
+
       // Send test email
       const result = await sendTestEmail({
         testEmail: input.testEmail,
@@ -611,7 +640,7 @@ export const campaignsRouter = createTRPCRouter({
           subject: campaign.subject,
           fromName: campaign.fromName,
           fromEmail: campaign.fromEmail,
-          html: campaign.html,
+          html: htmlWithSocialLinks,
         },
         clubSettings: {
           replyToEmail: settings.replyToEmail,
