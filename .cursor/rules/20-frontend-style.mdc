@@ -7,36 +7,25 @@ globs:
 alwaysApply: false
 ---
 
-# React & Components
+# React
 
-- Use **functional components** and React hooks only; do not generate class components.
-- In `src/app`, prefer **server components** by default:
-  - Only mark components as client components with `"use client"` when necessary for interactivity (state, effects, event handlers, or browser APIs).
-- Keep route/page files minimal:
-  - Delegate complex UI or logic to components in `src/components` or utilities in `src/lib`.
-  - Avoid deeply nested logic inside page components.
+- Use **functional components** with hooks; no class components.
+- `src/app`: default to **server components**; add `"use client"` only when needed.
+- Keep pages thin; delegate complex UI/logic to `src/components` and `src/lib`.
 
-# Tailwind & Styling
+# Styling
 
-- Use **TailwindCSS** utility classes for styling; avoid inline `style` except for rare, simple cases.
-- For conditional classes, prefer `clsx()` (and project-specific helpers like `cn` if they exist) instead of manual string concatenation.
-- Extract complex/patterned UIs into reusable components under `src/components`.
-
-# Headless UI
-
-- For common interactive patterns like dialogs, menus, listboxes, disclosures, and switches, prefer **Headless UI** primitives (e.g. `Dialog`, `Menu`, `Listbox`, `Disclosure`, `Switch`) over building from scratch.
-- Use Headless UI for its built-in accessibility and behavior, then style via Tailwind utility classes.
-- Only roll custom complex interactive widgets when Headless UI does not cover the use case, while still following the same ARIA and keyboard-navigation expectations.
+- Use **TailwindCSS** utilities for styling.
+- For conditional classes, use `clsx()`/`cn` instead of string concatenation.
+- Extract complex or repeated UI into reusable components.
 
 # Accessibility & Composition
 
-- Aim for accessible components:
-  - Provide appropriate `aria-*` attributes where helpful.
-  - Ensure form inputs have associated labels.
-  - Make interactive elements keyboard-focusable and use semantic elements (`button`, `a`, `nav`, `header`, etc.) instead of generic `div`s.
-- Favor **composable** components (slots, children, render props when appropriate) over tightly coupled, deeply nested components.
+- Prefer semantic elements (`button`, `a`, `nav`, etc.) with basic `aria-*` where needed.
+- Ensure form inputs have labels and interactive elements are keyboard-focusable.
+- Favor small, composable components over deeply nested ones.
 
-# Client Logic & Hooks
+# Headless UI
 
-- Put reusable client-side logic into custom hooks under `src/hooks` (e.g. `useXyz` files).
-- Avoid duplicating complex hook logic across components; factor it into shared hooks instead.
+- For dialogs, menus, listboxes, disclosures, switches, prefer **Headless UI** primitives.
+- Let Headless UI handle behavior/accessibility; style with Tailwind.

@@ -10,25 +10,31 @@ alwaysApply: true
 - Components in `src/components` should be framework-agnostic where reasonable and focused on **presentation** plus light logic.
 - Prefer smaller, reusable primitives (buttons, inputs, layout wrappers) composed into more complex components.
 
+---
+description: UI component, Tailwind, and Headless UI rules
+globs:
+  - "src/components/**/*"
+alwaysApply: true
+---
+
+# Components
+
+- Make components small, reusable, and mostly presentational.
+- Build primitives (buttons, inputs, layout pieces) and compose them.
+
 # Styling
 
-- Use Tailwind utility classes as the primary styling mechanism.
-- For conditional or dynamic classes, use `clsx()` or the project’s `cn` helper.
-- Avoid duplicating long Tailwind class strings; consider extracting variants into helper functions or smaller components.
+- Use Tailwind utilities for styling.
+- Use `clsx()`/`cn` for dynamic classes.
+- Avoid repeating long Tailwind strings; extract variants or smaller components.
 
 # Accessibility
 
-- For interactive elements, use semantic HTML (`button`, `input`, `a`) and include appropriate `aria-*` attributes when needed.
-- Ensure focus states are visible and not removed.
-- For dialogs, modals, or complex widgets, ensure keyboard navigation and basic ARIA roles/labels.
+- Use semantic interactive elements (`button`, `input`, `a`) with appropriate `aria-*`.
+- Preserve visible focus states.
+- For dialogs/menus/etc., ensure keyboard navigation and roles/labels.
 
 # Headless UI
 
-- When building dialogs, menus, listboxes, disclosures, switches, and similar interactive patterns, prefer **Headless UI** primitives (e.g. `Dialog`, `Menu`, `Listbox`, `Disclosure`, `Switch`).
-- Rely on Headless UI for correct accessibility semantics and behavior, and style with Tailwind utility classes.
-- Avoid reinventing complex interactive components unless Headless UI cannot support the scenario, and in those cases still meet the same ARIA and keyboard expectations.
-
-# Client vs Server
-
-- Most components under `src/components` will be **client components** if they use state/effects; omit `"use client"` only when a component is truly server-only.
-- Keep server-only logic out of reusable UI components; delegate that to callers or dedicated server utilities.
+- Prefer **Headless UI** (`Dialog`, `Menu`, `Listbox`, `Disclosure`, `Switch`, etc.) for common interactive patterns.
+- Rely on Headless UI for behavior/accessibility; style with Tailwind.
