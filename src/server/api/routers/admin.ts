@@ -89,19 +89,69 @@ export const adminRouter = createTRPCRouter({
 
   // Get club stats
   getClubStats: adminProcedure.query(async ({ ctx }) => {
-    const [activeClubs, totalMembers, totalSubscribers, totalCampaigns] =
-      await Promise.all([
-        ctx.db.club.count({ where: { isActive: true } }),
-        ctx.db.clubMember.count(),
-        ctx.db.subscriber.count({ where: { status: "SUBSCRIBED" } }),
-        ctx.db.campaign.count(),
-      ]);
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      activeClubs,
+      totalSubscribers,
+      totalCampaigns,
+      sentCampaigns,
+      allTimeEmailsSent,
+      emailsLast30Days,
+      emailsLast7Days,
+      totalEmailOpens,
+      totalEmailClicks,
+      totalBounces,
+      totalComplaints,
+      activeUsers,
+    ] = await Promise.all([
+      ctx.db.club.count({ where: { isActive: true } }),
+      ctx.db.subscriber.count({ where: { status: "SUBSCRIBED" } }),
+      ctx.db.campaign.count(),
+      ctx.db.campaign.count({
+        where: { status: { in: ["SENT", "SENDING"] } },
+      }),
+      ctx.db.email.count({
+        where: { status: { in: ["SENT", "DELIVERED"] } },
+      }),
+      ctx.db.email.count({
+        where: {
+          status: { in: ["SENT", "DELIVERED"] },
+          sentAt: { gte: thirtyDaysAgo },
+        },
+      }),
+      ctx.db.email.count({
+        where: {
+          status: { in: ["SENT", "DELIVERED"] },
+          sentAt: { gte: sevenDaysAgo },
+        },
+      }),
+      ctx.db.emailOpen.count(),
+      ctx.db.emailClick.count(),
+      ctx.db.bounceEvent.count(),
+      ctx.db.complaintEvent.count(),
+      ctx.db.user.count({
+        where: {
+          lastLoginAt: { not: null }, // Exclude stub users (includes both ADMIN and USER roles)
+        },
+      }),
+    ]);
 
     return {
       activeClubs,
-      totalMembers,
       totalSubscribers,
       totalCampaigns,
+      sentCampaigns,
+      allTimeEmailsSent,
+      emailsLast30Days,
+      emailsLast7Days,
+      totalEmailOpens,
+      totalEmailClicks,
+      totalBounces,
+      totalComplaints,
+      activeUsers,
     };
   }),
 
