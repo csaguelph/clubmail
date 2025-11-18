@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Trash2 } from "lucide-react";
+import { Mail, Search, Settings, Trash2, UserCog, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -163,9 +163,12 @@ export default function ClubsList() {
                   key={club.id}
                   className="group relative px-6 py-4 transition hover:bg-gray-50"
                 >
-                  <Link href={`/clubs/${club.slug}`} className="block">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex min-w-0 flex-1 items-center space-x-4">
+                      <Link
+                        href={`/clubs/${club.slug}`}
+                        className="min-w-0 flex-1"
+                      >
                         <div className="flex items-center space-x-3">
                           <h3 className="text-sm font-medium text-gray-900">
                             {club.name}
@@ -185,34 +188,61 @@ export default function ClubsList() {
                           <span>•</span>
                           <span>{club._count.subscribers} subscribers</span>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-sm text-gray-400">
-                          Created{" "}
-                          {new Date(club.createdAt).toLocaleDateString()}
-                        </span>
-                        <button
-                          onClick={(e) => handleDeleteClick(e, club)}
-                          className="rounded-md p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none"
-                          title="Delete club"
-                          aria-label={`Delete ${club.name}`}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                        <svg
-                          className="h-5 w-5 text-gray-400"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path d="M9 5l7 7-7 7"></path>
-                        </svg>
-                      </div>
+                      </Link>
+
+                      <span className="text-sm whitespace-nowrap text-gray-400">
+                        Created {new Date(club.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                  </Link>
+
+                    {/* Quick action icons */}
+                    <div className="ml-4 flex items-center space-x-1">
+                      <Link
+                        href={`/clubs/${club.slug}/campaigns`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded-md p-2 text-gray-400 transition hover:bg-blue-50 hover:text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        title="Go to campaigns"
+                        aria-label={`Go to ${club.name} campaigns`}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        href={`/clubs/${club.slug}/subscribers`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded-md p-2 text-gray-400 transition hover:bg-green-50 hover:text-green-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        title="Go to subscribers"
+                        aria-label={`Go to ${club.name} subscribers`}
+                      >
+                        <Users className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        href={`/clubs/${club.slug}/staff`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded-md p-2 text-gray-400 transition hover:bg-purple-50 hover:text-purple-600 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                        title="Go to staff"
+                        aria-label={`Go to ${club.name} staff`}
+                      >
+                        <UserCog className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        href={`/clubs/${club.slug}/settings`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded-md p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                        title="Go to settings"
+                        aria-label={`Go to ${club.name} settings`}
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={(e) => handleDeleteClick(e, club)}
+                        className="rounded-md p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                        title="Delete club"
+                        aria-label={`Delete ${club.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
               {hasNextPage && (
