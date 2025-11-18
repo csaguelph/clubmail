@@ -2,21 +2,33 @@
  * Script to generate PNG versions of social media icons from SVGs
  *
  * This script converts the SVG icons to PNG format for email compatibility.
+ * It can either save them to the public folder (Vercel) or upload to R2 (recommended).
  *
  * Requirements:
  * - sharp: pnpm add -D sharp
  * - The SVGs from src/lib/social-icons.tsx
+ * - R2 credentials in .env (optional, for R2 upload)
  *
  * Usage:
- * node scripts/generate-social-icons.js
+ * node scripts/generate-social-icons.js [--r2]
+ *
+ * Options:
+ *   --r2    Upload icons to R2 instead of saving to public folder
  */
 
 import fs from "fs";
 import path from "path";
+import { config } from "dotenv";
+
+// Load environment variables from .env file
+config();
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Check if --r2 flag is passed
+const uploadToR2 = process.argv.includes("--r2");
 
 // SVG icons (from src/lib/social-icons.tsx)
 const svgIcons = {
@@ -36,26 +48,107 @@ async function generatePNGs() {
     // @ts-ignore - sharp is optional, installed via pnpm add -D sharp
     const sharp = (await import("sharp")).default;
 
-    const outputDir = path.join(process.cwd(), "public", "social-icons");
-
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
     console.log("Generating PNG icons...");
+
+    /** @type {Record<string, string>} */
+    const iconUrls = {};
 
     for (const [platform, svg] of Object.entries(svgIcons)) {
       const svgBuffer = Buffer.from(svg);
-      const outputPath = path.join(outputDir, `${platform}.png`);
+      const pngBuffer = await sharp(svgBuffer).resize(24, 24).png().toBuffer();
 
-      await sharp(svgBuffer).resize(24, 24).png().toFile(outputPath);
+      if (uploadToR2) {
+        // Upload to R2 with predictable key
+        // Load AWS SDK
+        const { Upload } = await import("@aws-sdk/lib-storage");
+        const { S3Client } = await import("@aws-sdk/client-s3");
 
-      console.log(`✓ Generated ${platform}.png`);
+        // Get R2 configuration from environment variables directly
+        const r2AccountId = process.env.R2_ACCOUNT_ID;
+        const r2AccessKeyId = process.env.R2_ACCESS_KEY_ID;
+        const r2SecretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+        const r2BucketName = process.env.R2_BUCKET_NAME;
+        const r2PublicUrl = process.env.R2_PUBLIC_URL;
+
+        // Check if R2 is configured
+        if (
+          !r2AccountId ||
+          !r2AccessKeyId ||
+          !r2SecretAccessKey ||
+          !r2BucketName
+        ) {
+          console.error("\nError: R2 is not configured.");
+          console.error(
+            "Please set R2 environment variables or use without --r2 flag.",
+          );
+          process.exit(1);
+        }
+
+        // Create R2 client directly
+        // @ts-ignore - S3Client config
+        const client = new S3Client({
+          region: "auto",
+          endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
+          credentials: {
+            accessKeyId: r2AccessKeyId,
+            secretAccessKey: r2SecretAccessKey,
+          },
+        });
+
+        // Use predictable key for social icons: social-icons/{platform}.png
+        const socialIconKey = `social-icons/${platform}.png`;
+
+        // Upload to R2 with predictable key
+        const upload = new Upload({
+          client,
+          params: {
+            Bucket: r2BucketName,
+            Key: socialIconKey,
+            Body: pngBuffer,
+            ContentType: "image/png",
+          },
+        });
+
+        await upload.done();
+
+        // Generate public URL
+        const iconUrl = r2PublicUrl
+          ? `${r2PublicUrl}/${socialIconKey}`
+          : `https://${r2AccountId}.r2.cloudflarestorage.com/${r2BucketName}/${socialIconKey}`;
+
+        iconUrls[platform] = iconUrl;
+        console.log(`✓ Generated and uploaded ${platform}.png to R2`);
+        console.log(`  Key: ${socialIconKey}`);
+        console.log(`  URL: ${iconUrl}`);
+      } else {
+        // Save to public folder
+        const outputDir = path.join(process.cwd(), "public", "social-icons");
+
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        const outputPath = path.join(outputDir, `${platform}.png`);
+        fs.writeFileSync(outputPath, pngBuffer);
+        iconUrls[platform] = `/social-icons/${platform}.png`;
+        console.log(`✓ Generated ${platform}.png`);
+      }
     }
 
     console.log("\nAll icons generated successfully!");
-    console.log(`Icons saved to: ${outputDir}`);
+    if (uploadToR2) {
+      console.log(
+        "\nIcons uploaded to R2. Update the template to use R2 URLs.",
+      );
+      console.log("Icon URLs:");
+      Object.entries(iconUrls).forEach(([platform, url]) => {
+        console.log(`  ${platform}: ${url}`);
+      });
+    } else {
+      const outputDir = path.join(process.cwd(), "public", "social-icons");
+      console.log(`Icons saved to: ${outputDir}`);
+    }
   } catch (error) {
     // @ts-ignore - error handling for dynamic import
     const errorCode = error?.code;

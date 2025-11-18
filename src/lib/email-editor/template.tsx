@@ -231,8 +231,15 @@ const socialIconsContainer = {
 };
 
 // Social media icon PNG URLs (for email compatibility)
-// These should be stored in public/social-icons/ directory
+// Icons can be served from public folder (Vercel) or R2 (recommended for email)
 function getSocialIconUrl(platform: string): string {
+  // Check if R2 is configured and has a public URL
+  // If so, use R2 URLs (better for email delivery with CDN)
+  if (env.R2_PUBLIC_URL) {
+    return `${env.R2_PUBLIC_URL}/social-icons/${platform.toLowerCase()}.png`;
+  }
+
+  // Fallback to Vercel public folder
   const baseUrl = env.NEXT_PUBLIC_BASE_URL;
   return `${baseUrl}/social-icons/${platform.toLowerCase()}.png`;
 }
