@@ -1,9 +1,10 @@
 "use client";
 
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { AlertCircle, CheckCircle, Info, Upload, X } from "lucide-react";
+import { AlertCircle, CheckCircle, Info, Upload } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui";
 import { api } from "@/trpc/react";
 
 interface ParsedClub {
@@ -303,290 +304,268 @@ export default function ClubCSVImport() {
         Import CSV
       </button>
 
-      <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="mx-auto max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <DialogTitle className="text-xl font-semibold text-gray-900">
-                Import Clubs from CSV
-              </DialogTitle>
-              <button
-                onClick={handleClose}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            {/* Instructions */}
-            {!csvData.length && !importResult && (
-              <div className="mb-6 rounded-md bg-blue-50 p-4">
-                <div className="flex">
-                  <Info className="h-5 w-5 text-blue-400" />
-                  <div className="ml-3 text-sm text-blue-700">
-                    <p className="font-medium">CSV Format Instructions:</p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5">
-                      <li>
-                        <strong>Standard format:</strong> Required columns:{" "}
-                        <code>name</code>, <code>slug</code>, and one of{" "}
-                        <code>emails</code>, <code>contacts</code>, or{" "}
-                        <code>primary_contacts</code>
-                      </li>
-                      <li>
-                        <strong>GryphLife export format:</strong> Automatically
-                        detected (headers on row 3)
-                      </li>
-                      <li>
-                        Optional columns: <code>gryphlife_id</code> (or{" "}
-                        <code>gryphlife</code>), <code>organization_email</code>{" "}
-                        (or <code>org_email</code>), <code>is_active</code> or{" "}
-                        <code>active</code> (true/false, defaults to true)
-                      </li>
-                      <li>
-                        Slugs will be automatically converted to lowercase
-                      </li>
-                      <li>
-                        Fields containing commas should be wrapped in double
-                        quotes (e.g., &quot;Club Name, Inc.&quot;)
-                      </li>
-                      <li>
-                        Multiple emails can be separated by semicolons (;) or
-                        pipes (|)
-                      </li>
-                      <li>
-                        If a club with the same slug exists, it will be updated
-                      </li>
-                    </ul>
-                    <p className="mt-2">
-                      <strong>Example:</strong>
+      <Dialog
+        open={isOpen}
+        onClose={handleClose}
+        title="Import Clubs from CSV"
+        size="2xl"
+        className="max-h-[90vh] overflow-y-auto"
+      >
+        <DialogContent className="max-h-[calc(90vh-8rem)] overflow-y-auto">
+          {/* Instructions */}
+          {!csvData.length && !importResult && (
+            <div className="mb-6 rounded-md bg-blue-50 p-4">
+              <div className="flex">
+                <Info className="h-5 w-5 text-blue-400" />
+                <div className="ml-3 text-sm text-blue-700">
+                  <p className="font-medium">CSV Format Instructions:</p>
+                  <ul className="mt-2 list-disc space-y-1 pl-5">
+                    <li>
+                      <strong>Standard format:</strong> Required columns:{" "}
+                      <code>name</code>, <code>slug</code>, and one of{" "}
+                      <code>emails</code>, <code>contacts</code>, or{" "}
+                      <code>primary_contacts</code>
+                    </li>
+                    <li>
+                      <strong>GryphLife export format:</strong> Automatically
+                      detected (headers on row 3)
+                    </li>
+                    <li>
+                      Optional columns: <code>gryphlife_id</code> (or{" "}
+                      <code>gryphlife</code>), <code>organization_email</code>{" "}
+                      (or <code>org_email</code>), <code>is_active</code> or{" "}
+                      <code>active</code> (true/false, defaults to true)
+                    </li>
+                    <li>Slugs will be automatically converted to lowercase</li>
+                    <li>
+                      Fields containing commas should be wrapped in double
+                      quotes (e.g., &quot;Club Name, Inc.&quot;)
+                    </li>
+                    <li>
+                      Multiple emails can be separated by semicolons (;) or
+                      pipes (|)
+                    </li>
+                    <li>
+                      If a club with the same slug exists, it will be updated
+                    </li>
+                  </ul>
+                  <p className="mt-2">
+                    <strong>Example:</strong>
+                    <br />
+                    <code className="text-xs">
+                      name,slug,gryphlife_id,organization_email,emails,is_active
                       <br />
-                      <code className="text-xs">
-                        name,slug,gryphlife_id,organization_email,emails,is_active
-                        <br />
-                        &quot;Chess Club,
-                        Official&quot;,chess-club,12345,chess@uoguelph.ca,president@example.com;vp@example.com,true
-                      </code>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* File Upload */}
-            {!csvData.length && !importResult && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700">
-                  Upload CSV File
-                </label>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="mt-2 block w-full text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:bg-[#b1d135] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-900 hover:file:bg-[#9fbc2f]"
-                />
-              </div>
-            )}
-
-            {/* Parse Error */}
-            {parseError && (
-              <div className="mb-4 rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      Error parsing CSV
-                    </h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      {parseError}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Preview */}
-            {csvData.length > 0 && !importResult && (
-              <>
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    Preview ({csvData.length} clubs)
-                  </h3>
-                  <div className="mt-2 max-h-96 overflow-y-auto rounded-md border border-gray-300">
-                    <table className="min-w-full divide-y divide-gray-300">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                            Name
-                          </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                            Slug
-                          </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                            Gryphlife ID
-                          </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                            Org Email
-                          </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                            Primary Contacts
-                          </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
-                            Active
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {csvData.map((club, idx) => (
-                          <tr key={idx}>
-                            <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-900">
-                              {club.name}
-                            </td>
-                            <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                              {club.slug}
-                            </td>
-                            <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                              {club.gryphlifeId ?? "-"}
-                            </td>
-                            <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                              {club.organizationEmail ?? "-"}
-                            </td>
-                            <td className="px-3 py-2 text-sm text-gray-500">
-                              {club.primaryContactEmails.join(", ")}
-                            </td>
-                            <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
-                              {club.isActive ? "Yes" : "No"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={replaceStaff}
-                      onChange={(e) => setReplaceStaff(e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">
-                      Replace existing staff/primary contacts for clubs being
-                      updated
-                    </span>
-                  </label>
-                  <p className="mt-1 ml-6 text-xs text-gray-500">
-                    When checked, all existing CLUB_OWNER members will be
-                    removed and replaced with the contacts from the CSV. When
-                    unchecked, existing staff will be preserved.
+                      &quot;Chess Club,
+                      Official&quot;,chess-club,12345,chess@uoguelph.ca,president@example.com;vp@example.com,true
+                    </code>
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
 
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={handleClose}
-                    className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleImport}
-                    disabled={importMutation.isPending}
-                    className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#9fbc2f] disabled:opacity-50"
-                  >
-                    {importMutation.isPending
-                      ? "Importing..."
-                      : `Import ${csvData.length} Club${csvData.length !== 1 ? "s" : ""}`}
-                  </button>
-                </div>
-              </>
-            )}
+          {/* File Upload */}
+          {!csvData.length && !importResult && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700">
+                Upload CSV File
+              </label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="mt-2 block w-full text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:bg-[#b1d135] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-gray-900 hover:file:bg-[#9fbc2f]"
+              />
+            </div>
+          )}
 
-            {/* Import Result */}
-            {importResult && (
-              <div className="space-y-4">
-                {importResult.created.length > 0 && (
-                  <div className="rounded-md bg-green-50 p-4">
-                    <div className="flex">
-                      <CheckCircle className="h-5 w-5 text-green-400" />
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-green-800">
-                          Successfully created {importResult.created.length}{" "}
-                          club
-                          {importResult.created.length !== 1 ? "s" : ""}
-                        </h3>
-                        <div className="mt-2 text-sm text-green-700">
-                          <ul className="list-disc space-y-1 pl-5">
-                            {importResult.created.map((slug) => (
-                              <li key={slug}>{slug}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {importResult.updated.length > 0 && (
-                  <div className="rounded-md bg-blue-50 p-4">
-                    <div className="flex">
-                      <Info className="h-5 w-5 text-blue-400" />
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-blue-800">
-                          Successfully updated {importResult.updated.length}{" "}
-                          club
-                          {importResult.updated.length !== 1 ? "s" : ""}
-                        </h3>
-                        <div className="mt-2 text-sm text-blue-700">
-                          <ul className="list-disc space-y-1 pl-5">
-                            {importResult.updated.map((slug) => (
-                              <li key={slug}>{slug}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {importResult.errors.length > 0 && (
-                  <div className="rounded-md bg-red-50 p-4">
-                    <div className="flex">
-                      <AlertCircle className="h-5 w-5 text-red-400" />
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-800">
-                          Failed to import {importResult.errors.length} club
-                          {importResult.errors.length !== 1 ? "s" : ""}
-                        </h3>
-                        <div className="mt-2 text-sm text-red-700">
-                          <ul className="list-disc space-y-1 pl-5">
-                            {importResult.errors.map((error) => (
-                              <li key={error.slug}>
-                                <strong>{error.slug}:</strong> {error.error}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleClose}
-                    className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-[#9fbc2f]"
-                  >
-                    Done
-                  </button>
+          {/* Parse Error */}
+          {parseError && (
+            <div className="mb-4 rounded-md bg-red-50 p-4">
+              <div className="flex">
+                <AlertCircle className="h-5 w-5 text-red-400" />
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    Error parsing CSV
+                  </h3>
+                  <div className="mt-2 text-sm text-red-700">{parseError}</div>
                 </div>
               </div>
-            )}
-          </DialogPanel>
-        </div>
+            </div>
+          )}
+
+          {/* Preview */}
+          {csvData.length > 0 && !importResult && (
+            <>
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-gray-900">
+                  Preview ({csvData.length} clubs)
+                </h3>
+                <div className="mt-2 max-h-96 overflow-y-auto rounded-md border border-gray-300">
+                  <table className="min-w-full divide-y divide-gray-300">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                          Name
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                          Slug
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                          Gryphlife ID
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                          Org Email
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                          Primary Contacts
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">
+                          Active
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {csvData.map((club, idx) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-900">
+                            {club.name}
+                          </td>
+                          <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
+                            {club.slug}
+                          </td>
+                          <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
+                            {club.gryphlifeId ?? "-"}
+                          </td>
+                          <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
+                            {club.organizationEmail ?? "-"}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-500">
+                            {club.primaryContactEmails.join(", ")}
+                          </td>
+                          <td className="px-3 py-2 text-sm whitespace-nowrap text-gray-500">
+                            {club.isActive ? "Yes" : "No"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={replaceStaff}
+                    onChange={(e) => setReplaceStaff(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-[#b1d135] focus:ring-[#b1d135]"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">
+                    Replace existing staff/primary contacts for clubs being
+                    updated
+                  </span>
+                </label>
+                <p className="mt-1 ml-6 text-xs text-gray-500">
+                  When checked, all existing CLUB_OWNER members will be removed
+                  and replaced with the contacts from the CSV. When unchecked,
+                  existing staff will be preserved.
+                </p>
+              </div>
+
+              <DialogFooter>
+                <Button onClick={handleClose} variant="secondary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleImport}
+                  disabled={importMutation.isPending}
+                  variant="primary"
+                >
+                  {importMutation.isPending
+                    ? "Importing..."
+                    : `Import ${csvData.length} Club${csvData.length !== 1 ? "s" : ""}`}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+
+          {/* Import Result */}
+          {importResult && (
+            <div className="space-y-4">
+              {importResult.created.length > 0 && (
+                <div className="rounded-md bg-green-50 p-4">
+                  <div className="flex">
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-green-800">
+                        Successfully created {importResult.created.length} club
+                        {importResult.created.length !== 1 ? "s" : ""}
+                      </h3>
+                      <div className="mt-2 text-sm text-green-700">
+                        <ul className="list-disc space-y-1 pl-5">
+                          {importResult.created.map((slug) => (
+                            <li key={slug}>{slug}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {importResult.updated.length > 0 && (
+                <div className="rounded-md bg-blue-50 p-4">
+                  <div className="flex">
+                    <Info className="h-5 w-5 text-blue-400" />
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-blue-800">
+                        Successfully updated {importResult.updated.length} club
+                        {importResult.updated.length !== 1 ? "s" : ""}
+                      </h3>
+                      <div className="mt-2 text-sm text-blue-700">
+                        <ul className="list-disc space-y-1 pl-5">
+                          {importResult.updated.map((slug) => (
+                            <li key={slug}>{slug}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {importResult.errors.length > 0 && (
+                <div className="rounded-md bg-red-50 p-4">
+                  <div className="flex">
+                    <AlertCircle className="h-5 w-5 text-red-400" />
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800">
+                        Failed to import {importResult.errors.length} club
+                        {importResult.errors.length !== 1 ? "s" : ""}
+                      </h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <ul className="list-disc space-y-1 pl-5">
+                          {importResult.errors.map((error) => (
+                            <li key={error.slug}>
+                              <strong>{error.slug}:</strong> {error.error}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button onClick={handleClose} variant="primary">
+                  Done
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
       </Dialog>
     </>
   );

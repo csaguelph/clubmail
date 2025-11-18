@@ -8,8 +8,8 @@ import { env } from "@/env";
 import { generateEmailHTML, parseDesignJSON } from "@/lib/email-editor/utils";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
-import CampaignActions from "./CampaignActions";
-import PreviewButton from "./PreviewButton";
+import { CampaignActions } from "@/components/campaigns/CampaignActions";
+import { PreviewButton } from "@/components/campaigns/PreviewButton";
 
 export default async function CampaignDetailPage({
   params,

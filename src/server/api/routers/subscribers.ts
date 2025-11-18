@@ -7,17 +7,22 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import {
+  cuidSchema,
+  emailSchema,
+  subscriberStatusSchema,
+} from "@/server/api/validators";
 
 export const subscribersRouter = createTRPCRouter({
   // List subscribers for a club
   listSubscribers: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string().optional(),
-        status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
-        limit: z.number().min(1).max(100).default(50),
-        cursor: z.string().optional(),
+        clubId: cuidSchema,
+        listId: cuidSchema.optional(),
+        status: subscriberStatusSchema.optional(),
+        limit: z.number().int().min(1).max(100).default(50),
+        cursor: cuidSchema.optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -28,7 +33,7 @@ export const subscribersRouter = createTRPCRouter({
       ]);
       const where: {
         clubId: string;
-        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";
+        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED" | "BLOCKED";
         listMemberships?: { some: { emailListId: string } };
       } = {
         clubId: input.clubId,
@@ -81,9 +86,9 @@ export const subscribersRouter = createTRPCRouter({
   getSubscriberCount: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string().optional(),
-        status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
+        clubId: cuidSchema,
+        listId: cuidSchema.optional(),
+        status: subscriberStatusSchema.optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -94,7 +99,7 @@ export const subscribersRouter = createTRPCRouter({
       ]);
       const where: {
         clubId: string;
-        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";
+        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED" | "BLOCKED";
         listMemberships?: { some: { emailListId: string } };
       } = {
         clubId: input.clubId,
@@ -121,10 +126,10 @@ export const subscribersRouter = createTRPCRouter({
   createSubscriber: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        email: z.string().email(),
-        name: z.string().optional().nullable(),
-        listIds: z.array(z.string()).optional(),
+        clubId: cuidSchema,
+        email: emailSchema,
+        name: z.string().max(255).optional().nullable(),
+        listIds: z.array(cuidSchema).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -209,12 +214,12 @@ export const subscribersRouter = createTRPCRouter({
   bulkImport: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string(),
+        clubId: cuidSchema,
+        listId: cuidSchema,
         subscribers: z.array(
           z.object({
-            email: z.string().email(),
-            name: z.string().optional(),
+            email: emailSchema,
+            name: z.string().max(255).optional(),
           }),
         ),
       }),
@@ -325,12 +330,10 @@ export const subscribersRouter = createTRPCRouter({
   updateSubscriber: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        subscriberId: z.string(),
-        name: z.string().optional().nullable(),
-        status: z
-          .enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "BLOCKED"])
-          .optional(),
+        clubId: cuidSchema,
+        subscriberId: cuidSchema,
+        name: z.string().max(255).optional().nullable(),
+        status: subscriberStatusSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -380,8 +383,8 @@ export const subscribersRouter = createTRPCRouter({
   deleteSubscriber: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        subscriberId: z.string(),
+        clubId: cuidSchema,
+        subscriberId: cuidSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -415,9 +418,9 @@ export const subscribersRouter = createTRPCRouter({
   exportSubscribers: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string().optional(),
-        status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
+        clubId: cuidSchema,
+        listId: cuidSchema.optional(),
+        status: subscriberStatusSchema.optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -428,7 +431,7 @@ export const subscribersRouter = createTRPCRouter({
       ]);
       const where: {
         clubId: string;
-        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED";
+        status?: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED" | "BLOCKED";
         listMemberships?: { some: { emailListId: string } };
       } = {
         clubId: input.clubId,
@@ -500,9 +503,9 @@ export const subscribersRouter = createTRPCRouter({
   subscribe: publicProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        email: z.string().email(),
-        name: z.string().optional(),
+        clubId: cuidSchema,
+        email: emailSchema,
+        name: z.string().max(255).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

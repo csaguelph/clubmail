@@ -2,14 +2,15 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
+import { cuidSchema, emailSchema, slugSchema } from "@/server/api/validators";
 
 export const adminRouter = createTRPCRouter({
   // List all clubs
   listClubs: adminProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).default(50),
-        cursor: z.string().optional(),
+        limit: z.number().int().min(1).max(100).default(50),
+        cursor: cuidSchema.optional(),
         search: z.string().optional(),
       }),
     )
@@ -87,7 +88,7 @@ export const adminRouter = createTRPCRouter({
 
   // Get a specific club
   getClub: adminProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .query(async ({ ctx, input }) => {
       const club = await ctx.db.club.findUnique({
         where: { id: input.clubId },
@@ -136,14 +137,10 @@ export const adminRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(255),
-        slug: z
-          .string()
-          .min(1)
-          .max(255)
-          .regex(/^[a-z0-9-]+$/),
+        slug: slugSchema,
         gryphlifeId: z.string().optional(),
-        organizationEmail: z.string().email().optional(),
-        primaryContactEmails: z.array(z.string().email()).min(1).max(5),
+        organizationEmail: emailSchema.optional(),
+        primaryContactEmails: z.array(emailSchema).min(1).max(5),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -228,7 +225,7 @@ export const adminRouter = createTRPCRouter({
   updateClub: adminProcedure
     .input(
       z.object({
-        clubId: z.string(),
+        clubId: cuidSchema,
         name: z.string().min(1).max(255).optional(),
         slug: z
           .string()
@@ -237,7 +234,7 @@ export const adminRouter = createTRPCRouter({
           .regex(/^[a-z0-9-]+$/)
           .optional(),
         gryphlifeId: z.string().optional(),
-        organizationEmail: z.string().email().optional(),
+        organizationEmail: emailSchema.optional(),
         isActive: z.boolean().optional(),
       }),
     )
@@ -280,7 +277,7 @@ export const adminRouter = createTRPCRouter({
 
   // Delete a club
   deleteClub: adminProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .mutation(async ({ ctx, input }) => {
       // This will cascade delete all related records due to Prisma schema
       await ctx.db.club.delete({
@@ -303,8 +300,8 @@ export const adminRouter = createTRPCRouter({
               .max(255)
               .regex(/^[a-z0-9-]+$/),
             gryphlifeId: z.string().optional(),
-            organizationEmail: z.string().email().optional(),
-            primaryContactEmails: z.array(z.string().email()).min(1).max(10),
+            organizationEmail: emailSchema.optional(),
+            primaryContactEmails: z.array(emailSchema).min(1).max(10),
             replaceStaff: z.boolean().default(true),
             isActive: z.boolean().default(true),
           }),

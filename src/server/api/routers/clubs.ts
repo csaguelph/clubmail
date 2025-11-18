@@ -7,6 +7,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { cuidSchema, slugSchema } from "@/server/api/validators";
 
 export const clubsRouter = createTRPCRouter({
   // List clubs the current user is a member of (legacy - use listMyClubsInfinite for better performance)
@@ -66,9 +67,9 @@ export const clubsRouter = createTRPCRouter({
   listMyClubsInfinite: protectedProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).default(20),
-        cursor: z.string().optional(),
-        search: z.string().optional(),
+        limit: z.number().int().min(1).max(100).default(20),
+        cursor: cuidSchema.optional(),
+        search: z.string().min(1).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -180,7 +181,7 @@ export const clubsRouter = createTRPCRouter({
 
   // Get detailed information about a specific club
   getClubDetails: protectedProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .query(async ({ ctx, input }) => {
       await checkClubPermission(ctx, input.clubId, [
         "CLUB_OWNER",
@@ -266,7 +267,7 @@ export const clubsRouter = createTRPCRouter({
 
   // Get club by slug (useful for public-facing pages)
   getClubBySlug: protectedProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ slug: slugSchema }))
     .query(async ({ ctx, input }) => {
       const club = await ctx.db.club.findUnique({
         where: { slug: input.slug },
@@ -314,7 +315,7 @@ export const clubsRouter = createTRPCRouter({
 
   // Get public club info for subscription page
   getPublicClubInfo: publicProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ slug: slugSchema }))
     .query(async ({ ctx, input }) => {
       const club = await ctx.db.club.findUnique({
         where: { slug: input.slug },

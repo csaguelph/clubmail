@@ -7,6 +7,11 @@ import {
   protectedProcedure,
 } from "@/server/api/trpc";
 import {
+  campaignStatusSchema,
+  cuidSchema,
+  emailSchema,
+} from "@/server/api/validators";
+import {
   batchSendCampaignEmails,
   sendTestEmail,
 } from "@/server/services/email";
@@ -22,19 +27,10 @@ export const campaignsRouter = createTRPCRouter({
   listCampaigns: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        status: z
-          .enum([
-            "DRAFT",
-            "SCHEDULED",
-            "SENDING",
-            "SENT",
-            "FAILED",
-            "CANCELLED",
-          ])
-          .optional(),
-        limit: z.number().min(1).max(100).default(50),
-        cursor: z.string().optional(),
+        clubId: cuidSchema,
+        status: campaignStatusSchema.optional(),
+        limit: z.number().int().min(1).max(100).default(50),
+        cursor: cuidSchema.optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -104,8 +100,8 @@ export const campaignsRouter = createTRPCRouter({
   getCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -156,8 +152,8 @@ export const campaignsRouter = createTRPCRouter({
   getCampaignStats: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -234,8 +230,8 @@ export const campaignsRouter = createTRPCRouter({
   getCampaignEngagement: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -321,11 +317,11 @@ export const campaignsRouter = createTRPCRouter({
   createCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
+        clubId: cuidSchema,
         name: z.string().min(1).max(255),
         subject: z.string().optional(),
         preheaderText: z.string().optional(),
-        emailListId: z.string(),
+        emailListId: cuidSchema,
         designJson: z.string().optional(),
         html: z.string().optional(),
       }),
@@ -398,8 +394,8 @@ export const campaignsRouter = createTRPCRouter({
   updateCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
         name: z.string().min(1).max(255).optional(),
         subject: z.string().optional(),
         preheaderText: z.string().optional().nullable(),
@@ -480,8 +476,8 @@ export const campaignsRouter = createTRPCRouter({
   deleteCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -524,9 +520,9 @@ export const campaignsRouter = createTRPCRouter({
   sendTest: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
-        testEmail: z.string().email(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
+        testEmail: emailSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -599,8 +595,8 @@ export const campaignsRouter = createTRPCRouter({
   sendCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -852,8 +848,8 @@ export const campaignsRouter = createTRPCRouter({
   duplicateCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -901,8 +897,8 @@ export const campaignsRouter = createTRPCRouter({
   scheduleCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
         scheduledFor: z.date(),
       }),
     )
@@ -977,8 +973,8 @@ export const campaignsRouter = createTRPCRouter({
   cancelCampaign: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        campaignId: z.string(),
+        clubId: cuidSchema,
+        campaignId: cuidSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -1031,7 +1027,7 @@ export const campaignsRouter = createTRPCRouter({
   getScheduledCampaigns: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
+        clubId: cuidSchema,
         startDate: z.date().optional(),
         endDate: z.date().optional(),
       }),

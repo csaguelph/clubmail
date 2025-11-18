@@ -4,7 +4,7 @@ import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { requireAuth } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
-import SettingsForm from "./SettingsForm";
+import SettingsForm from "@/components/clubs/SettingsForm";
 
 export default async function ClubSettingsPage({
   params,

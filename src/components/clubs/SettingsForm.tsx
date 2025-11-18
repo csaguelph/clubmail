@@ -5,6 +5,9 @@ import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui";
+import { Input } from "@/components/ui";
+
 interface SettingsFormProps {
   clubId: string;
   slug: string;
@@ -74,14 +77,14 @@ export default function SettingsForm({
             >
               From Name *
             </label>
-            <input
+            <Input
               type="text"
               id="fromName"
               required
               value={fromName}
               onChange={(e) => setFromName(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="Computer Science Club"
+              className="mt-1"
             />
             <p className="mt-1 text-xs text-gray-500">
               The name that will appear in the &quot;From&quot; field of emails
@@ -96,14 +99,14 @@ export default function SettingsForm({
               From Email
             </label>
             <div className="mt-1 flex items-center gap-2">
-              <input
+              <Input
                 type="text"
                 id="fromEmailSlug"
                 value={fromEmailSlug}
                 onChange={(e) => setFromEmailSlug(e.target.value.toLowerCase())}
                 pattern="^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
                 required
-                className="block w-48 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                className="w-48"
               />
               <span className="text-sm text-gray-700">
                 @clubmail.csaonline.ca
@@ -126,13 +129,13 @@ export default function SettingsForm({
             >
               Reply-To Email (optional)
             </label>
-            <input
+            <Input
               type="email"
               id="replyToEmail"
               value={replyToEmail}
               onChange={(e) => setReplyToEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="contact@example.com"
+              className="mt-1"
             />
             <p className="mt-1 text-xs text-gray-500">
               Where should replies be sent? If not set, replies will go to
@@ -155,13 +158,13 @@ export default function SettingsForm({
             >
               Default Subject Prefix (optional)
             </label>
-            <input
+            <Input
               type="text"
               id="defaultSubjectPrefix"
               value={defaultSubjectPrefix}
               onChange={(e) => setDefaultSubjectPrefix(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
               placeholder="[CS Club]"
+              className="mt-1"
             />
             <p className="mt-1 text-xs text-gray-500">
               Will be prepended to campaign subjects
@@ -182,13 +185,14 @@ export default function SettingsForm({
                 value={brandColor}
                 onChange={(e) => setBrandColor(e.target.value)}
                 className="h-10 w-20 cursor-pointer rounded-md border border-gray-300"
+                aria-label="Brand color picker"
               />
-              <input
+              <Input
                 type="text"
                 value={brandColor}
                 onChange={(e) => setBrandColor(e.target.value)}
                 pattern="^#[0-9A-Fa-f]{6}$"
-                className="block w-32 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                className="w-32"
                 placeholder="#b1d135"
               />
               <button
@@ -210,6 +214,7 @@ export default function SettingsForm({
                   color: getTextColorForBackground(brandColor),
                 }}
                 className="rounded-md px-4 py-2 text-sm font-semibold shadow-sm"
+                aria-label="Brand color preview"
               >
                 Sample Button
               </button>
@@ -255,24 +260,23 @@ export default function SettingsForm({
 
       {/* Actions */}
       <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+        <Button type="button" onClick={() => router.back()} variant="secondary">
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={updateSettings.isPending}
-          className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+          variant="primary"
         >
           {updateSettings.isPending ? "Saving..." : "Save Settings"}
-        </button>
+        </Button>
       </div>
 
       {updateSettings.error && (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
+        <div
+          className="rounded-md bg-red-50 p-4 text-sm text-red-800"
+          role="alert"
+        >
           {(updateSettings.error as unknown as Error).message}
         </div>
       )}

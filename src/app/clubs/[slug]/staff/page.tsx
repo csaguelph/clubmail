@@ -4,7 +4,7 @@ import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { getCurrentUser } from "@/server/auth-utils";
 import { api } from "@/trpc/server";
-import ClubStaffManager from "./ClubStaffManager";
+import ClubStaffManager from "@/components/clubs/ClubStaffManager";
 
 interface PageProps {
   params: Promise<{

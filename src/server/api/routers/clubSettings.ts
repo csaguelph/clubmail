@@ -6,11 +6,17 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import {
+  cuidSchema,
+  emailSchema,
+  emailSlugSchema,
+  hexColorSchema,
+} from "@/server/api/validators";
 
 export const clubSettingsRouter = createTRPCRouter({
   // Get club settings
   getSettings: protectedProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .query(async ({ ctx, input }) => {
       await checkClubPermission(ctx, input.clubId, [
         "CLUB_OWNER",
@@ -36,20 +42,12 @@ export const clubSettingsRouter = createTRPCRouter({
   updateSettings: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        fromName: z.string().min(1).optional(),
-        fromEmailSlug: z
-          .string()
-          .min(1)
-          .max(64)
-          .regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/)
-          .optional(),
-        replyToEmail: z.string().email().optional().nullable(),
-        defaultSubjectPrefix: z.string().optional().nullable(),
-        brandColor: z
-          .string()
-          .regex(/^#[0-9A-Fa-f]{6}$/)
-          .optional(),
+        clubId: cuidSchema,
+        fromName: z.string().min(1).max(255).optional(),
+        fromEmailSlug: emailSlugSchema.optional(),
+        replyToEmail: emailSchema.optional().nullable(),
+        defaultSubjectPrefix: z.string().max(255).optional().nullable(),
+        brandColor: hexColorSchema.optional(),
         enableTracking: z.boolean().optional(),
       }),
     )

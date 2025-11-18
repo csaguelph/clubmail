@@ -6,11 +6,12 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/server/api/trpc";
+import { cuidSchema } from "@/server/api/validators";
 
 export const emailListsRouter = createTRPCRouter({
   // List email lists for a club
   listLists: protectedProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .query(async ({ ctx, input }) => {
       await checkClubPermission(ctx, input.clubId, [
         "CLUB_OWNER",
@@ -36,7 +37,7 @@ export const emailListsRouter = createTRPCRouter({
 
   // Get default list for a club
   getDefaultList: protectedProcedure
-    .input(z.object({ clubId: z.string() }))
+    .input(z.object({ clubId: cuidSchema }))
     .query(async ({ ctx, input }) => {
       await checkClubPermission(ctx, input.clubId, [
         "CLUB_OWNER",
@@ -73,8 +74,8 @@ export const emailListsRouter = createTRPCRouter({
   getList: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string(),
+        clubId: cuidSchema,
+        listId: cuidSchema,
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -113,9 +114,9 @@ export const emailListsRouter = createTRPCRouter({
   createList: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
+        clubId: cuidSchema,
         name: z.string().min(1).max(255),
-        description: z.string().optional().nullable(),
+        description: z.string().max(1000).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -140,10 +141,10 @@ export const emailListsRouter = createTRPCRouter({
   updateList: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string(),
+        clubId: cuidSchema,
+        listId: cuidSchema,
         name: z.string().min(1).max(255).optional(),
-        description: z.string().optional().nullable(),
+        description: z.string().max(1000).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -181,8 +182,8 @@ export const emailListsRouter = createTRPCRouter({
   deleteList: protectedProcedure
     .input(
       z.object({
-        clubId: z.string(),
-        listId: z.string(),
+        clubId: cuidSchema,
+        listId: cuidSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {

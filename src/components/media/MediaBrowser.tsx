@@ -1,16 +1,11 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import {
-  Check,
-  FileIcon,
-  Image as ImageIcon,
-  Loader2,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useCallback, useState } from "react";
+
+import { Button } from "@/components/ui";
+import { MediaItem } from "@/components/media/MediaItem";
 
 interface MediaBrowserProps {
   clubId?: string;
@@ -140,7 +135,7 @@ export function MediaBrowser({
         <h3 className="text-lg font-semibold text-gray-900">Media Library</h3>
         <div className="flex items-center gap-2">
           {allowUpload && (
-            <label className="cursor-pointer rounded-md bg-[#b1d135] px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-[#a0c030]">
+            <label className="cursor-pointer">
               <input
                 type="file"
                 className="hidden"
@@ -153,23 +148,30 @@ export function MediaBrowser({
                 }
                 onChange={handleFileSelect}
                 disabled={uploadingFile}
+                aria-label="Upload media file"
               />
-              <div className="flex items-center gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={uploadingFile}
+                className="flex items-center gap-2"
+              >
                 {uploadingFile ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}
                 Upload
-              </div>
+              </Button>
             </label>
           )}
           {onClose && (
             <button
               onClick={onClose}
               className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              aria-label="Close media browser"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -183,7 +185,10 @@ export function MediaBrowser({
           </div>
         ) : allItems.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-gray-500">
-            <ImageIcon className="mb-2 h-12 w-12 text-gray-300" />
+            <ImageIcon
+              className="mb-2 h-12 w-12 text-gray-300"
+              aria-hidden="true"
+            />
             <p className="text-sm">No media files yet</p>
             {allowUpload && (
               <p className="mt-1 text-xs text-gray-400">
@@ -207,12 +212,12 @@ export function MediaBrowser({
 
             {hasNextPage && (
               <div className="mt-4 text-center">
-                <button
+                <Button
                   onClick={() => void fetchNextPage()}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  variant="secondary"
                 >
                   Load More
-                </button>
+                </Button>
               </div>
             )}
           </>
@@ -227,95 +232,20 @@ export function MediaBrowser({
           </p>
           <div className="flex gap-2">
             {onClose && (
-              <button
-                onClick={onClose}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
+              <Button onClick={onClose} variant="secondary">
                 Cancel
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               onClick={handleSelect}
               disabled={!selectedId}
-              className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+              variant="primary"
             >
               Insert
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-interface MediaItemProps {
-  item: {
-    id: string;
-    url: string;
-    filename: string;
-    mimeType: string;
-    altText: string | null;
-    size: number;
-  };
-  isSelected: boolean;
-  onSelect: () => void;
-  onDelete: () => void;
-}
-
-function MediaItem({ item, isSelected, onSelect, onDelete }: MediaItemProps) {
-  const isImage = item.mimeType.startsWith("image/");
-  const sizeKB = (item.size / 1024).toFixed(1);
-
-  return (
-    <div
-      onClick={onSelect}
-      className={`group relative cursor-pointer overflow-hidden rounded-lg border-2 ${
-        isSelected
-          ? "ring-opacity-50 border-[#b1d135] ring-2 ring-[#b1d135]"
-          : "border-gray-200 hover:border-gray-300"
-      }`}
-    >
-      {/* Preview */}
-      <div className="aspect-square bg-gray-100">
-        {isImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.url}
-            alt={item.altText ?? item.filename}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <FileIcon className="h-12 w-12 text-gray-400" />
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="p-2">
-        <p className="truncate text-xs font-medium text-gray-900">
-          {item.filename}
-        </p>
-        <p className="text-xs text-gray-500">{sizeKB} KB</p>
-      </div>
-
-      {/* Selection indicator */}
-      {isSelected && (
-        <div className="absolute top-2 right-2 rounded-full bg-[#b1d135] p-1">
-          <Check className="h-4 w-4 text-white" />
-        </div>
-      )}
-
-      {/* Delete button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="absolute top-2 left-2 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
     </div>
   );
 }

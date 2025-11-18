@@ -1,7 +1,10 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { Button } from "@/components/ui";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui";
+import { Input } from "@/components/ui";
+import { Select } from "@/components/ui";
 import {
   Crown,
   Edit,
@@ -10,9 +13,10 @@ import {
   Shield,
   Trash2,
   UserPlus,
-  X,
 } from "lucide-react";
 import { useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 interface ClubStaffManagerProps {
   clubId: string;
@@ -139,13 +143,14 @@ export default function ClubStaffManager({
           {staffMembers?.length ?? 0} staff{" "}
           {staffMembers?.length === 1 ? "member" : "members"}
         </p>
-        <button
+        <Button
           onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030]"
+          variant="primary"
+          size="sm"
         >
           <UserPlus className="h-4 w-4" />
           Add Staff Member
-        </button>
+        </Button>
       </div>
 
       {/* Role Legend */}
@@ -157,7 +162,7 @@ export default function ClubStaffManager({
         <div className="grid gap-2 md:grid-cols-3">
           {Object.entries(ROLE_INFO).map(([role, info]) => (
             <div key={role} className="flex items-start gap-2">
-              <div className={`mt-0.5 rounded-md border p-1.5 ${info.color}`}>
+              <div className={cn("mt-0.5 rounded-md border p-1.5", info.color)}>
                 {info.icon}
               </div>
               <div>
@@ -246,7 +251,10 @@ export default function ClubStaffManager({
                       </td>
                       <td className="px-6 py-4 text-sm whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${roleInfo.color}`}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold",
+                            roleInfo.color,
+                          )}
                         >
                           {roleInfo.icon}
                           {roleInfo.label}
@@ -266,12 +274,16 @@ export default function ClubStaffManager({
                               setIsEditModalOpen(true);
                             }}
                             disabled={isCurrentUser}
-                            className="text-[#b1d135] hover:text-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+                            className={cn(
+                              "text-[#b1d135] hover:text-[#a0c030]",
+                              "disabled:cursor-not-allowed disabled:opacity-50",
+                            )}
                             title={
                               isCurrentUser
                                 ? "Cannot change your own role"
                                 : "Change role"
                             }
+                            aria-label={`Change role for ${member.user.name}`}
                           >
                             <Edit className="h-4 w-4" />
                           </button>
@@ -286,7 +298,10 @@ export default function ClubStaffManager({
                               setIsRemoveModalOpen(true);
                             }}
                             disabled={isCurrentUser || isLastOwner}
-                            className="text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className={cn(
+                              "text-red-600 hover:text-red-700",
+                              "disabled:cursor-not-allowed disabled:opacity-50",
+                            )}
                             title={
                               isCurrentUser
                                 ? "Cannot remove yourself"
@@ -294,6 +309,7 @@ export default function ClubStaffManager({
                                   ? "Cannot remove the last owner"
                                   : "Remove staff member"
                             }
+                            aria-label={`Remove ${member.user.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -312,245 +328,205 @@ export default function ClubStaffManager({
       <Dialog
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        className="relative z-50"
+        title="Add Staff Member"
+        size="md"
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-lg font-semibold text-gray-900">
-                Add Staff Member
-              </DialogTitle>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-gray-400 hover:text-gray-500"
+        <form onSubmit={handleAddStaff}>
+          <DialogContent>
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
               >
-                <X className="h-5 w-5" />
-              </button>
+                Email Address *
+              </label>
+              <Input
+                type="email"
+                id="email"
+                required
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="staff@example.com"
+                className="mt-1"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                If the user doesn&apos;t have an account, they&apos;ll be
+                invited to sign up.
+              </p>
             </div>
 
-            <form onSubmit={handleAddStaff} className="mt-4 space-y-4">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
-                  placeholder="staff@example.com"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  If the user doesn&apos;t have an account, they&apos;ll be
-                  invited to sign up.
-                </p>
-              </div>
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Role *
+              </label>
+              <Select
+                id="role"
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value as ClubRole)}
+                className="mt-1"
+              >
+                {Object.entries(ROLE_INFO).map(([role, info]) => (
+                  <option key={role} value={role}>
+                    {info.label} - {info.description}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-              <div>
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Role *
-                </label>
-                <select
-                  id="role"
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as ClubRole)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
-                >
-                  {Object.entries(ROLE_INFO).map(([role, info]) => (
-                    <option key={role} value={role}>
-                      {info.label} - {info.description}
-                    </option>
-                  ))}
-                </select>
+            {addStaff.error && (
+              <div
+                className="rounded-md bg-red-50 p-3 text-sm text-red-800"
+                role="alert"
+              >
+                {addStaff.error.message}
               </div>
-
-              {addStaff.error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                  {addStaff.error.message}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={addStaff.isPending}
-                  className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {addStaff.isPending ? "Adding..." : "Add Staff Member"}
-                </button>
-              </div>
-            </form>
-          </DialogPanel>
-        </div>
+            )}
+          </DialogContent>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              variant="secondary"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={addStaff.isPending}
+              variant="primary"
+            >
+              {addStaff.isPending ? "Adding..." : "Add Staff Member"}
+            </Button>
+          </DialogFooter>
+        </form>
       </Dialog>
 
       {/* Edit Role Modal */}
       <Dialog
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        className="relative z-50"
+        title="Change Staff Role"
+        size="md"
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-lg font-semibold text-gray-900">
-                Change Staff Role
-              </DialogTitle>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <form onSubmit={handleUpdateRole}>
+          <DialogContent>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Staff Member
+              </label>
+              <div className="mt-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2">
+                <div className="text-sm font-medium text-gray-900">
+                  {editingStaff?.name}
+                </div>
+                <div className="text-xs text-gray-600">
+                  {editingStaff?.email}
+                </div>
+              </div>
             </div>
 
-            <form onSubmit={handleUpdateRole} className="mt-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Staff Member
-                </label>
-                <div className="mt-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2">
-                  <div className="text-sm font-medium text-gray-900">
-                    {editingStaff?.name}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {editingStaff?.email}
-                  </div>
-                </div>
-              </div>
+            <div>
+              <label
+                htmlFor="edit-role"
+                className="block text-sm font-medium text-gray-700"
+              >
+                New Role *
+              </label>
+              <Select
+                id="edit-role"
+                value={editingStaff?.newRole ?? ""}
+                onChange={(e) =>
+                  setEditingStaff(
+                    editingStaff
+                      ? {
+                          ...editingStaff,
+                          newRole: e.target.value as ClubRole,
+                        }
+                      : null,
+                  )
+                }
+                className="mt-1"
+              >
+                {Object.entries(ROLE_INFO).map(([role, info]) => (
+                  <option key={role} value={role}>
+                    {info.label} - {info.description}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-              <div>
-                <label
-                  htmlFor="edit-role"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  New Role *
-                </label>
-                <select
-                  id="edit-role"
-                  value={editingStaff?.newRole ?? ""}
-                  onChange={(e) =>
-                    setEditingStaff(
-                      editingStaff
-                        ? {
-                            ...editingStaff,
-                            newRole: e.target.value as ClubRole,
-                          }
-                        : null,
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
-                >
-                  {Object.entries(ROLE_INFO).map(([role, info]) => (
-                    <option key={role} value={role}>
-                      {info.label} - {info.description}
-                    </option>
-                  ))}
-                </select>
+            {updateRole.error && (
+              <div
+                className="rounded-md bg-red-50 p-3 text-sm text-red-800"
+                role="alert"
+              >
+                {updateRole.error.message}
               </div>
-
-              {updateRole.error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                  {updateRole.error.message}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updateRole.isPending}
-                  className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {updateRole.isPending ? "Updating..." : "Update Role"}
-                </button>
-              </div>
-            </form>
-          </DialogPanel>
-        </div>
+            )}
+          </DialogContent>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              variant="secondary"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={updateRole.isPending}
+              variant="primary"
+            >
+              {updateRole.isPending ? "Updating..." : "Update Role"}
+            </Button>
+          </DialogFooter>
+        </form>
       </Dialog>
 
       {/* Remove Staff Modal */}
       <Dialog
         open={isRemoveModalOpen}
         onClose={() => setIsRemoveModalOpen(false)}
-        className="relative z-50"
+        title="Remove Staff Member"
+        size="md"
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-lg font-semibold text-gray-900">
-                Remove Staff Member
-              </DialogTitle>
-              <button
-                onClick={() => setIsRemoveModalOpen(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <DialogContent>
+          <p className="text-sm text-gray-600">
+            Are you sure you want to remove{" "}
+            <span className="font-semibold">{removingStaff?.name}</span> from
+            the club staff?
+          </p>
+          <p className="mt-2 text-sm text-gray-600">
+            They will lose all access to club management features.
+          </p>
+
+          {removeStaff.error && (
+            <div
+              className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800"
+              role="alert"
+            >
+              {removeStaff.error.message}
             </div>
-
-            <div className="mt-4">
-              <p className="text-sm text-gray-600">
-                Are you sure you want to remove{" "}
-                <span className="font-semibold">{removingStaff?.name}</span>{" "}
-                from the club staff?
-              </p>
-              <p className="mt-2 text-sm text-gray-600">
-                They will lose all access to club management features.
-              </p>
-
-              {removeStaff.error && (
-                <div className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800">
-                  {removeStaff.error.message}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsRemoveModalOpen(false)}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleRemoveStaff}
-                  disabled={removeStaff.isPending}
-                  className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {removeStaff.isPending
-                    ? "Removing..."
-                    : "Remove Staff Member"}
-                </button>
-              </div>
-            </div>
-          </DialogPanel>
-        </div>
+          )}
+        </DialogContent>
+        <DialogFooter>
+          <Button
+            type="button"
+            onClick={() => setIsRemoveModalOpen(false)}
+            variant="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleRemoveStaff}
+            disabled={removeStaff.isPending}
+            variant="danger"
+          >
+            {removeStaff.isPending ? "Removing..." : "Remove Staff Member"}
+          </Button>
+        </DialogFooter>
       </Dialog>
     </div>
   );
