@@ -804,7 +804,16 @@ export default function SubscribersList({
                         <Input
                           type="text"
                           placeholder="Value"
-                          value={String(value ?? "")}
+                          value={
+                            typeof value === "string"
+                              ? value
+                              : value === null || value === undefined
+                                ? ""
+                                : typeof value === "number" ||
+                                    typeof value === "boolean"
+                                  ? String(value)
+                                  : JSON.stringify(value)
+                          }
                           onChange={(e) => {
                             setEditingSubscriber({
                               ...editingSubscriber,
