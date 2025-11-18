@@ -247,7 +247,7 @@ function getEnv(): EnvType {
   // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
   _env ??= require("@/env").env;
   // After ??=, _env is guaranteed to be non-null
-  return _env as EnvType;
+  return _env!;
 }
 
 // Social media icon PNG URLs (for email compatibility)
