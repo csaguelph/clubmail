@@ -631,6 +631,7 @@ export const campaignsRouter = createTRPCRouter({
         settings.brandColor,
         testUnsubscribeUrl,
         (settings.socialLinks as Record<string, string> | null) ?? null,
+        false, // useInlineSvgs = false for server-side (use PNGs for better email client compatibility)
       );
 
       // Send test email

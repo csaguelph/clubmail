@@ -44,6 +44,7 @@ export default async function CampaignDetailPage({
     settings.brandColor,
     testUnsubscribeUrl,
     (settings.socialLinks as Record<string, string> | null) ?? null,
+    false, // useInlineSvgs = false for server-side (use PNGs for better email client compatibility)
   );
 
   const stats = await api.campaigns.getCampaignStats({

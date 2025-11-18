@@ -71,12 +71,15 @@ export default function CampaignEditForm({
     e.preventDefault();
 
     // Generate HTML from blocks
+    // Use inline SVGs for client-side generation (avoids server env access)
+    // Server will use PNGs when actually sending emails
     const html = await generateEmailHTML(
       blocks,
       clubName,
       brandColor,
       undefined, // No unsubscribe token for draft
       socialLinks ?? null,
+      true, // useInlineSvgs = true for client-side generation
     );
 
     // Generate design JSON from blocks

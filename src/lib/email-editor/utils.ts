@@ -63,6 +63,7 @@ export async function generateEmailHTML(
   brandColor?: string,
   unsubscribeUrl?: string,
   socialLinks?: Record<string, string> | null,
+  useInlineSvgs = false,
 ): Promise<string> {
   return await render(
     EmailTemplate({
@@ -71,6 +72,7 @@ export async function generateEmailHTML(
       brandColor,
       unsubscribeUrl,
       socialLinks,
+      useInlineSvgs,
     }),
   );
 }

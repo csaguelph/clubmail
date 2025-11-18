@@ -233,6 +233,7 @@ function EmailPreview({
       brandColor,
       testUnsubscribeUrl,
       socialLinks ?? null,
+      true, // useInlineSvgs = true for preview (client-side)
     )
       .then(setHtml)
       .catch((err) => console.error("Failed to generate email preview:", err));
