@@ -130,6 +130,7 @@ export const subscribersRouter = createTRPCRouter({
         email: emailSchema,
         name: z.string().max(255).optional().nullable(),
         listIds: z.array(cuidSchema).optional(),
+        customFields: z.record(z.string(), z.unknown()).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -181,6 +182,7 @@ export const subscribersRouter = createTRPCRouter({
             email: input.email,
             name: input.name,
             status: "SUBSCRIBED",
+            customFields: input.customFields ?? {},
           },
         });
 
@@ -334,6 +336,7 @@ export const subscribersRouter = createTRPCRouter({
         subscriberId: cuidSchema,
         name: z.string().max(255).optional().nullable(),
         status: subscriberStatusSchema.optional(),
+        customFields: z.record(z.string(), z.unknown()).optional().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -371,9 +374,28 @@ export const subscribersRouter = createTRPCRouter({
         });
       }
 
+      // Prepare update data, handling customFields properly
+      const dataToUpdate: Record<string, unknown> = { ...updateData };
+
+      // Filter out empty keys from customFields
+      if (updateData.customFields !== undefined) {
+        if (updateData.customFields === null) {
+          dataToUpdate.customFields = null;
+        } else {
+          const filteredFields = Object.fromEntries(
+            Object.entries(updateData.customFields).filter(
+              ([key, value]) =>
+                key.trim() !== "" && value !== null && value !== undefined,
+            ),
+          );
+          dataToUpdate.customFields =
+            Object.keys(filteredFields).length > 0 ? filteredFields : {};
+        }
+      }
+
       const updated = await ctx.db.subscriber.update({
         where: { id: subscriberId },
-        data: updateData,
+        data: dataToUpdate,
       });
 
       return updated;

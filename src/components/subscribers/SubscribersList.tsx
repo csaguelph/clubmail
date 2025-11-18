@@ -6,7 +6,16 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui";
 import { Input } from "@/components/ui";
 import { Select } from "@/components/ui";
 import { Textarea } from "@/components/ui";
-import { Download, Edit, Info, Trash2, Upload, UserPlus } from "lucide-react";
+import {
+  Download,
+  Edit,
+  Info,
+  Minus,
+  Plus,
+  Trash2,
+  Upload,
+  UserPlus,
+} from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -48,6 +57,7 @@ export default function SubscribersList({
     email: string;
     name: string | null;
     status: "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED" | "BLOCKED";
+    customFields: Record<string, unknown>;
   } | null>(null);
   const [deletingSubscriber, setDeletingSubscriber] = useState<{
     id: string;
@@ -269,6 +279,7 @@ export default function SubscribersList({
       subscriberId: editingSubscriber.id,
       name: editingSubscriber.name,
       status: editingSubscriber.status,
+      customFields: editingSubscriber.customFields,
     });
   };
 
@@ -478,6 +489,11 @@ export default function SubscribersList({
                               email: subscriber.email,
                               name: subscriber.name,
                               status: subscriber.status,
+                              customFields:
+                                (subscriber.customFields as Record<
+                                  string,
+                                  unknown
+                                > | null) ?? {},
                             });
                             setIsEditModalOpen(true);
                           }}
@@ -731,6 +747,105 @@ export default function SubscribersList({
                   Blocked subscribers cannot have their status changed
                 </p>
               )}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Custom Fields
+                </label>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (!editingSubscriber) return;
+                    const keys = Object.keys(editingSubscriber.customFields);
+                    const newKey = `field_${keys.length + 1}`;
+                    setEditingSubscriber({
+                      ...editingSubscriber,
+                      customFields: {
+                        ...editingSubscriber.customFields,
+                        [newKey]: "",
+                      },
+                    });
+                  }}
+                  variant="secondary"
+                  size="sm"
+                  className="h-7"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add Field
+                </Button>
+              </div>
+              <div className="mt-2 space-y-2">
+                {editingSubscriber &&
+                  Object.entries(editingSubscriber.customFields).map(
+                    ([key, value], index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="Key"
+                          value={key}
+                          onChange={(e) => {
+                            const newKey = e.target.value;
+                            const newCustomFields = {
+                              ...editingSubscriber.customFields,
+                            };
+                            delete newCustomFields[key];
+                            if (newKey) {
+                              newCustomFields[newKey] = value;
+                            }
+                            setEditingSubscriber({
+                              ...editingSubscriber,
+                              customFields: newCustomFields,
+                            });
+                          }}
+                          className="flex-1"
+                        />
+                        <Input
+                          type="text"
+                          placeholder="Value"
+                          value={String(value ?? "")}
+                          onChange={(e) => {
+                            setEditingSubscriber({
+                              ...editingSubscriber,
+                              customFields: {
+                                ...editingSubscriber.customFields,
+                                [key]: e.target.value,
+                              },
+                            });
+                          }}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            if (!editingSubscriber) return;
+                            const newCustomFields = {
+                              ...editingSubscriber.customFields,
+                            };
+                            delete newCustomFields[key];
+                            setEditingSubscriber({
+                              ...editingSubscriber,
+                              customFields: newCustomFields,
+                            });
+                          }}
+                          variant="secondary"
+                          size="sm"
+                          className="h-10 px-3"
+                          aria-label={`Remove ${key}`}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ),
+                  )}
+                {(!editingSubscriber ||
+                  Object.keys(editingSubscriber.customFields).length === 0) && (
+                  <p className="text-sm text-gray-500">
+                    No custom fields. Click &quot;Add Field&quot; to add one.
+                  </p>
+                )}
+              </div>
             </div>
 
             {updateSubscriber.error && (
