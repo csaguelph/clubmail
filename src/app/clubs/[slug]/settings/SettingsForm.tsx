@@ -10,6 +10,7 @@ interface SettingsFormProps {
   slug: string;
   settings: {
     fromName: string;
+    fromEmailSlug: string | null;
     replyToEmail: string | null;
     defaultSubjectPrefix: string | null;
     brandColor: string;
@@ -23,8 +24,8 @@ export default function SettingsForm({
   settings: initialSettings,
 }: SettingsFormProps) {
   const router = useRouter();
-  const [fromName, setFromName] = useState(initialSettings.fromName);
-  const [fromEmailSlug, setFromEmailSlug] = useState(
+  const [fromName, setFromName] = useState<string>(initialSettings.fromName);
+  const [fromEmailSlug, setFromEmailSlug] = useState<string>(
     initialSettings.fromEmailSlug ?? slug,
   );
   const [replyToEmail, setReplyToEmail] = useState(
@@ -272,7 +273,7 @@ export default function SettingsForm({
 
       {updateSettings.error && (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
-          {updateSettings.error.message}
+          {(updateSettings.error as Error).message}
         </div>
       )}
     </form>
