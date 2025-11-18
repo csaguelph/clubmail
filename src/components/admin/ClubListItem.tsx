@@ -1,6 +1,18 @@
-import { Mail, Settings, Trash2, UserCog, Users } from "lucide-react";
+import {
+  Archive,
+  Mail,
+  RefreshCw,
+  Settings,
+  Trash2,
+  UserCog,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
+import DeactivateClubDialog from "@/components/admin/DeactivateClubDialog";
+import { api } from "@/trpc/react";
 import type { RouterOutputs } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +65,49 @@ interface ClubActionButtonsProps {
 }
 
 function ClubActionButtons({ club, onDeleteClick }: ClubActionButtonsProps) {
+  const router = useRouter();
+  const utils = api.useUtils();
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+
+  const reactivateMutation = api.admin.reactivateClub.useMutation({
+    onSuccess: () => {
+      void utils.admin.listClubs.invalidate();
+      void utils.admin.getClubStats.invalidate();
+      router.refresh();
+    },
+    onError: (error) => {
+      alert(`Failed to reactivate club: ${error.message}`);
+    },
+  });
+
+  const deactivateMutation = api.admin.deactivateClub.useMutation({
+    onSuccess: () => {
+      void utils.admin.listClubs.invalidate();
+      void utils.admin.getClubStats.invalidate();
+      router.refresh();
+      setDeactivateDialogOpen(false);
+    },
+    onError: (error) => {
+      alert(`Failed to deactivate club: ${error.message}`);
+    },
+  });
+
+  const handleReactivate = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    reactivateMutation.mutate({ clubId: club.id });
+  };
+
+  const handleDeactivateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeactivateDialogOpen(true);
+  };
+
+  const handleConfirmDeactivate = () => {
+    deactivateMutation.mutate({ clubId: club.id });
+  };
+
   const actions = [
     {
       href: `/clubs/${club.slug}/campaigns`,
@@ -110,6 +165,59 @@ function ClubActionButtons({ club, onDeleteClick }: ClubActionButtonsProps) {
           </Link>
         );
       })}
+      {!club.isActive && (
+        <button
+          onClick={handleReactivate}
+          disabled={reactivateMutation.isPending}
+          className={cn(
+            "rounded-md p-2 text-gray-400 transition",
+            "hover:bg-green-50 hover:text-green-600",
+            "focus:ring-2 focus:ring-green-500 focus:outline-none",
+            reactivateMutation.isPending && "cursor-not-allowed opacity-50",
+          )}
+          title="Reactivate club"
+          aria-label={`Reactivate ${club.name}`}
+        >
+          <RefreshCw
+            className={cn(
+              "h-4 w-4",
+              reactivateMutation.isPending && "animate-spin",
+            )}
+            aria-hidden="true"
+          />
+        </button>
+      )}
+      {club.isActive && (
+        <>
+          <button
+            onClick={handleDeactivateClick}
+            disabled={deactivateMutation.isPending}
+            className={cn(
+              "rounded-md p-2 text-gray-400 transition",
+              "hover:bg-amber-50 hover:text-amber-600",
+              "focus:ring-2 focus:ring-amber-500 focus:outline-none",
+              deactivateMutation.isPending && "cursor-not-allowed opacity-50",
+            )}
+            title="Deactivate club"
+            aria-label={`Deactivate ${club.name}`}
+          >
+            <Archive
+              className={cn(
+                "h-4 w-4",
+                deactivateMutation.isPending && "animate-spin",
+              )}
+              aria-hidden="true"
+            />
+          </button>
+          <DeactivateClubDialog
+            isOpen={deactivateDialogOpen}
+            onClose={() => setDeactivateDialogOpen(false)}
+            onConfirm={handleConfirmDeactivate}
+            clubName={club.name}
+            isDeactivating={deactivateMutation.isPending}
+          />
+        </>
+      )}
       <button
         onClick={(e) => onDeleteClick(e, club)}
         className={cn(
