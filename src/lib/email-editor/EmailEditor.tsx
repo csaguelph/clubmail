@@ -108,8 +108,6 @@ export function EmailEditor({
     setDraggedBlockId(null);
   };
 
-  const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
-
   return (
     <div className="space-y-4">
       {/* Preview Toggle */}
@@ -126,9 +124,9 @@ export function EmailEditor({
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-        {/* Block List */}
+        {/* Block List with Expandable Editors */}
         <div
-          className={`space-y-2 ${showPreview ? "lg:flex-1" : selectedBlock ? "lg:flex-1" : "w-full"}`}
+          className={`space-y-2 ${showPreview ? "w-full lg:w-2/5" : "w-full"}`}
         >
           <div className="mb-4 flex items-center justify-between">
             <BlockMenu onAddBlock={addBlock} />
@@ -150,38 +148,29 @@ export function EmailEditor({
                   isDragging={draggedBlockId === block.id}
                   isFirst={index === 0}
                   isLast={index === blocks.length - 1}
-                  onSelect={() => setSelectedBlockId(block.id)}
+                  onSelect={() => {
+                    // Toggle selection: if already selected, deselect
+                    setSelectedBlockId(
+                      selectedBlockId === block.id ? null : block.id,
+                    );
+                  }}
                   onDelete={() => deleteBlock(block.id)}
                   onMoveUp={() => moveBlock(block.id, "up")}
                   onMoveDown={() => moveBlock(block.id, "down")}
                   onDragStart={() => handleDragStart(block.id)}
                   onDragOver={(e) => handleDragOver(e, block.id)}
                   onDragEnd={handleDragEnd}
+                  onUpdateBlock={updateBlock}
+                  clubId={clubId}
                 />
               ))}
             </div>
           )}
         </div>
 
-        {/* Block Editor */}
-        {selectedBlock && (
-          <div
-            className={`overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 lg:sticky lg:top-4 lg:max-h-[600px] lg:self-start ${showPreview ? "w-full lg:w-80" : "w-full lg:flex-1"}`}
-          >
-            <h3 className="mb-4 text-sm font-medium text-gray-900">
-              Edit {selectedBlock.type}
-            </h3>
-            <BlockEditor
-              block={selectedBlock}
-              onChange={updateBlock}
-              clubId={clubId}
-            />
-          </div>
-        )}
-
         {/* Live Preview */}
         {showPreview && (
-          <div className="w-full lg:flex-1">
+          <div className="w-full lg:w-3/5">
             <div className="lg:sticky lg:top-4">
               <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
                 <div className="border-b border-gray-200 bg-gray-50 px-4 py-2">
@@ -366,6 +355,8 @@ function BlockItem({
   onDragStart,
   onDragOver,
   onDragEnd,
+  onUpdateBlock,
+  clubId,
 }: {
   block: EmailBlock;
   isSelected: boolean;
@@ -379,8 +370,11 @@ function BlockItem({
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragEnd: () => void;
+  onUpdateBlock: (id: string, updates: Partial<EmailBlock>) => void;
+  clubId?: string;
 }) {
   const blockRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   const handleDragStart = (e: React.DragEvent) => {
     // Set the drag image to the entire block
@@ -407,74 +401,121 @@ function BlockItem({
     }
   };
 
+  // Scroll editor into view when expanded
+  useEffect(() => {
+    if (isSelected && editorRef.current) {
+      editorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [isSelected]);
+
   return (
     <div
       ref={blockRef}
       onDragOver={onDragOver}
-      onClick={onSelect}
-      className={`flex items-center gap-2 rounded-lg border p-3 transition ${
+      className={`overflow-hidden rounded-lg border transition-all ${
         isDragging
           ? "opacity-50"
           : isSelected
-            ? "border-[#b1d135] bg-[#b1d135]/5"
+            ? "border-[#b1d135] bg-white shadow-sm"
             : "border-gray-200 bg-white hover:border-gray-300"
       }`}
     >
-      {/* Drag Handle */}
+      {/* Block Card Header */}
       <div
-        draggable
-        onDragStart={handleDragStart}
-        onDragEnd={onDragEnd}
-        className="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVertical className="h-5 w-5" />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoveUp();
-          }}
-          disabled={isFirst}
-          className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
-        >
-          <ChevronUp className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoveDown();
-          }}
-          disabled={isLast}
-          className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="flex-1">
-        <div className="text-xs font-medium text-gray-500 uppercase">
-          {block.type}
-        </div>
-        <div className="truncate text-sm text-gray-900">
-          {getBlockPreview()}
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
+        onClick={onSelect}
+        className={`flex items-center gap-2 p-3 transition ${
+          isSelected ? "rounded-t-lg" : "rounded-lg"
+        } cursor-pointer`}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isSelected}
+        aria-controls={`block-editor-${block.id}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect();
+          }
         }}
-        className="text-red-500 hover:text-red-700"
       >
-        <Trash2 className="h-4 w-4" />
-      </button>
+        {/* Drag Handle */}
+        <div
+          draggable
+          onDragStart={handleDragStart}
+          onDragEnd={onDragEnd}
+          className="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing"
+          onClick={(e) => e.stopPropagation()}
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="h-5 w-5" />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveUp();
+            }}
+            disabled={isFirst}
+            className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+            aria-label="Move up"
+          >
+            <ChevronUp className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveDown();
+            }}
+            disabled={isLast}
+            className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+            aria-label="Move down"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex-1">
+          <div className="text-xs font-medium text-gray-500 uppercase">
+            {block.type}
+          </div>
+          <div className="truncate text-sm text-gray-900">
+            {getBlockPreview()}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="text-red-500 hover:text-red-700"
+          aria-label="Delete block"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Expandable Editor Section */}
+      {isSelected && (
+        <div
+          ref={editorRef}
+          id={`block-editor-${block.id}`}
+          className="rounded-b-lg border-t border-gray-200 bg-gray-50 p-4"
+          role="region"
+          aria-label={`Edit ${block.type} block`}
+        >
+          <h3 className="mb-4 text-sm font-medium text-gray-900">
+            Edit {block.type}
+          </h3>
+          <BlockEditor block={block} onChange={onUpdateBlock} clubId={clubId} />
+        </div>
+      )}
     </div>
   );
 }
