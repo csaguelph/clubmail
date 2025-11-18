@@ -233,19 +233,19 @@ const socialIconsContainer = {
 
 // Lazy getter for env (only accessed server-side)
 // This avoids importing env on the client, which would cause errors
-let _env: (typeof import("@/env"))["env"] | null = null;
-function getEnv() {
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type EnvType = (typeof import("@/env"))["env"];
+let _env: EnvType | null = null;
+function getEnv(): EnvType {
   // Safety check: this should never be called on the client
   if (typeof window !== "undefined") {
     throw new Error(
       "getSocialIconUrl should only be called server-side. Use useInlineSvgs=true for client-side preview.",
     );
   }
-  if (_env === null) {
-    // This will only execute server-side when useInlineSvgs is false
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    _env = require("@/env").env;
-  }
+  // This will only execute server-side when useInlineSvgs is false
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
+  _env ??= require("@/env").env;
   return _env;
 }
 
