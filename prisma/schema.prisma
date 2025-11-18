@@ -143,6 +143,7 @@ model Subscriber {
   name              String?
   status            SubscriberStatus @default(SUBSCRIBED)
   unsubscribeToken  String           @unique @default(cuid())
+  customFields      Json?            @default("{}")
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
