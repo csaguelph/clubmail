@@ -59,6 +59,14 @@ export default function SubscribersList({
     id: string;
     email: string;
   } | null>(null);
+  const [changingStatusSubscriber, setChangingStatusSubscriber] = useState<{
+    id: string;
+    email: string;
+    currentStatus: string;
+  } | null>(null);
+  const [newStatus, setNewStatus] = useState<
+    "SUBSCRIBED" | "UNSUBSCRIBED" | "BOUNCED" | "BLOCKED"
+  >("SUBSCRIBED");
 
   const utils = api.useUtils();
 
@@ -96,6 +104,13 @@ export default function SubscribersList({
       void utils.subscribers.listSubscribers.invalidate();
       setIsEditModalOpen(false);
       setEditingSubscriber(null);
+    },
+  });
+
+  const changeStatus = api.subscribers.updateSubscriber.useMutation({
+    onSuccess: () => {
+      void utils.subscribers.listSubscribers.invalidate();
+      setChangingStatusSubscriber(null);
     },
   });
 
@@ -271,6 +286,16 @@ export default function SubscribersList({
     });
   };
 
+  const handleChangeStatus = () => {
+    if (!changingStatusSubscriber) return;
+
+    changeStatus.mutate({
+      clubId,
+      subscriberId: changingStatusSubscriber.id,
+      status: newStatus,
+    });
+  };
+
   const handleExportCSV = async () => {
     const result = await triggerExport();
     if (result.data?.csv) {
@@ -400,21 +425,41 @@ export default function SubscribersList({
                       {subscriber.name ?? "-"}
                     </td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap">
-                      <span
+                      <button
+                        onClick={() => {
+                          if (subscriber.status !== "BLOCKED") {
+                            setChangingStatusSubscriber({
+                              id: subscriber.id,
+                              email: subscriber.email,
+                              currentStatus: subscriber.status,
+                            });
+                            setNewStatus(subscriber.status);
+                          }
+                        }}
+                        disabled={subscriber.status === "BLOCKED"}
                         className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                           subscriber.status === "SUBSCRIBED"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
                             : subscriber.status === "UNSUBSCRIBED"
-                              ? "bg-gray-100 text-gray-800"
-                              : "bg-red-100 text-red-800"
-                        }`}
+                              ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                              : subscriber.status === "BOUNCED"
+                                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                                : "cursor-not-allowed bg-red-100 text-red-800"
+                        } ${subscriber.status !== "BLOCKED" ? "cursor-pointer" : ""}`}
+                        title={
+                          subscriber.status === "BLOCKED"
+                            ? "Blocked subscribers cannot have their status changed"
+                            : "Click to change status"
+                        }
                       >
                         {subscriber.status === "SUBSCRIBED"
                           ? "Active"
                           : subscriber.status === "UNSUBSCRIBED"
                             ? "Unsubscribed"
-                            : "Bounced"}
-                      </span>
+                            : subscriber.status === "BOUNCED"
+                              ? "Bounced"
+                              : "Blocked"}
+                      </button>
                     </td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
                       {new Date(subscriber.createdAt).toLocaleDateString()}
@@ -842,6 +887,93 @@ export default function SubscribersList({
                   {bulkImport.isPending
                     ? "Importing..."
                     : `Import ${gryphLifeParsedData.length} Subscriber(s)`}
+                </button>
+              </div>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* Change Status Modal */}
+      <Dialog
+        open={!!changingStatusSubscriber}
+        onClose={() => setChangingStatusSubscriber(null)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-semibold text-gray-900">
+                Change Subscriber Status
+              </DialogTitle>
+              <button
+                onClick={() => setChangingStatusSubscriber(null)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <p className="mb-2 text-sm text-gray-600">
+                  Change status for{" "}
+                  <span className="font-semibold">
+                    {changingStatusSubscriber?.email}
+                  </span>
+                </p>
+                <label
+                  htmlFor="status"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  New Status
+                </label>
+                <select
+                  id="status"
+                  value={newStatus}
+                  onChange={(e) =>
+                    setNewStatus(
+                      e.target.value as
+                        | "SUBSCRIBED"
+                        | "UNSUBSCRIBED"
+                        | "BOUNCED"
+                        | "BLOCKED",
+                    )
+                  }
+                  className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
+                >
+                  <option value="SUBSCRIBED">Active</option>
+                  <option value="UNSUBSCRIBED">Unsubscribed</option>
+                  <option value="BOUNCED">Bounced</option>
+                  <option value="BLOCKED">Blocked</option>
+                </select>
+                <p className="mt-2 text-xs text-gray-500">
+                  Note: Changing to &quot;Blocked&quot; will permanently prevent
+                  this subscriber from being changed to any other status.
+                </p>
+              </div>
+
+              {changeStatus.error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {changeStatus.error.message}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setChangingStatusSubscriber(null)}
+                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangeStatus}
+                  disabled={changeStatus.isPending}
+                  className="rounded-md bg-[#b1d135] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-[#a0c030] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {changeStatus.isPending ? "Updating..." : "Update Status"}
                 </button>
               </div>
             </div>

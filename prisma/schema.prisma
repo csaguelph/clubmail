@@ -233,7 +233,7 @@ model Email {
   campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   campaignId String
 
-  subscriber   Subscriber @relation(fields: [subscriberId], references: [id])
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   subscriberId String
 
   opens      EmailOpen[]
