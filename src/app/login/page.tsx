@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Logo } from "@/components/layout/Logo";
 import { env } from "@/env";
 import { auth } from "@/server/better-auth";
 import { getSession } from "@/server/better-auth/server";
@@ -27,15 +28,14 @@ export default async function LoginPage({
   const error = params.error;
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4 py-12">
+    <div className="flex flex-1 items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4 py-8">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl bg-white px-8 py-10 shadow-xl">
+        <div className="rounded-2xl bg-white px-8 py-8 shadow-xl">
           {/* Logo */}
-          <div className="mb-8 text-center">
-            <h1 className="mb-2 text-4xl font-bold">
-              <span className="text-[#b1d135]">Club</span>
-              <span className="text-gray-900">Mail</span>
-            </h1>
+          <div className="mb-6 text-center">
+            <div className="mb-2 flex justify-center">
+              <Logo className="[&_div]:text-4xl [&_svg]:h-10 [&_svg]:w-10" />
+            </div>
             <p className="text-gray-600">Sign in to your account</p>
           </div>
 
@@ -142,7 +142,7 @@ export default async function LoginPage({
           </div>
 
           {/* Info text */}
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-4 text-center text-sm text-gray-500">
             Sign-in is restricted to{" "}
             <span className="font-medium text-gray-700">@uoguelph.ca</span>{" "}
             accounts.
@@ -150,7 +150,7 @@ export default async function LoginPage({
         </div>
 
         {/* Back to home */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <Link
             href="/"
             className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
