@@ -328,7 +328,9 @@ export const subscribersRouter = createTRPCRouter({
         clubId: z.string(),
         subscriberId: z.string(),
         name: z.string().optional().nullable(),
-        status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED"]).optional(),
+        status: z
+          .enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "BLOCKED"])
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -350,6 +352,19 @@ export const subscribersRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Subscriber not found",
+        });
+      }
+
+      // Prevent changing status from BLOCKED
+      if (
+        subscriber.status === "BLOCKED" &&
+        updateData.status &&
+        updateData.status !== "BLOCKED"
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "Cannot change status of a blocked subscriber. Blocked subscribers must remain blocked due to hard bounces or spam complaints.",
         });
       }
 
