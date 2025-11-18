@@ -44,7 +44,7 @@ export default function SettingsForm({
     initialSettings.enableTracking,
   );
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>(
-    (initialSettings.socialLinks as Record<string, string> | null) ?? {},
+    initialSettings.socialLinks ?? {},
   );
 
   const updateSettings = api.clubSettings.updateSettings.useMutation({
