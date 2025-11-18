@@ -1,0 +1,41 @@
+---
+description: Architecture rules for tRPC, Prisma, and backend organization
+globs:
+  - "src/server/**/*"
+  - "prisma/**/*"
+alwaysApply: false
+---
+
+# tRPC Architecture
+
+- All backend business logic should live in **tRPC routers** under `src/server/api`.
+- When adding new backend functionality, prefer creating or extending routers/procedures rather than ad-hoc API routes.
+- For each procedure:
+  - Define input with **Zod schemas**.
+  - Avoid `any` types; maintain strict typing for inputs, outputs, and context.
+  - Use `publicProcedure`, `protectedProcedure`, or project-standard helpers for auth-aware procedures.
+- Prefer composition of smaller procedures and helper functions over large monolithic procedures.
+
+# Prisma Usage
+
+- Access the database only via `@/server/db`. Do **not** create new `PrismaClient` instances (no `new PrismaClient()`).
+- Prefer **type inference** from Prisma instead of handwritten types, e.g. `Prisma.UserGetPayload`.
+- When querying:
+  - Use explicit `select` or `include` objects for predictable types.
+  - Avoid retrieving unused columns; be deliberate with selected fields.
+- When adding or changing database-related logic:
+  - Consider whether you should also update the **Prisma schema** (`prisma/schema.prisma`).
+  - If schema changes are implied, mention the needed model/field changes and a migration.
+
+# API and Server Organization
+
+- Place reusable server-only helpers (e.g. domain services, mailers, queues) under `src/server` or `src/server/services`, not in API route files.
+- Keep router definitions focused on wiring and validation; move heavy business logic into separate functions in `src/server` or `src/lib`.
+- Ensure procedures and services are **pure** where possible and easy to test.
+
+# Types from tRPC and Prisma
+
+- Derive types from routers and Prisma client:
+  - Use tRPC `RouterInputs`/`RouterOutputs` utilities when available.
+  - Use Prisma’s generated types for models, payloads, and enums.
+- Avoid redefining DTOs that mirror router or Prisma types; instead, **reuse** or **transform** inferred types.

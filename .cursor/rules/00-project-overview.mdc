@@ -1,0 +1,62 @@
+---
+description: Project-wide T3 stack and coding guidelines
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Project Overview
+
+- This project uses the T3 Stack: **Next.js**, **tRPC**, **Prisma**, **BetterAuth**, **TailwindCSS**, and **TypeScript**.
+- All new code should embrace type safety, end-to-end typing, and framework conventions.
+
+# Coding Guidelines
+
+- Always use **TypeScript** files (`.ts`, `.tsx`). Do **not** create `.js` or `.jsx` files.
+- Use **functional React components with hooks**; do not use class components.
+- In `src/app`, prefer **React Server Components** by default. Add `"use client"` only when interactivity or browser-only APIs are strictly required.
+- Keep page entries in `src/app` **thin**:
+  - Move reusable logic into `src/components` or `src/lib`.
+  - Avoid large components or business logic directly in route files.
+
+# Data & Types
+
+- Derive types from **tRPC routers**, **Zod schemas**, or **Prisma models** instead of redefining them manually.
+- Store shared/domain types in `src/types` only when they are **not** directly inferrable from tRPC, Prisma, or Zod.
+- Prefer inferred/utility types:
+  - `Awaited<ReturnType<typeof someFn>>` for async return types.
+  - `RouterOutputs["route"]["procedure"]` and `RouterInputs[...]` for tRPC.
+  - `Prisma.ModelNameGetPayload<{ select | include }>` over custom interfaces.
+- Avoid duplicating interfaces that mirror Prisma models.
+
+# Tooling & Automation
+
+- When writing or editing non-trivial code, ensure it will pass linting and typechecking.
+- After substantial changes, **suggest** (and be prepared for) running:
+
+  ```bash
+  pnpm lint
+  pnpm typecheck
+  ```
+
+- Before suggesting commits or PRs, assume the developer will verify:
+  - ESLint passes via `pnpm lint`.
+  - TypeScript builds cleanly via `pnpm typecheck`.
+
+# File Organization
+
+- Follow these location conventions:
+  - Components: `src/components` (and subfolders).
+  - Utilities and shared helpers: `src/lib`.
+  - tRPC routers and server logic: `src/server/api`.
+  - Prisma schema and migrations: `prisma/schema.prisma` and `prisma/migrations`.
+  - BetterAuth configuration: `src/server/better-auth/config.ts`.
+  - Environment variables: `src/env.js` (and corresponding type-safe access patterns).
+- Do **not** introduce new config files in arbitrary locations; prefer existing patterns and top-level config.
+
+# AI-Specific
+
+- When generating code, default to **TypeScript**, **TailwindCSS**, and **tRPC**-aligned patterns.
+- Never generate random credentials, API keys, or secrets.
+- When changing or introducing persistent data structures, also propose the corresponding **Prisma schema** updates and migration considerations.
+- For UI components, include basic **accessibility** best practices (ARIA attributes, labels, keyboard-focusable elements) when relevant.

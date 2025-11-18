@@ -1,0 +1,36 @@
+---
+description: tRPC router and procedure conventions for src/server/api
+globs:
+  - "src/server/api/**/*"
+alwaysApply: true
+---
+
+# tRPC Routers
+
+- Define all tRPC routers in `src/server/api`.
+- When creating a new router:
+  - Use the shared router helpers (e.g. `createTRPCRouter`, `publicProcedure`, `protectedProcedure`) as defined in this project.
+  - Group related procedures by domain (e.g. `clubRouter`, `campaignRouter`).
+
+# Input Validation
+
+- Every tRPC procedure **must** validate its input using **Zod**.
+- Do not accept `any` or untyped inputs.
+- Prefer small, reusable Zod schemas imported from shared validation modules when patterns repeat.
+
+# Types & Returns
+
+- Avoid manually retyping inputs/outputs; instead, use:
+  - `RouterInputs["routerName"]["procedureName"]` for inputs.
+  - `RouterOutputs["routerName"]["procedureName"]` for outputs.
+- Return **plain JSON-serializable data** or Prisma results shaped with `select`/`include`, not class instances.
+
+# Prisma Integration
+
+- Use the shared Prisma client from `@/server/db` inside procedures.
+- Use `select`/`include` to control payload shapes and ensure predictable, strongly-typed responses.
+
+# Auth and Context
+
+- Use the project’s auth-aware procedures (`protectedProcedure`, etc.) for authenticated operations.
+- Read auth/session information from the established tRPC context rather than recreating auth logic.

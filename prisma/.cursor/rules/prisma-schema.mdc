@@ -1,0 +1,31 @@
+---
+description: Prisma schema and migration rules
+globs:
+  - "prisma/**/*"
+alwaysApply: true
+---
+
+# Prisma Schema
+
+- All database schema definitions live in `prisma/schema.prisma`.
+- When changing data structures (adding fields/models or changing relations):
+  - Update `schema.prisma` accordingly.
+  - Consider the impact on existing data and migrations.
+
+# Migrations
+
+- Use Prisma Migrate to evolve the schema; do not hand-edit migration SQL unless necessary and understood.
+- Keep migrations small and focused.
+
+# Types & Usage
+
+- Prefer generated Prisma types in application code:
+  - e.g. `Prisma.UserGetPayload<{ select: { ... } }>` instead of custom interfaces.
+- Ensure queries use explicit `select`/`include` for predictable types and minimal overfetching.
+
+# Coordination with App Code
+
+- When a schema change is introduced, also guide corresponding changes in:
+  - tRPC routers (`src/server/api`).
+  - UI components or forms that rely on the affected models.
+- Mention follow-up steps like re-running Prisma generate and re-running type checks when schema changes are suggested.
