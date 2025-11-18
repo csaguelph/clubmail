@@ -1,4 +1,5 @@
 import { getTextColorForBackground } from "@/lib/color-utils";
+import { env } from "@/env";
 import {
   Body,
   Button,
@@ -18,6 +19,7 @@ interface EmailTemplateProps {
   clubName: string;
   brandColor?: string;
   unsubscribeUrl?: string;
+  socialLinks?: Record<string, string> | null;
 }
 
 export function EmailTemplate({
@@ -25,6 +27,7 @@ export function EmailTemplate({
   clubName,
   brandColor = "#b1d135",
   unsubscribeUrl,
+  socialLinks,
 }: EmailTemplateProps) {
   return (
     <Html>
@@ -41,6 +44,14 @@ export function EmailTemplate({
           {/* Footer */}
           <Section style={footer}>
             <Hr style={hr} />
+            {socialLinks && Object.keys(socialLinks).length > 0 && (
+              <Text
+                style={socialIconsContainer}
+                dangerouslySetInnerHTML={{
+                  __html: renderSocialIcons(socialLinks),
+                }}
+              />
+            )}
             <Text style={footerTextStyle}>
               This content is created by {clubName} and is not reviewed or
               endorsed by the Central Student Association or the University of
@@ -210,3 +221,88 @@ const link = {
   color: "#3b82f6", // Match rich text link color
   textDecoration: "underline",
 };
+
+const socialIconsContainer = {
+  fontSize: "12px",
+  lineHeight: "1.5",
+  color: "#8898aa",
+  marginTop: "16px",
+  textAlign: "center" as const,
+};
+
+// Social media icon PNG URLs (for email compatibility)
+// Icons can be served from public folder (Vercel) or R2 (recommended for email)
+function getSocialIconUrl(platform: string): string {
+  // Check if R2 is configured and has a public URL
+  // If so, use R2 URLs (better for email delivery with CDN)
+  if (env.R2_PUBLIC_URL) {
+    return `${env.R2_PUBLIC_URL}/social-icons/${platform.toLowerCase()}.png`;
+  }
+
+  // Fallback to Vercel public folder
+  const baseUrl = env.NEXT_PUBLIC_BASE_URL;
+  return `${baseUrl}/social-icons/${platform.toLowerCase()}.png`;
+}
+
+function renderSocialIcons(links: Record<string, string>): string {
+  const iconSize = 20;
+  const iconSpacing = 12;
+
+  // Preferred order for university students (most popular first)
+  const preferredOrder = [
+    "instagram",
+    "tiktok",
+    "discord",
+    "twitter",
+    "youtube",
+    "facebook",
+    "linkedin",
+    "github",
+  ];
+
+  // Sort entries by preferred order, then filter and map
+  const sortedEntries = Object.entries(links)
+    .filter(([_, url]) => url && url.trim() !== "")
+    .sort(([platformA], [platformB]) => {
+      const indexA = preferredOrder.indexOf(platformA.toLowerCase());
+      const indexB = preferredOrder.indexOf(platformB.toLowerCase());
+      // If platform not in preferred order, put it at the end
+      const orderA = indexA === -1 ? Infinity : indexA;
+      const orderB = indexB === -1 ? Infinity : indexB;
+      return orderA - orderB;
+    });
+
+  // Use table-based layout with PNG images for better email client compatibility
+  // This works much better in Outlook than SVGs
+  // Wrap in a centered table to ensure proper alignment
+  const icons = sortedEntries
+    .map(([platform, url]) => {
+      const iconUrl = getSocialIconUrl(platform);
+      const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
+
+      return `
+        <table cellpadding="0" cellspacing="0" border="0" style="display: inline-block; margin: 0 ${iconSpacing / 2}px; vertical-align: middle;">
+          <tr>
+            <td style="padding: 0;">
+              <a href="${url}" style="display: block; text-decoration: none;" target="_blank" rel="noopener noreferrer">
+                <img src="${iconUrl}" alt="${platformName}" width="${iconSize}" height="${iconSize}" style="display: block; border: 0; outline: none; text-decoration: none; width: ${iconSize}px; height: ${iconSize}px;" />
+              </a>
+            </td>
+          </tr>
+        </table>
+      `;
+    })
+    .filter(Boolean)
+    .join("");
+
+  // Wrap all icons in a centered container table for proper alignment
+  return `
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 auto;">
+      <tr>
+        <td align="center" style="padding: 0;">
+          ${icons}
+        </td>
+      </tr>
+    </table>
+  `;
+}

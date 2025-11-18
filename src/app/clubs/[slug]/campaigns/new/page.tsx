@@ -50,6 +50,7 @@ export default function NewCampaignPage() {
       club.name,
       settings.brandColor,
       undefined, // unsubscribe URL will be injected when sending
+      (settings.socialLinks as Record<string, string> | null) ?? null,
     );
 
     const designJson = generateDesignJSON(blocks);
@@ -188,6 +189,10 @@ export default function NewCampaignPage() {
                 clubName={club.name}
                 brandColor={settings?.brandColor}
                 clubId={club.id}
+                socialLinks={
+                  (settings?.socialLinks as Record<string, string> | null) ??
+                  null
+                }
               />
             </div>
           </div>

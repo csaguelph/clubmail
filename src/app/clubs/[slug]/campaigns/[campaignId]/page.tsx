@@ -43,6 +43,7 @@ export default async function CampaignDetailPage({
     club.name,
     settings.brandColor,
     testUnsubscribeUrl,
+    (settings.socialLinks as Record<string, string> | null) ?? null,
   );
 
   const stats = await api.campaigns.getCampaignStats({

@@ -65,6 +65,9 @@ export default async function CampaignEditPage({
         emailLists={emailLists}
         clubName={club.name}
         brandColor={settings.brandColor}
+        socialLinks={
+          (settings.socialLinks as Record<string, string> | null) ?? null
+        }
       />
     </PageContainer>
   );

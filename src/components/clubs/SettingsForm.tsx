@@ -1,6 +1,7 @@
 "use client";
 
 import { getTextColorForBackground } from "@/lib/color-utils";
+import { SocialIcon } from "@/lib/social-icons";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -18,6 +19,7 @@ interface SettingsFormProps {
     defaultSubjectPrefix: string | null;
     brandColor: string;
     enableTracking: boolean;
+    socialLinks: Record<string, string> | null;
   };
 }
 
@@ -41,6 +43,9 @@ export default function SettingsForm({
   const [enableTracking, setEnableTracking] = useState(
     initialSettings.enableTracking,
   );
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>(
+    initialSettings.socialLinks ?? {},
+  );
 
   const updateSettings = api.clubSettings.updateSettings.useMutation({
     onSuccess: () => {
@@ -59,6 +64,8 @@ export default function SettingsForm({
       defaultSubjectPrefix: defaultSubjectPrefix || undefined,
       brandColor,
       enableTracking,
+      socialLinks:
+        Object.keys(socialLinks).length > 0 ? socialLinks : undefined,
     });
   };
 
@@ -255,6 +262,89 @@ export default function SettingsForm({
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Social Media Links */}
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Social Media Links
+        </h2>
+        <p className="mb-4 text-sm text-gray-600">
+          Add your social media links to display them in the footer of your
+          emails. These will appear as icons in the email footer.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {[
+            {
+              key: "facebook",
+              label: "Facebook",
+              placeholder: "https://facebook.com/yourclub",
+            },
+            {
+              key: "twitter",
+              label: "Twitter/X",
+              placeholder: "https://twitter.com/yourclub",
+            },
+            {
+              key: "instagram",
+              label: "Instagram",
+              placeholder: "https://instagram.com/yourclub",
+            },
+            {
+              key: "linkedin",
+              label: "LinkedIn",
+              placeholder: "https://linkedin.com/company/yourclub",
+            },
+            {
+              key: "youtube",
+              label: "YouTube",
+              placeholder: "https://youtube.com/@yourclub",
+            },
+            {
+              key: "tiktok",
+              label: "TikTok",
+              placeholder: "https://tiktok.com/@yourclub",
+            },
+            {
+              key: "discord",
+              label: "Discord",
+              placeholder: "https://discord.gg/yourclub",
+            },
+            {
+              key: "github",
+              label: "GitHub",
+              placeholder: "https://github.com/yourclub",
+            },
+          ].map((platform) => (
+            <div key={platform.key}>
+              <label
+                htmlFor={`social-${platform.key}`}
+                className="block text-sm font-medium text-gray-700"
+              >
+                {platform.label}
+              </label>
+              <div className="mt-1 flex items-center gap-2">
+                <SocialIcon
+                  platform={platform.key}
+                  className="h-5 w-5 shrink-0 text-gray-400"
+                />
+                <Input
+                  type="url"
+                  id={`social-${platform.key}`}
+                  value={socialLinks[platform.key] ?? ""}
+                  onChange={(e) =>
+                    setSocialLinks({
+                      ...socialLinks,
+                      [platform.key]: e.target.value,
+                    })
+                  }
+                  placeholder={platform.placeholder}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

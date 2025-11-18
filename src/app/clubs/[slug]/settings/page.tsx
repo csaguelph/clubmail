@@ -36,7 +36,15 @@ export default async function ClubSettingsPage({
         description={`Configure how emails are sent from ${club.name}`}
       />
 
-      <SettingsForm clubId={club.id} slug={slug} settings={settings} />
+      <SettingsForm
+        clubId={club.id}
+        slug={slug}
+        settings={{
+          ...settings,
+          socialLinks:
+            (settings.socialLinks as Record<string, string> | null) ?? null,
+        }}
+      />
     </PageContainer>
   );
 }

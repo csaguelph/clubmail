@@ -104,6 +104,7 @@ model ClubSettings {
   defaultSubjectPrefix  String?
   brandColor            String  @default("#b1d135")
   enableTracking        Boolean @default(true)
+  socialLinks           Json?   @default("{}") // JSON object: { "facebook": "url", "twitter": "url", ... }
 
   club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId String @unique
