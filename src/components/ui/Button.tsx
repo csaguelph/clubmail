@@ -15,6 +15,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = "md",
       disabled,
       children,
+      type = "button",
       ...props
     },
     ref,
@@ -40,6 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        type={type}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled}
         {...props}
