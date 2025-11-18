@@ -47,11 +47,14 @@ export default function NewCampaignPage() {
     // Generate HTML from blocks
     // Use inline SVGs for client-side generation (avoids server env access)
     // Server will use PNGs when actually sending emails
+    // Note: archiveUrl is not included here since campaign doesn't exist yet
+    // It will be added server-side when the campaign is created
     const html = await generateEmailHTML(
       blocks,
       club.name,
       settings.brandColor,
       undefined, // unsubscribe URL will be injected when sending
+      undefined, // archiveUrl will be added server-side after campaign creation
       (settings.socialLinks as Record<string, string> | null) ?? null,
       true, // useInlineSvgs = true for client-side generation
     );

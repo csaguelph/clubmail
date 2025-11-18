@@ -20,6 +20,7 @@ interface EmailTemplateProps {
   clubName: string;
   brandColor?: string;
   unsubscribeUrl?: string;
+  archiveUrl?: string; // URL to view campaign on the web
   socialLinks?: Record<string, string> | null;
   useInlineSvgs?: boolean; // Use inline SVGs for preview (client-side), PNGs for actual emails (server-side)
 }
@@ -29,6 +30,7 @@ export function EmailTemplate({
   clubName,
   brandColor = "#b1d135",
   unsubscribeUrl,
+  archiveUrl,
   socialLinks,
   useInlineSvgs = false,
 }: EmailTemplateProps) {
@@ -66,6 +68,12 @@ export function EmailTemplate({
               {unsubscribeUrl && (
                 <a href={unsubscribeUrl} style={link}>
                   Unsubscribe
+                </a>
+              )}
+              {unsubscribeUrl && archiveUrl && " • "}
+              {archiveUrl && (
+                <a href={archiveUrl} style={link}>
+                  View on the web
                 </a>
               )}
             </Text>

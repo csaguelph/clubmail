@@ -62,6 +62,7 @@ export async function generateEmailHTML(
   clubName: string,
   brandColor?: string,
   unsubscribeUrl?: string,
+  archiveUrl?: string,
   socialLinks?: Record<string, string> | null,
   useInlineSvgs = false,
 ): Promise<string> {
@@ -71,6 +72,7 @@ export async function generateEmailHTML(
       clubName,
       brandColor,
       unsubscribeUrl,
+      archiveUrl,
       socialLinks,
       useInlineSvgs,
     }),
