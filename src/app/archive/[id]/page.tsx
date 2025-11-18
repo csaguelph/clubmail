@@ -36,7 +36,7 @@ export default async function ArchivePage({
         </div>
       </PageContainer>
     );
-  } catch (error) {
+  } catch {
     notFound();
   }
 }
