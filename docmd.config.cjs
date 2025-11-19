@@ -4,7 +4,7 @@ module.exports = {
   siteTitle: "ClubMail Documentation",
   // Define a base URL for your site, crucial for SEO and absolute paths
   // No trailing slash
-  siteUrl: "https://clubmail-docs.csaonline.ca", // Replace with your actual deployed URL
+  siteUrl: "https://docs.clubmail.csaonline.ca", // Replace with your actual deployed URL
 
   // Logo Configuration
   logo: {
