@@ -350,4 +350,190 @@ export const clubsRouter = createTRPCRouter({
 
       return club;
     }),
+
+  // Get club analytics
+  getClubAnalytics: protectedProcedure
+    .input(z.object({ clubId: cuidSchema }))
+    .query(async ({ ctx, input }) => {
+      await checkClubPermission(ctx, input.clubId, [
+        "CLUB_OWNER",
+        "CLUB_EDITOR",
+        "CLUB_VIEWER",
+      ]);
+
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      // Get all campaigns for this club
+      const campaigns = await ctx.db.campaign.findMany({
+        where: { clubId: input.clubId },
+        select: { id: true, status: true },
+      });
+
+      const campaignIds = campaigns.map((c) => c.id);
+
+      // Get sent campaigns (only these have meaningful metrics)
+      const sentCampaigns = campaigns.filter(
+        (c) => c.status === "SENT" || c.status === "SENDING",
+      );
+
+      // Get email statistics
+      const [totalEmailsSent, emailsLast30Days, emailsLast7Days] =
+        await Promise.all([
+          // Total emails sent
+          ctx.db.email.count({
+            where: {
+              campaignId: { in: campaignIds },
+              status: { in: ["SENT", "DELIVERED"] },
+            },
+          }),
+          // Emails sent in last 30 days
+          ctx.db.email.count({
+            where: {
+              campaignId: { in: campaignIds },
+              status: { in: ["SENT", "DELIVERED"] },
+              sentAt: { gte: thirtyDaysAgo },
+            },
+          }),
+          // Emails sent in last 7 days
+          ctx.db.email.count({
+            where: {
+              campaignId: { in: campaignIds },
+              status: { in: ["SENT", "DELIVERED"] },
+              sentAt: { gte: sevenDaysAgo },
+            },
+          }),
+        ]);
+
+      // Calculate average rates across sent campaigns
+      let totalOpenRate = 0;
+      let totalClickRate = 0;
+      let campaignsWithMetrics = 0;
+
+      for (const campaign of sentCampaigns) {
+        const [emailsDelivered, uniqueOpens, uniqueClicks] = await Promise.all([
+          ctx.db.email.count({
+            where: {
+              campaignId: campaign.id,
+              status: "DELIVERED",
+            },
+          }),
+          ctx.db.emailOpen.groupBy({
+            by: ["emailId"],
+            where: {
+              email: {
+                campaignId: campaign.id,
+              },
+            },
+          }),
+          ctx.db.emailClick.groupBy({
+            by: ["emailId"],
+            where: {
+              email: {
+                campaignId: campaign.id,
+              },
+            },
+          }),
+        ]);
+
+        if (emailsDelivered > 0) {
+          const openRate = (uniqueOpens.length / emailsDelivered) * 100;
+          const clickRate = (uniqueClicks.length / emailsDelivered) * 100;
+
+          totalOpenRate += openRate;
+          totalClickRate += clickRate;
+          campaignsWithMetrics++;
+        }
+      }
+
+      const avgOpenRate =
+        campaignsWithMetrics > 0 ? totalOpenRate / campaignsWithMetrics : 0;
+      const avgClickRate =
+        campaignsWithMetrics > 0 ? totalClickRate / campaignsWithMetrics : 0;
+
+      // Get recent sent campaigns with engagement stats
+      const recentSentCampaigns = await ctx.db.campaign.findMany({
+        where: {
+          clubId: input.clubId,
+          status: "SENT",
+          startedAt: { not: null },
+        },
+        orderBy: { startedAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          startedAt: true,
+        },
+      });
+
+      // Get engagement stats for each recent campaign
+      const recentCampaignsWithStats = await Promise.all(
+        recentSentCampaigns.map(async (campaign) => {
+          const [emailsDelivered, uniqueOpens, uniqueClicks, totalRecipients] =
+            await Promise.all([
+              ctx.db.email.count({
+                where: {
+                  campaignId: campaign.id,
+                  status: "DELIVERED",
+                },
+              }),
+              ctx.db.emailOpen.groupBy({
+                by: ["emailId"],
+                where: {
+                  email: {
+                    campaignId: campaign.id,
+                  },
+                },
+              }),
+              ctx.db.emailClick.groupBy({
+                by: ["emailId"],
+                where: {
+                  email: {
+                    campaignId: campaign.id,
+                  },
+                },
+              }),
+              ctx.db.email.count({
+                where: {
+                  campaignId: campaign.id,
+                  status: { in: ["SENT", "DELIVERED"] },
+                },
+              }),
+            ]);
+
+          const openRate =
+            emailsDelivered > 0
+              ? (uniqueOpens.length / emailsDelivered) * 100
+              : 0;
+          const clickRate =
+            emailsDelivered > 0
+              ? (uniqueClicks.length / emailsDelivered) * 100
+              : 0;
+
+          return {
+            id: campaign.id,
+            name: campaign.name,
+            status: campaign.status,
+            startedAt: campaign.startedAt,
+            recipients: totalRecipients,
+            openRate,
+            clickRate,
+          };
+        }),
+      );
+
+      return {
+        totalEmailsSent,
+        emailsLast30Days,
+        emailsLast7Days,
+        avgOpenRate,
+        avgClickRate,
+        recentCampaigns: recentCampaignsWithStats,
+        totalCampaigns: campaigns.length,
+        sentCampaigns: sentCampaigns.length,
+      };
+    }),
 });

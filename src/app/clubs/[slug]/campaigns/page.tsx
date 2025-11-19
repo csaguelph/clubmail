@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import { CampaignsList } from "@/components/campaigns/CampaignsList";
 import { ClubPageHeader } from "@/components/layout";
@@ -59,12 +60,17 @@ export default async function CampaignsPage({
         </div>
         <Link
           href={`/clubs/${slug}/campaigns/scheduled`}
-          className="rounded-lg bg-white p-6 shadow transition hover:shadow-md"
+          className="group relative rounded-lg bg-white p-6 shadow transition hover:shadow-md"
         >
-          <h3 className="text-sm font-medium text-gray-500">Scheduled</h3>
-          <p className="mt-2 text-3xl font-semibold text-blue-600">
-            {campaigns.filter((c) => c.status === "SCHEDULED").length}
-          </p>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-gray-500">Scheduled</h3>
+              <p className="mt-2 text-3xl font-semibold text-blue-600">
+                {campaigns.filter((c) => c.status === "SCHEDULED").length}
+              </p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-gray-400 transition group-hover:text-blue-600" />
+          </div>
         </Link>
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="text-sm font-medium text-gray-500">Sent</h3>
