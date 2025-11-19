@@ -296,10 +296,11 @@ export const campaignsRouter = createTRPCRouter({
       }
 
       // Get all emails for this campaign
+      // Only count delivered emails for accurate engagement rates
       const emails = await ctx.db.email.findMany({
         where: {
           campaignId: input.campaignId,
-          status: "SENT", // Only count sent emails
+          status: "DELIVERED", // Only count delivered emails for accurate rates
         },
         select: {
           id: true,
@@ -320,12 +321,13 @@ export const campaignsRouter = createTRPCRouter({
       const totalOpens = emails.reduce((sum, e) => sum + e._count.opens, 0);
       const totalClicks = emails.reduce((sum, e) => sum + e._count.clicks, 0);
 
-      // Get top clicked URLs
+      // Get top clicked URLs (only from delivered emails)
       const clickedUrls = await ctx.db.emailClick.groupBy({
         by: ["url"],
         where: {
           email: {
             campaignId: input.campaignId,
+            status: "DELIVERED",
           },
         },
         _count: true,
