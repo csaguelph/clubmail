@@ -167,12 +167,10 @@ export async function sendTestEmail(params: {
   let html = injectUnsubscribeLink(params.campaign.html, "test");
 
   // Resolve placeholders with test data
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const testCampaignName: string =
-    params.campaignName ??
-    (typeof params.campaign.name === "string"
+    typeof params.campaign.name === "string"
       ? params.campaign.name
-      : "Test Campaign");
+      : "Test Campaign";
   const placeholderData = {
     email: params.testEmail,
     name: "Test User",
@@ -403,10 +401,8 @@ export async function sendCampaignEmail(params: {
 
   // Resolve all placeholders in subject and HTML using the new placeholder system
   // This supports {{.Variable}} format with nested access and custom fields
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const campaignNameValue: string =
-    params.campaignName ??
-    (typeof params.campaign.name === "string" ? params.campaign.name : "");
+    typeof params.campaign.name === "string" ? params.campaign.name : "";
   const placeholderData = {
     email: params.subscriber.email,
     name: params.subscriber.name ?? null,
