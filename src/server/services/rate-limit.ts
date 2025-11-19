@@ -167,11 +167,13 @@ export async function getRateLimitUsage() {
 /**
  * Calculate delay needed to respect rate limits
  *
- * @param emailsToSend - Total emails to send
- * @returns Delay in milliseconds between batches
+ * @param _emailsToSend - Total emails to send (for future use)
+ * @param _rateLimitStatus - Optional current rate limit status (for future use)
+ * @returns Delay in milliseconds between emails
  */
 export async function calculateSendDelay(
-  _emailsToSend: number,
+  _emailsToSend?: number,
+  _rateLimitStatus?: RateLimitStatus,
 ): Promise<number> {
   const settings = await getRateLimitSettings();
 
@@ -179,6 +181,7 @@ export async function calculateSendDelay(
     return 0;
   }
 
+  // Calculate base delay based on rate limits
   // Use the more restrictive of the two limits
   const delayForPerSecond = 1000 / settings.maxEmailsPerSecond;
   const delayForPerDay = (24 * 60 * 60 * 1000) / settings.maxEmailsPerDay;

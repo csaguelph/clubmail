@@ -2,6 +2,7 @@ import { env } from "@/env";
 import { db } from "@/server/db";
 import { sendCampaignEmail } from "@/server/services/email";
 import type { QueueEmailJob } from "@/server/services/email-queue";
+import { checkRateLimit } from "@/server/services/rate-limit";
 import { Receiver } from "@upstash/qstash";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -84,6 +85,27 @@ async function handler(req: NextRequest) {
     if (emailRecord.status === "SENT" || emailRecord.status === "DELIVERED") {
       console.log(`Email ${job.emailId} already sent, skipping`);
       return NextResponse.json({ status: "already_sent" });
+    }
+
+    // Check rate limit as a safety net (Flow Control should handle this, but double-check)
+    const rateLimitCheck = await checkRateLimit(1);
+    if (!rateLimitCheck.allowed) {
+      // Return 429 to signal QStash to retry later
+      // Flow Control should prevent this, but this is a safety net
+      console.log(
+        `Rate limit exceeded for email ${job.emailId}, will retry: ${rateLimitCheck.reason}`,
+      );
+      return NextResponse.json(
+        {
+          error: `Rate limit exceeded: ${rateLimitCheck.reason}`,
+          retryAfter: rateLimitCheck.resetTime
+            ? Math.ceil(
+                (rateLimitCheck.resetTime.getTime() - Date.now()) / 1000,
+              )
+            : 1,
+        },
+        { status: 429 },
+      );
     }
 
     // Send the email
