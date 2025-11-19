@@ -114,9 +114,13 @@ async function handler(req: NextRequest) {
         email: job.subscriberEmail,
         name: job.subscriberName,
         unsubscribeToken: job.unsubscribeToken,
+        customFields: job.subscriberCustomFields ?? null,
       },
       campaign: job.campaign,
       clubSettings: job.clubSettings,
+      clubName: job.clubName,
+      emailListName: job.emailListName,
+      archiveUrl: job.archiveUrl,
       trackingToken: job.trackingToken,
     });
 

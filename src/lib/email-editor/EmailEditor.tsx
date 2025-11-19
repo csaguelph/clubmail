@@ -10,6 +10,8 @@
 
 import { MediaBrowser } from "@/components/media/MediaBrowser";
 import { MediaUploadButton } from "@/components/media/MediaUploadButton";
+import { wrapPlaceholdersForPreview } from "@/lib/placeholder-preview";
+import { VariablePickerDialog } from "./VariablePickerDialog";
 import {
   ChevronDown,
   ChevronUp,
@@ -22,6 +24,7 @@ import {
   Plus,
   Trash2,
   Type,
+  Variable,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { RichTextEditor } from "./RichTextEditor";
@@ -225,7 +228,11 @@ function EmailPreview({
       socialLinks ?? null,
       true, // useInlineSvgs = true for preview (client-side)
     )
-      .then(setHtml)
+      .then((generatedHtml) => {
+        // Wrap placeholders in styled pills for preview
+        const previewHtml = wrapPlaceholdersForPreview(generatedHtml);
+        setHtml(previewHtml);
+      })
       .catch((err) => console.error("Failed to generate email preview:", err));
   }, [blocks, clubName, brandColor, socialLinks]);
 
@@ -387,12 +394,29 @@ function BlockItem({
 
   const getBlockPreview = () => {
     switch (block.type) {
-      case "heading":
-        return block.content || "Heading";
-      case "richtext":
+      case "heading": {
+        const content = block.content || "Heading";
+        // Check if content has placeholders
+        if (content.includes("{{.")) {
+          // Show a simplified preview with placeholder indicator
+          return `${content.substring(0, 50)}${content.length > 50 ? "..." : ""} [Variables]`;
+        }
+        return content;
+      }
+      case "richtext": {
+        // Check if richtext has placeholders
+        if (block.content.includes("{{.")) {
+          return "Rich Text Content [Variables]";
+        }
         return "Rich Text Content";
-      case "button":
-        return `Button: ${block.text}`;
+      }
+      case "button": {
+        const text = block.text || "Button";
+        if (text.includes("{{.")) {
+          return `Button: ${text.substring(0, 30)}${text.length > 30 ? "..." : ""} [Variables]`;
+        }
+        return `Button: ${text}`;
+      }
       case "image":
         return `Image: ${block.alt}`;
       case "divider":
@@ -531,6 +555,10 @@ function BlockEditor({
   clubId?: string;
 }) {
   const [showMediaBrowser, setShowMediaBrowser] = useState(false);
+  const [showVariablePicker, setShowVariablePicker] = useState(false);
+  const [variableInputType, setVariableInputType] = useState<
+    "heading" | "button" | null
+  >(null);
 
   switch (block.type) {
     case "heading":
@@ -555,9 +583,23 @@ function BlockEditor({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Content
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700">
+                Content
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setVariableInputType("heading");
+                  setShowVariablePicker(true);
+                }}
+                className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                title="Insert Variable"
+              >
+                <Variable className="h-3 w-3" />
+                <span>Variable</span>
+              </button>
+            </div>
             <input
               type="text"
               value={block.content}
@@ -565,6 +607,20 @@ function BlockEditor({
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#b1d135] focus:ring-1 focus:ring-[#b1d135] focus:outline-none"
             />
           </div>
+          <VariablePickerDialog
+            isOpen={showVariablePicker && variableInputType === "heading"}
+            onClose={() => {
+              setShowVariablePicker(false);
+              setVariableInputType(null);
+            }}
+            onSelect={(placeholder) => {
+              onChange(block.id, {
+                content: block.content + placeholder,
+              });
+              setShowVariablePicker(false);
+              setVariableInputType(null);
+            }}
+          />
         </div>
       );
 
@@ -585,9 +641,23 @@ function BlockEditor({
       return (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Button Text
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700">
+                Button Text
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setVariableInputType("button");
+                  setShowVariablePicker(true);
+                }}
+                className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                title="Insert Variable"
+              >
+                <Variable className="h-3 w-3" />
+                <span>Variable</span>
+              </button>
+            </div>
             <input
               type="text"
               value={block.text}
@@ -624,6 +694,20 @@ function BlockEditor({
               <option value="right">Right</option>
             </select>
           </div>
+          <VariablePickerDialog
+            isOpen={showVariablePicker && variableInputType === "button"}
+            onClose={() => {
+              setShowVariablePicker(false);
+              setVariableInputType(null);
+            }}
+            onSelect={(placeholder) => {
+              onChange(block.id, {
+                text: block.text + placeholder,
+              });
+              setShowVariablePicker(false);
+              setVariableInputType(null);
+            }}
+          />
         </div>
       );
 

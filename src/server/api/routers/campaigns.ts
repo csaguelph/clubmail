@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "@/env";
 import {
   checkClubPermission,
   createTRPCRouter,
@@ -633,6 +634,13 @@ export const campaignsRouter = createTRPCRouter({
           id: input.campaignId,
           clubId: input.clubId,
         },
+        include: {
+          emailList: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
 
       if (!campaign) {
@@ -703,10 +711,15 @@ export const campaignsRouter = createTRPCRouter({
           fromName: campaign.fromName,
           fromEmail: campaign.fromEmail,
           html: htmlWithSocialLinks,
+          name: campaign.name,
+          id: campaign.id,
         },
         clubSettings: {
           replyToEmail: settings.replyToEmail,
         },
+        clubName: club.name,
+        emailListName: campaign.emailList.name,
+        archiveUrl,
       });
 
       if (!result.success) {
@@ -795,6 +808,7 @@ export const campaignsRouter = createTRPCRouter({
           email: true,
           name: true,
           unsubscribeToken: true,
+          customFields: true,
         },
       });
 
@@ -886,11 +900,24 @@ export const campaignsRouter = createTRPCRouter({
           ]),
         );
 
+        // Get club name for placeholders (emailList is already included in campaign query)
+        const club = await ctx.db.club.findUnique({
+          where: { id: input.clubId },
+          select: { name: true },
+        });
+
         // Send emails in batch with rate limiting
         const { sent, failed, rateLimited, results } =
           await batchSendCampaignEmails({
             subscribers: subscribers.map((sub) => ({
-              ...sub,
+              id: sub.id,
+              email: sub.email,
+              name: sub.name,
+              unsubscribeToken: sub.unsubscribeToken,
+              customFields:
+                sub.customFields && typeof sub.customFields === "object"
+                  ? (sub.customFields as Record<string, unknown>)
+                  : null,
               trackingToken: settings.enableTracking
                 ? trackingTokenMap.get(sub.id)!
                 : undefined,
@@ -900,10 +927,15 @@ export const campaignsRouter = createTRPCRouter({
               fromName: campaign.fromName,
               fromEmail: campaign.fromEmail,
               html: campaign.html,
+              name: campaign.name,
+              id: campaign.id,
             },
             clubSettings: {
               replyToEmail: settings.replyToEmail,
             },
+            clubName: club?.name,
+            emailListName: campaign.emailList.name,
+            archiveUrl: `${env.NEXT_PUBLIC_BASE_URL}/archive/${campaign.id}`,
             maxPerSecond: 10, // Conservative rate limit
           });
 

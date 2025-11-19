@@ -41,6 +41,7 @@ export interface QueueEmailJob {
   subscriberId: string;
   subscriberEmail: string;
   subscriberName?: string | null;
+  subscriberCustomFields?: Record<string, unknown> | null;
   unsubscribeToken: string;
   trackingToken?: string;
   campaign: {
@@ -48,10 +49,15 @@ export interface QueueEmailJob {
     fromName: string;
     fromEmail: string;
     html: string;
+    name?: string;
+    id?: string;
   };
   clubSettings: {
     replyToEmail?: string | null;
   };
+  clubName?: string;
+  emailListName?: string;
+  archiveUrl?: string;
 }
 
 /**
@@ -231,6 +237,10 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
       subscriberId: subscriber.id,
       subscriberEmail: subscriber.email,
       subscriberName: subscriber.name,
+      subscriberCustomFields:
+        subscriber.customFields && typeof subscriber.customFields === "object"
+          ? (subscriber.customFields as Record<string, unknown>)
+          : null,
       unsubscribeToken: subscriber.unsubscribeToken,
       trackingToken: campaign.club.settings?.enableTracking
         ? emailRecord.trackingToken
@@ -240,10 +250,15 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
         fromName: campaign.fromName,
         fromEmail: campaign.fromEmail,
         html: campaign.html,
+        name: campaign.name,
+        id: campaign.id,
       },
       clubSettings: {
         replyToEmail: campaign.club.settings?.replyToEmail,
       },
+      clubName: campaign.club.name,
+      emailListName: campaign.emailList.name,
+      archiveUrl: `${env.NEXT_PUBLIC_BASE_URL}/archive/${campaign.id}`,
     };
 
     const result = await queueEmail(job, flowControl);

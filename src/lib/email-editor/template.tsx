@@ -169,13 +169,16 @@ const main = {
   backgroundColor: "#f6f9fc",
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  paddingTop: "32px",
+  paddingBottom: "32px",
 };
 
 const container = {
   backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "20px 0 48px",
-  marginBottom: "64px",
+  padding: "16px 0 32px",
+  width: "100%",
+  maxWidth: "650px",
 };
 
 const section = {

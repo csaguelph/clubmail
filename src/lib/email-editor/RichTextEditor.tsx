@@ -13,10 +13,12 @@ import {
   Redo,
   Underline as UnderlineIcon,
   Undo,
+  Variable,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { LinkDialog } from "./LinkDialog";
+import { VariablePickerDialog } from "./VariablePickerDialog";
 
 interface RichTextEditorProps {
   content: string;
@@ -28,6 +30,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkTarget, setLinkTarget] = useState(false);
+  const [showVariablePicker, setShowVariablePicker] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -104,6 +107,14 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     setShowLinkModal(false);
   }, [editor, linkUrl, linkTarget]);
 
+  const insertVariable = useCallback(
+    (placeholder: string) => {
+      if (!editor) return;
+      editor.chain().focus().insertContent(placeholder).run();
+    },
+    [editor],
+  );
+
   // Update editor content when prop changes (for loading existing content)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -151,6 +162,13 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           title="Add Link"
         >
           <Link2 className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          onClick={() => setShowVariablePicker(true)}
+          title="Insert Variable"
+        >
+          <Variable className="h-4 w-4" />
         </ToolbarButton>
 
         <div className="mx-1 w-px bg-gray-300" />
@@ -202,6 +220,13 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         target={linkTarget}
         onTargetChange={setLinkTarget}
         onApply={applyLink}
+      />
+
+      {/* Variable Picker Modal */}
+      <VariablePickerDialog
+        isOpen={showVariablePicker}
+        onClose={() => setShowVariablePicker(false)}
+        onSelect={insertVariable}
       />
     </div>
   );
