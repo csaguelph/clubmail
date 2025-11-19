@@ -1,30 +1,16 @@
 "use client";
 
 import { api } from "@/trpc/react";
+import type { RouterOutputs } from "@/trpc/react";
 import { Mail, MailOpen, MousePointerClick, Send } from "lucide-react";
 import Link from "next/link";
+
+type ClubAnalytics = RouterOutputs["clubs"]["getClubAnalytics"];
 
 interface ClubAnalyticsDashboardProps {
   clubId: string;
   clubSlug: string;
-  initialAnalytics: {
-    totalEmailsSent: number;
-    emailsLast30Days: number;
-    emailsLast7Days: number;
-    avgOpenRate: number;
-    avgClickRate: number;
-    recentCampaigns: Array<{
-      id: string;
-      name: string;
-      status: string;
-      startedAt: Date | null;
-      recipients: number;
-      openRate: number;
-      clickRate: number;
-    }>;
-    totalCampaigns: number;
-    sentCampaigns: number;
-  };
+  initialAnalytics: ClubAnalytics;
 }
 
 export function ClubAnalyticsDashboard({
