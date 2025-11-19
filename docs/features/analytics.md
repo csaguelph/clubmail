@@ -7,8 +7,6 @@ description: "Track email opens, clicks, bounces, and complaints. Monitor campai
 
 ClubMail provides comprehensive analytics to help you understand how your email campaigns are performing. Track opens, clicks, bounces, and more.
 
-<!-- TODO: Add screenshot of analytics dashboard -->
-
 ## Key Features
 
 ### Open Tracking
@@ -31,23 +29,6 @@ Track link clicks in your campaigns:
 - **Click Rate** - Percentage of subscribers who clicked
 - **Click Timestamps** - When each click occurred
 - **Link URLs** - Which links were clicked
-
-### Bounce Tracking
-
-Monitor email delivery issues:
-
-- **Soft Bounces** - Temporary delivery failures
-- **Hard Bounces** - Permanent delivery failures
-- **Bounce Details** - Diagnostic codes and reasons
-- **Automatic Handling** - Subscribers automatically updated based on bounce type
-
-### Complaint Tracking
-
-Track spam complaints:
-
-- **Complaint Events** - When subscribers mark emails as spam
-- **Automatic Unsubscribe** - Complaints trigger automatic unsubscribe
-- **Complaint Details** - Feedback type and provider information
 
 ## Campaign Analytics
 
