@@ -65,7 +65,7 @@ export async function queueEmail(
   flowControl?: {
     key: string;
     rate: number;
-    period: string;
+    period: `${number}s` | `${number}m` | `${number}h` | `${number}d`;
     parallelism?: number;
   },
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
@@ -87,7 +87,9 @@ export async function queueEmail(
 
     // Add Flow Control if provided (for rate limiting)
     if (flowControl) {
-      publishOptions.flowControl = flowControl;
+      publishOptions.flowControl = flowControl as Parameters<
+        typeof client.publishJSON
+      >[0]["flowControl"];
     }
 
     const response = await client.publishJSON(publishOptions);
