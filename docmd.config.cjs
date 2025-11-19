@@ -8,9 +8,9 @@ module.exports = {
 
   // Logo Configuration
   logo: {
-    light: "/assets/images/docmd-logo-light.png", // Path relative to outputDir root
-    dark: "/assets/images/docmd-logo-dark.png", // Path relative to outputDir root
-    alt: "docmd logo", // Alt text for the logo
+    light: "/assets/images/clubmail-logo-light.svg", // Path relative to outputDir root
+    dark: "/assets/images/clubmail-logo-dark.svg", // Path relative to outputDir root
+    alt: "ClubMail logo", // Alt text for the logo
     href: "/", // Link for the logo, defaults to site root
   },
 
@@ -31,10 +31,7 @@ module.exports = {
     enableModeToggle: true, // Show UI button to toggle light/dark modes
     positionMode: "top", // 'top' or 'bottom' for the theme toggle
     codeHighlight: true, // Enable/disable codeblock highlighting and import of highlight.js
-    customCss: [
-      // Array of paths to custom CSS files
-      // '/assets/css/custom.css', // Custom TOC styles
-    ],
+    customCss: [],
   },
 
   // Custom JavaScript Files
@@ -145,7 +142,7 @@ module.exports = {
     // External links:
     {
       title: "GitHub",
-      path: "https://github.com/csaonline/clubmail",
+      path: "https://github.com/csaguelph/clubmail",
       icon: "github",
       external: true,
     },
