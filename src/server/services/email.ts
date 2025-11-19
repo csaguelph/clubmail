@@ -158,7 +158,7 @@ export async function sendTestEmail(params: {
 
   // Generate archive URL if campaign ID is available
   const archiveUrl =
-    params.archiveUrl ||
+    params.archiveUrl ??
     (params.campaign.id
       ? `${env.NEXT_PUBLIC_BASE_URL}/archive/${params.campaign.id}`
       : undefined);
@@ -167,6 +167,12 @@ export async function sendTestEmail(params: {
   let html = injectUnsubscribeLink(params.campaign.html, "test");
 
   // Resolve placeholders with test data
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const testCampaignName: string =
+    params.campaignName ??
+    (typeof params.campaign.name === "string"
+      ? params.campaign.name
+      : "Test Campaign");
   const placeholderData = {
     email: params.testEmail,
     name: "Test User",
@@ -185,10 +191,9 @@ export async function sendTestEmail(params: {
     },
     unsubscribeUrl: testUnsubscribeUrl,
     archiveUrl,
-    clubName: params.clubName || "Test Club",
-    campaignName:
-      params.campaignName || params.campaign.name || "Test Campaign",
-    emailListName: params.emailListName || "Test Email List",
+    clubName: params.clubName ?? "Test Club",
+    campaignName: testCampaignName,
+    emailListName: params.emailListName ?? "Test Email List",
   };
 
   // Debug: Check if placeholders exist in HTML
@@ -380,7 +385,7 @@ export async function sendCampaignEmail(params: {
 
   // Generate archive URL if campaign ID is available
   const archiveUrl =
-    params.archiveUrl ||
+    params.archiveUrl ??
     (params.campaign.id
       ? `${env.NEXT_PUBLIC_BASE_URL}/archive/${params.campaign.id}`
       : undefined);
@@ -398,6 +403,10 @@ export async function sendCampaignEmail(params: {
 
   // Resolve all placeholders in subject and HTML using the new placeholder system
   // This supports {{.Variable}} format with nested access and custom fields
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const campaignNameValue: string =
+    params.campaignName ??
+    (typeof params.campaign.name === "string" ? params.campaign.name : "");
   const placeholderData = {
     email: params.subscriber.email,
     name: params.subscriber.name ?? null,
@@ -405,7 +414,7 @@ export async function sendCampaignEmail(params: {
     unsubscribeUrl,
     archiveUrl,
     clubName: params.clubName,
-    campaignName: params.campaignName ?? params.campaign.name,
+    campaignName: campaignNameValue,
     emailListName: params.emailListName,
   };
 

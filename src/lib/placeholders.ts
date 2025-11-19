@@ -102,17 +102,17 @@ function buildPlaceholderData(data: PlaceholderData): Record<string, unknown> {
 
   const result: Record<string, unknown> = {
     Email: data.email,
-    Name: data.name || "",
-    UnsubscribeUrl: data.unsubscribeUrl || "",
-    ArchiveUrl: data.archiveUrl || "",
+    Name: data.name ?? "",
+    UnsubscribeUrl: data.unsubscribeUrl ?? "",
+    ArchiveUrl: data.archiveUrl ?? "",
     Club: {
-      Name: data.clubName || "",
+      Name: data.clubName ?? "",
     },
     Campaign: {
-      Name: data.campaignName || "",
+      Name: data.campaignName ?? "",
     },
     EmailList: {
-      Name: data.emailListName || "",
+      Name: data.emailListName ?? "",
     },
     // Date/time variables
     Date: now.toLocaleDateString(),
@@ -169,7 +169,7 @@ function resolvePlaceholder(
 
   // Special case: {{.Name}} should return the full name
   if (placeholder === "Name") {
-    return data.name || "";
+    return data.name ?? "";
   }
 
   const value = getNestedValue(placeholderData, placeholder);
@@ -189,7 +189,7 @@ function parsePlaceholder(placeholderText: string): {
   defaultValue?: string;
 } {
   // Check if there's a default value using || operator
-  const defaultMatch = placeholderText.match(/^(.+?)\s*\|\|\s*(["'])(.*?)\2$/);
+  const defaultMatch = /^(.+?)\s*\|\|\s*(["'])(.*?)\2$/.exec(placeholderText);
 
   if (defaultMatch) {
     return {
@@ -234,33 +234,36 @@ export function resolvePlaceholders(
   // Content: variable path (word chars and dots) optionally followed by || "default"
   const placeholderRegex = /\{\{\.([\w.]+(?:\s*\|\|\s*["'][^"']*["'])?)\}\}/g;
 
-  return decoded.replace(placeholderRegex, (match, placeholderContent) => {
-    try {
-      const { variablePath, defaultValue } =
-        parsePlaceholder(placeholderContent);
-
-      const resolved = resolvePlaceholder(variablePath, data);
-
-      // Use default value if resolved value is empty
-      if (!resolved || resolved.trim() === "") {
-        return defaultValue ?? "";
-      }
-
-      return resolved;
-    } catch (error) {
-      console.warn(
-        `Failed to resolve placeholder ${match}:`,
-        error instanceof Error ? error.message : String(error),
-      );
-      // Return default value if provided, otherwise empty string
+  return decoded.replace(
+    placeholderRegex,
+    (match, placeholderContent: string) => {
       try {
-        const parsed = parsePlaceholder(placeholderContent);
-        return parsed.defaultValue ?? "";
-      } catch {
-        return "";
+        const { variablePath, defaultValue } =
+          parsePlaceholder(placeholderContent);
+
+        const resolved = resolvePlaceholder(variablePath, data);
+
+        // Use default value if resolved value is empty
+        if (!resolved || resolved.trim() === "") {
+          return defaultValue ?? "";
+        }
+
+        return resolved;
+      } catch (error) {
+        console.warn(
+          `Failed to resolve placeholder ${match}:`,
+          error instanceof Error ? error.message : String(error),
+        );
+        // Return default value if provided, otherwise empty string
+        try {
+          const parsed = parsePlaceholder(placeholderContent);
+          return parsed.defaultValue ?? "";
+        } catch {
+          return "";
+        }
       }
-    }
-  });
+    },
+  );
 }
 
 /**
