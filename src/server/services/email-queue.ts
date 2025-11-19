@@ -173,7 +173,6 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
     where: { id: "platform_settings" },
     select: {
       maxEmailsPerSecond: true,
-      maxEmailsPerDay: true,
       enableRateLimiting: true,
     },
   });
@@ -182,10 +181,6 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
     settings?.enableRateLimiting && settings.maxEmailsPerSecond
       ? settings.maxEmailsPerSecond
       : 14;
-  const maxPerDay =
-    settings?.enableRateLimiting && settings.maxEmailsPerDay
-      ? settings.maxEmailsPerDay
-      : 50000;
 
   // Create Email records first (for tracking)
   const emailRecords = await Promise.all(
@@ -225,8 +220,7 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
     : undefined;
 
   // Queue each email - QStash Flow Control will handle rate limiting automatically
-  for (let i = 0; i < subscribers.length; i++) {
-    const subscriber = subscribers[i]!;
+  for (const subscriber of subscribers) {
     const emailRecord = trackingTokenMap.get(subscriber.id)!;
 
     const job: QueueEmailJob = {
