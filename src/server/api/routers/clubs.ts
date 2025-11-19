@@ -424,6 +424,7 @@ export const clubsRouter = createTRPCRouter({
             where: {
               email: {
                 campaignId: campaign.id,
+                status: "DELIVERED",
               },
             },
           }),
@@ -432,6 +433,7 @@ export const clubsRouter = createTRPCRouter({
             where: {
               email: {
                 campaignId: campaign.id,
+                status: "DELIVERED",
               },
             },
           }),
@@ -485,6 +487,7 @@ export const clubsRouter = createTRPCRouter({
                 where: {
                   email: {
                     campaignId: campaign.id,
+                    status: "DELIVERED",
                   },
                 },
               }),
@@ -493,6 +496,7 @@ export const clubsRouter = createTRPCRouter({
                 where: {
                   email: {
                     campaignId: campaign.id,
+                    status: "DELIVERED",
                   },
                 },
               }),
