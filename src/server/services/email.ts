@@ -4,6 +4,7 @@ import {
   SendEmailCommand,
   SendRawEmailCommand,
 } from "@aws-sdk/client-ses";
+import { resolvePlaceholders } from "@/lib/placeholders";
 import { checkRateLimit } from "./rate-limit";
 
 /**
@@ -142,27 +143,84 @@ export async function sendTestEmail(params: {
     fromName: string;
     fromEmail: string;
     html: string;
+    name?: string;
+    id?: string;
   };
   clubSettings: {
     replyToEmail?: string | null;
   };
+  clubName?: string;
+  emailListName?: string;
+  archiveUrl?: string;
 }): Promise<{ success: boolean; error?: string }> {
   // Generate test unsubscribe URL with special "test" token
   const testUnsubscribeUrl = generateUnsubscribeLink("test");
 
+  // Generate archive URL if campaign ID is available
+  const archiveUrl =
+    params.archiveUrl ||
+    (params.campaign.id
+      ? `${env.NEXT_PUBLIC_BASE_URL}/archive/${params.campaign.id}`
+      : undefined);
+
   // Inject unsubscribe link into HTML
-  const htmlWithUnsubscribe = injectUnsubscribeLink(
-    params.campaign.html,
-    "test",
+  let html = injectUnsubscribeLink(params.campaign.html, "test");
+
+  // Resolve placeholders with test data
+  const placeholderData = {
+    email: params.testEmail,
+    name: "Test User",
+    customFields: {
+      membershipType: "Premium",
+      role: "Admin",
+      year: "2024",
+      address: {
+        city: "Guelph",
+        province: "ON",
+      },
+      profile: {
+        program: "Computer Science",
+        year: "2024",
+      },
+    },
+    unsubscribeUrl: testUnsubscribeUrl,
+    archiveUrl,
+    clubName: params.clubName || "Test Club",
+    campaignName:
+      params.campaignName || params.campaign.name || "Test Campaign",
+    emailListName: params.emailListName || "Test Email List",
+  };
+
+  // Debug: Check if placeholders exist in HTML
+  const hasPlaceholders = html.includes("{{.");
+  if (hasPlaceholders) {
+    console.log("Found placeholders in test email HTML, resolving...");
+    // Check for HTML-encoded placeholders
+    if (html.includes("&lt;&lt;.")) {
+      console.warn("Placeholders appear to be HTML-encoded, decoding first...");
+      html = html.replace(/&lt;&lt;\./g, "{{.");
+      html = html.replace(/&gt;&gt;/g, "}}");
+    }
+  } else {
+    console.warn(
+      "No placeholders found in test email HTML. HTML snippet:",
+      html.substring(0, 500),
+    );
+  }
+
+  const subject = resolvePlaceholders(
+    `[TEST] ${params.campaign.subject}`,
+    placeholderData,
   );
+  html = resolvePlaceholders(html, placeholderData);
 
   const result = await sendEmail({
     to: params.testEmail,
     from: params.campaign.fromEmail,
     fromName: params.campaign.fromName,
     replyTo: params.clubSettings.replyToEmail ?? undefined,
-    subject: `[TEST] ${params.campaign.subject}`,
-    html: htmlWithUnsubscribe,
+    subject,
+    html,
     unsubscribeUrl: testUnsubscribeUrl,
   });
 
@@ -293,16 +351,22 @@ export async function sendCampaignEmail(params: {
     email: string;
     name?: string | null;
     unsubscribeToken: string;
+    customFields?: Record<string, unknown> | null;
   };
   campaign: {
     subject: string;
     fromName: string;
     fromEmail: string;
     html: string;
+    name?: string;
+    id?: string;
   };
   clubSettings: {
     replyToEmail?: string | null;
   };
+  clubName?: string;
+  emailListName?: string;
+  archiveUrl?: string;
   trackingToken?: string; // Optional tracking token for open/click tracking
 }): Promise<{
   success: boolean;
@@ -313,6 +377,13 @@ export async function sendCampaignEmail(params: {
   const unsubscribeUrl = generateUnsubscribeLink(
     params.subscriber.unsubscribeToken,
   );
+
+  // Generate archive URL if campaign ID is available
+  const archiveUrl =
+    params.archiveUrl ||
+    (params.campaign.id
+      ? `${env.NEXT_PUBLIC_BASE_URL}/archive/${params.campaign.id}`
+      : undefined);
 
   // Inject unsubscribe link
   let html = injectUnsubscribeLink(
@@ -325,13 +396,38 @@ export async function sendCampaignEmail(params: {
     html = injectTracking(html, params.trackingToken);
   }
 
-  // Personalize subject and content if subscriber has a name
-  let subject = params.campaign.subject;
+  // Resolve all placeholders in subject and HTML using the new placeholder system
+  // This supports {{.Variable}} format with nested access and custom fields
+  const placeholderData = {
+    email: params.subscriber.email,
+    name: params.subscriber.name ?? null,
+    customFields: params.subscriber.customFields ?? null,
+    unsubscribeUrl,
+    archiveUrl,
+    clubName: params.clubName,
+    campaignName: params.campaignName ?? params.campaign.name,
+    emailListName: params.emailListName,
+  };
 
-  if (params.subscriber.name) {
-    subject = subject.replace(/\{\{name\}\}/g, params.subscriber.name);
-    html = html.replace(/\{\{name\}\}/g, params.subscriber.name);
+  // Debug: Check if placeholders exist in HTML
+  const hasPlaceholders = html.includes("{{.");
+  if (hasPlaceholders) {
+    console.log("Found placeholders in HTML, resolving...");
+    // Check for HTML-encoded placeholders ({{ becomes &lt;&lt;)
+    if (html.includes("&lt;&lt;.")) {
+      console.warn("Placeholders appear to be HTML-encoded, decoding first...");
+      html = html.replace(/&lt;&lt;\./g, "{{.");
+      html = html.replace(/&gt;&gt;/g, "}}");
+    }
+  } else {
+    console.warn(
+      "No placeholders found in HTML. HTML snippet:",
+      html.substring(0, 500),
+    );
   }
+
+  const subject = resolvePlaceholders(params.campaign.subject, placeholderData);
+  html = resolvePlaceholders(html, placeholderData);
 
   return await sendEmail({
     to: params.subscriber.email,
@@ -361,16 +457,22 @@ export async function batchSendCampaignEmails(params: {
     name?: string | null;
     unsubscribeToken: string;
     trackingToken?: string; // Optional tracking token from Email record
+    customFields?: Record<string, unknown> | null;
   }>;
   campaign: {
     subject: string;
     fromName: string;
     fromEmail: string;
     html: string;
+    name?: string;
+    id?: string;
   };
   clubSettings: {
     replyToEmail?: string | null;
   };
+  clubName?: string;
+  emailListName?: string;
+  archiveUrl?: string;
   onProgress?: (sent: number, total: number) => void;
   maxPerSecond?: number; // Default SES limit is 14 emails/second for most accounts
 }): Promise<{
@@ -453,6 +555,9 @@ export async function batchSendCampaignEmails(params: {
       subscriber,
       campaign: params.campaign,
       clubSettings: params.clubSettings,
+      clubName: params.clubName,
+      emailListName: params.emailListName,
+      archiveUrl: params.archiveUrl,
       trackingToken: subscriber.trackingToken,
     });
 

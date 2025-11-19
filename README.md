@@ -11,6 +11,7 @@ ClubMail is a comprehensive email marketing platform designed specifically for C
 - **Scheduled Sending** - Schedule campaigns for future delivery
 - **Campaign Management** - Draft, edit, and track all your email campaigns
 - **Email Templates** - Professional, responsive email templates powered by React Email
+- **Variable Placeholders** - Personalize emails with dynamic variables (see [Variable Placeholders Documentation](./docs/VARIABLE_PLACEHOLDERS.md))
 
 ### 👥 Subscriber Management
 - **Email Lists** - Organize subscribers into multiple lists
@@ -149,6 +150,10 @@ The application uses PostgreSQL with Prisma ORM. The schema includes models for:
 - Campaigns and email tracking
 - Media uploads
 - Bounce and complaint events
+
+## 📚 Documentation
+
+- [Variable Placeholders Guide](./docs/VARIABLE_PLACEHOLDERS.md) - Learn how to use dynamic variables in your email campaigns
 
 ## 📄 License
 
