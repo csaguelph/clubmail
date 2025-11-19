@@ -18,7 +18,10 @@
     "lint:fix": "eslint --fix .",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docs:init": "docmd init",
+    "docs:dev": "docmd dev -c docmd.config.cjs",
+    "docs:build": "docmd build -c docmd.config.cjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
@@ -52,6 +55,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@mgks/docmd": "^0.2.6",
     "@tailwindcss/postcss": "^4.0.15",
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",
