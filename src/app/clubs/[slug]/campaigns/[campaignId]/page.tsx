@@ -2,6 +2,7 @@ import { Pencil } from "lucide-react";
 import Link from "next/link";
 
 import CancelScheduledCampaign from "@/components/campaigns/CancelScheduledCampaign";
+import { CampaignStats } from "@/components/campaigns/CampaignStats";
 import { ClubPageHeader } from "@/components/layout";
 import PageContainer from "@/components/layout/PageContainer";
 import { env } from "@/env";
@@ -203,59 +204,12 @@ export default async function CampaignDetailPage({
           </dl>
         </div>
 
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">
-            Campaign Stats
-          </h2>
-          <dl className="space-y-3">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">
-                Total Recipients
-              </dt>
-              <dd className="mt-1 text-2xl font-bold text-gray-900">
-                {stats.total}
-              </dd>
-            </div>
-            {stats.total > 0 && (
-              <>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Sent</dt>
-                  <dd className="text-sm font-semibold text-green-600">
-                    {stats.sent}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Delivered
-                  </dt>
-                  <dd className="text-sm font-semibold text-green-600">
-                    {stats.delivered}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Bounced</dt>
-                  <dd className="text-sm font-semibold text-orange-600">
-                    {stats.bounced}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Complained
-                  </dt>
-                  <dd className="text-sm font-semibold text-red-600">
-                    {stats.complained}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm font-medium text-gray-500">Failed</dt>
-                  <dd className="text-sm font-semibold text-red-600">
-                    {stats.failed}
-                  </dd>
-                </div>
-              </>
-            )}
-          </dl>
-        </div>
+        <CampaignStats
+          clubId={club.id}
+          campaignId={campaignId}
+          initialStats={stats}
+          initialStatus={campaign.status}
+        />
       </div>
 
       {/* Campaign Scheduling - Show cancel button for scheduled campaigns */}

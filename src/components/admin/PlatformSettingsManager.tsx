@@ -8,7 +8,7 @@ import {
   Info,
   Mail,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function PlatformSettingsManager() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -28,14 +28,6 @@ export function PlatformSettingsManager() {
     limit: 20,
   });
 
-  const updateSettings = api.platformSettings.update.useMutation({
-    onSuccess: () => {
-      setSuccessMessage("Settings updated successfully!");
-      setTimeout(() => setSuccessMessage(null), 3000);
-      void refetch();
-    },
-  });
-
   const [formData, setFormData] = useState({
     softBounceThreshold: 2,
     hardBounceAction: "BLOCK" as "BLOCK" | "UNSUBSCRIBE",
@@ -47,22 +39,43 @@ export function PlatformSettingsManager() {
     enableRateLimiting: true,
   });
 
-  // Update form data when settings load
-  if (
-    settings &&
-    formData.softBounceThreshold !== settings.softBounceThreshold
-  ) {
-    setFormData({
-      softBounceThreshold: settings.softBounceThreshold,
-      hardBounceAction: settings.hardBounceAction as "BLOCK" | "UNSUBSCRIBE",
-      complaintThreshold: settings.complaintThreshold,
-      complaintAction: settings.complaintAction as "BLOCK" | "UNSUBSCRIBE",
-      enableAutoCleanup: settings.enableAutoCleanup,
-      maxEmailsPerDay: settings.maxEmailsPerDay,
-      maxEmailsPerSecond: settings.maxEmailsPerSecond,
-      enableRateLimiting: settings.enableRateLimiting,
-    });
-  }
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Update form data when settings first load
+  useEffect(() => {
+    if (settings && !isInitialized) {
+      setFormData({
+        softBounceThreshold: settings.softBounceThreshold,
+        hardBounceAction: settings.hardBounceAction as "BLOCK" | "UNSUBSCRIBE",
+        complaintThreshold: settings.complaintThreshold,
+        complaintAction: settings.complaintAction as "BLOCK" | "UNSUBSCRIBE",
+        enableAutoCleanup: settings.enableAutoCleanup,
+        maxEmailsPerDay: settings.maxEmailsPerDay,
+        maxEmailsPerSecond: settings.maxEmailsPerSecond,
+        enableRateLimiting: settings.enableRateLimiting,
+      });
+      setIsInitialized(true);
+    }
+  }, [settings, isInitialized]);
+
+  const updateSettings = api.platformSettings.update.useMutation({
+    onSuccess: (data) => {
+      setSuccessMessage("Settings updated successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+      // Update form data with the returned values to keep it in sync
+      setFormData({
+        softBounceThreshold: data.softBounceThreshold,
+        hardBounceAction: data.hardBounceAction as "BLOCK" | "UNSUBSCRIBE",
+        complaintThreshold: data.complaintThreshold,
+        complaintAction: data.complaintAction as "BLOCK" | "UNSUBSCRIBE",
+        enableAutoCleanup: data.enableAutoCleanup,
+        maxEmailsPerDay: data.maxEmailsPerDay,
+        maxEmailsPerSecond: data.maxEmailsPerSecond,
+        enableRateLimiting: data.enableRateLimiting,
+      });
+      void refetch();
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
