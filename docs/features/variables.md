@@ -1,6 +1,13 @@
-# Variable Placeholders in Campaigns
+---
+title: "Variable Placeholders"
+description: "Personalize email campaigns with dynamic variable placeholders. Use subscriber data, custom fields, and campaign information to create personalized emails."
+---
+
+# Variable Placeholders
 
 ClubMail supports dynamic variable placeholders in email campaigns, allowing you to personalize content for each subscriber. Placeholders use the format `{{.Variable}}` and support both simple and nested data access.
+
+<!-- TODO: Add screenshot showing placeholders in use in the email editor -->
 
 ## Table of Contents
 
@@ -355,7 +362,9 @@ Potential future features:
 - String formatting and filters
 - Date formatting for custom date fields
 
----
+## Related Guides
 
-For questions or issues, please refer to the main [README.md](../README.md) or open an issue in the repository.
+- [Creating Campaigns](/user-guide/creating-campaigns) - Use placeholders in your campaigns
+- [Managing Subscribers](/user-guide/managing-subscribers) - Set up custom fields for personalization
+- [Email Campaigns](/features/campaigns) - Learn about campaign features
 

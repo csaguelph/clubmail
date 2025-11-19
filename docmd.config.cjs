@@ -72,34 +72,73 @@ module.exports = {
   navigation: [
     { title: "Welcome", path: "/", icon: "home" }, // Corresponds to docs/index.md
     {
-      title: "Getting Started",
-      icon: "rocket",
+      title: "Features",
+      icon: "sparkles",
       path: "#",
-      collapsible: true, // This makes the menu section collapsible
+      collapsible: true,
       children: [
         {
-          title: "Documentation",
-          path: "https://docmd.mgks.dev",
-          icon: "scroll",
-          external: true,
+          title: "Email Campaigns",
+          path: "/features/campaigns",
+          icon: "mail",
         },
         {
-          title: "Installation",
-          path: "https://docmd.mgks.dev/getting-started/installation",
-          icon: "download",
-          external: true,
+          title: "Subscriber Management",
+          path: "/features/subscribers",
+          icon: "users",
         },
         {
-          title: "Basic Usage",
-          path: "https://docmd.mgks.dev/getting-started/basic-usage",
-          icon: "play",
-          external: true,
+          title: "Club Management",
+          path: "/features/clubs",
+          icon: "building",
         },
         {
-          title: "Content",
-          path: "https://docmd.mgks.dev/content",
-          icon: "layout-template",
-          external: true,
+          title: "Analytics & Tracking",
+          path: "/features/analytics",
+          icon: "bar-chart",
+        },
+        {
+          title: "Variable Placeholders",
+          path: "/features/variables",
+          icon: "code",
+        },
+      ],
+    },
+    {
+      title: "User Guide",
+      icon: "book-open",
+      path: "#",
+      collapsible: true,
+      children: [
+        {
+          title: "Creating Campaigns",
+          path: "/user-guide/creating-campaigns",
+          icon: "edit",
+        },
+        {
+          title: "Managing Subscribers",
+          path: "/user-guide/managing-subscribers",
+          icon: "user-plus",
+        },
+        {
+          title: "Club Settings",
+          path: "/user-guide/club-settings",
+          icon: "settings",
+        },
+        {
+          title: "Viewing Analytics",
+          path: "/user-guide/analytics",
+          icon: "line-chart",
+        },
+        {
+          title: "Scheduling Campaigns",
+          path: "/user-guide/scheduling-campaigns",
+          icon: "calendar",
+        },
+        {
+          title: "Team Management",
+          path: "/user-guide/team-management",
+          icon: "user-cog",
         },
       ],
     },
