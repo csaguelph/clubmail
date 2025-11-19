@@ -10,6 +10,7 @@
 
 import { MediaBrowser } from "@/components/media/MediaBrowser";
 import { MediaUploadButton } from "@/components/media/MediaUploadButton";
+import { wrapPlaceholdersForPreview } from "@/lib/placeholder-preview";
 import {
   ChevronDown,
   ChevronUp,
@@ -225,7 +226,11 @@ function EmailPreview({
       socialLinks ?? null,
       true, // useInlineSvgs = true for preview (client-side)
     )
-      .then(setHtml)
+      .then((generatedHtml) => {
+        // Wrap placeholders in styled pills for preview
+        const previewHtml = wrapPlaceholdersForPreview(generatedHtml);
+        setHtml(previewHtml);
+      })
       .catch((err) => console.error("Failed to generate email preview:", err));
   }, [blocks, clubName, brandColor, socialLinks]);
 
@@ -387,12 +392,29 @@ function BlockItem({
 
   const getBlockPreview = () => {
     switch (block.type) {
-      case "heading":
-        return block.content || "Heading";
-      case "richtext":
+      case "heading": {
+        const content = block.content || "Heading";
+        // Check if content has placeholders
+        if (content.includes("{{.")) {
+          // Show a simplified preview with placeholder indicator
+          return `${content.substring(0, 50)}${content.length > 50 ? "..." : ""} [Variables]`;
+        }
+        return content;
+      }
+      case "richtext": {
+        // Check if richtext has placeholders
+        if (block.content.includes("{{.")) {
+          return "Rich Text Content [Variables]";
+        }
         return "Rich Text Content";
-      case "button":
-        return `Button: ${block.text}`;
+      }
+      case "button": {
+        const text = block.text || "Button";
+        if (text.includes("{{.")) {
+          return `Button: ${text.substring(0, 30)}${text.length > 30 ? "..." : ""} [Variables]`;
+        }
+        return `Button: ${text}`;
+      }
       case "image":
         return `Image: ${block.alt}`;
       case "divider":
