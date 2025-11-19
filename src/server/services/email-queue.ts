@@ -1,7 +1,6 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { Client } from "@upstash/qstash";
-import { calculateSendDelay, checkRateLimit } from "./rate-limit";
 
 /**
  * Email Queue Service using Upstash QStash
@@ -59,21 +58,24 @@ export interface QueueEmailJob {
  * Queue a single email for sending
  *
  * @param job - Email job details
- * @param delaySeconds - Delay before processing (for rate limiting)
+ * @param flowControl - Optional QStash Flow Control configuration for rate limiting
  */
 export async function queueEmail(
   job: QueueEmailJob,
-  delaySeconds = 0,
+  flowControl?: {
+    key: string;
+    rate: number;
+    period: `${number}s` | `${number}m` | `${number}h` | `${number}d`;
+    parallelism?: number;
+  },
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const client = getQStashClient();
     const callbackUrl = `${env.NEXT_PUBLIC_BASE_URL}/api/queue/send-campaign-email`;
 
-    const response = await client.publishJSON({
+    const publishOptions: Parameters<typeof client.publishJSON>[0] = {
       url: callbackUrl,
       body: job,
-      // Add delay for rate limiting
-      ...(delaySeconds > 0 && { delay: delaySeconds }),
       // Retry configuration
       retries: 3,
       // Add headers for easier debugging
@@ -81,7 +83,16 @@ export async function queueEmail(
         "X-Campaign-Id": job.campaignId,
         "X-Email-Id": job.emailId,
       },
-    });
+    };
+
+    // Add Flow Control if provided (for rate limiting)
+    if (flowControl) {
+      publishOptions.flowControl = flowControl as Parameters<
+        typeof client.publishJSON
+      >[0]["flowControl"];
+    }
+
+    const response = await client.publishJSON(publishOptions);
 
     return {
       success: true,
@@ -99,7 +110,9 @@ export async function queueEmail(
 /**
  * Queue all emails for a campaign with rate limiting
  *
- * This intelligently spaces out email jobs to respect rate limits.
+ * Uses QStash Flow Control to automatically handle rate limiting.
+ * All emails share the same flow control key, so multiple campaigns
+ * queued simultaneously will respect global rate limits.
  *
  * @param campaignId - Campaign ID
  * @returns Status of queue operation
@@ -157,20 +170,19 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
     };
   }
 
-  // Check if we can queue this many emails
-  const rateLimitCheck = await checkRateLimit(subscribers.length);
-  if (!rateLimitCheck.allowed) {
-    return {
-      success: false,
-      queued: 0,
-      failed: subscribers.length,
-      message: `${rateLimitCheck.reason}. Current: ${rateLimitCheck.currentCount}/${rateLimitCheck.limit}. Reset at: ${rateLimitCheck.resetTime?.toISOString()}`,
-      rateLimited: true,
-    };
-  }
+  // Get rate limit settings for QStash Flow Control
+  const settings = await db.platformSettings.findUnique({
+    where: { id: "platform_settings" },
+    select: {
+      maxEmailsPerSecond: true,
+      enableRateLimiting: true,
+    },
+  });
 
-  // Calculate delay between emails to respect rate limits (per-second and per-day)
-  const delayMs = await calculateSendDelay(subscribers.length);
+  const maxPerSecond =
+    settings?.enableRateLimiting && settings.maxEmailsPerSecond
+      ? settings.maxEmailsPerSecond
+      : 14;
 
   // Create Email records first (for tracking)
   const emailRecords = await Promise.all(
@@ -197,13 +209,21 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
   let queued = 0;
   let failed = 0;
 
-  // Queue each email with incremental delay for rate limiting
-  for (let i = 0; i < subscribers.length; i++) {
-    const subscriber = subscribers[i]!;
-    const emailRecord = trackingTokenMap.get(subscriber.id)!;
+  // Configure Flow Control for rate limiting
+  // Use a single key for all emails so QStash enforces rate limits globally
+  // This ensures multiple campaigns don't exceed rate limits when queued simultaneously
+  const flowControl = settings?.enableRateLimiting
+    ? {
+        key: "email-sending", // All emails share this key for global rate limiting
+        rate: maxPerSecond, // Max emails per period
+        period: "1s" as const, // Per-second rate limit
+        parallelism: Math.min(maxPerSecond, 10), // Allow concurrent processing up to rate limit (capped at 10 for safety)
+      }
+    : undefined;
 
-    // Calculate delay for this specific email (spread them out)
-    const delaySeconds = Math.floor((delayMs * i) / 1000);
+  // Queue each email - QStash Flow Control will handle rate limiting automatically
+  for (const subscriber of subscribers) {
+    const emailRecord = trackingTokenMap.get(subscriber.id)!;
 
     const job: QueueEmailJob = {
       emailId: emailRecord.id,
@@ -226,7 +246,7 @@ export async function queueCampaignEmails(campaignId: string): Promise<{
       },
     };
 
-    const result = await queueEmail(job, delaySeconds);
+    const result = await queueEmail(job, flowControl);
 
     if (result.success) {
       queued++;
